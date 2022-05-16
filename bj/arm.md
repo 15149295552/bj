@@ -606,11 +606,6 @@ void delay(int n){
       答 : GPIOD14 配置为复用功能1 
       GPIODALTFN0   0XC001D020 
         [29:28] = 01 配置为复用功能1 -> 配置为了UARTRXD0 
-
-任务 :
-  课下将AD19的复用功能设置好
-  绘制简要的硬件连接图 : 
-
   2.1.SP3232E芯片功能 
     电平转换线芯片, 电平转换, 将TTL电平转换为EIA电平,将EIA电平转换为TTL电平 
     TTL电平 : 开发板上电压/PC机, CPU和芯片所需要的电压 
@@ -716,7 +711,51 @@ UFRACVALO=根据公式计算
 2.GPIO寄存器
 
 ​	AD19 - UARTTXD0
+​		GPIODALTFN1
+​		[5:4]=01 UARTTXD0功能
+​		选择复用功能1，UARTTXD0
 
 ​	AE19 - UARTTXD0
+​		GPIODALTFN0
+​		[29:28]=01 UARTRXD0功能
+​		选择复用功能1，UARTTXD0
 
-​	复用功能配置
+​	复用功能配置 使用GPIO复用功能选择寄存器
+
+3.时钟寄存器
+
+​	UART：控制器适宜频率50MHz
+
+UART使用的时钟源PLL[0]/PLL[1]，为800MHz，被UBOOT指定了
+
+UARTCLKENB 0XC00A9000
+[2]=0,禁止时钟
+   =1,使能时钟
+
+UARTCLKGENOL OXCO0A9004
+[4:2]时钟源选择
+	000p11[0]
+	001p11[1]
+		->ok uboot初始化为了800MHz
+	要SCLK UART=50MHz
+	分频系数n=800/50=16
+
+分频系数计算
+	公式：分频系数n=CLKDIV0+1
+			      =[12:5]+1
+
+代码：
+vim uart.c //定义
+void uart_init(void){
+	//1.关闭uart时钟
+	//2.配置复用功能：UARTTXD0 UARTRXDO
+	//3.配置数据线功能：ULCON0
+	//4.配置读写方式（轮训）UCoN0
+	//5.配置波特率为
+	//5.1.配置时钟为50MHz
+	//5.2.配置UBRDIV0 UFRACVAL0
+	//n.打开uart时钟
+}
+
+vim uart.h //声明
+vim main.c //调用
