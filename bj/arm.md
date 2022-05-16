@@ -705,11 +705,18 @@ UTXH0:接收缓冲寄存器
 地址：0XC00A1024
 URXH0[7:0]:保存接收到的数据
 	unsigned char data =URXH0;
-2.时钟寄存器
-3.GPIO寄存器
+UBRDIV0:波特率配置寄存器
+地址：0XC00A1028
+UBRDIVO=根据公式计算
+UFRACVAL0：波特率配置寄存器
+地址：0XC00A102C
+UFRACVALO=根据公式计算
 ```
 
-a
-b
+2.GPIO寄存器
 
-c
+​	AD19 - UARTTXD0
+
+​	AE19 - UARTTXD0
+
+​	复用功能配置
