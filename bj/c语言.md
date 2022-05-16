@@ -536,3 +536,62 @@ int main(){
 
 # 分支和循环语句
 
+## 分支语句(选择结构)
+
+### if语句
+
+```c
+#include<stdio.h>
+int main(){
+    int age=10;
+    if(age<18){
+        printf("未成年\n");
+    }
+    else{
+        printf("成年\n");
+    }
+    return 0;
+}
+```
+
+```c
+#include<stdio.h>
+int maint(){
+    int i=0;
+    while(i<=100){
+        if(i%2==1){
+            printf("%d \n",i);
+        }
+        i++;
+    }
+    return 0;
+}
+```
+
+### switch语句
+
+```c
+#include<stdio.h>
+int maint(){
+    int day=0;
+    scanf("%d",&day);
+    switch(day){
+        case 1:
+            printf("星期一\n");
+        case 2:
+            printf("星期二\n");
+        case 3:
+            printf("星期三\n");
+        case 4:
+            printf("星期四\n");
+        case 5:
+            printf("星期五\n");
+        case 6:
+            printf("星期六\n");
+        case 7:
+            printf("星期日\n");
+            break;
+    }
+    return 0;
+}
+```

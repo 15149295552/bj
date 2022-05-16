@@ -795,7 +795,6 @@ off_t lseek(int fd,off_t offset,int whence);
 int fd=open(“hello.txt”);
 
 ​	0	1	2	3	4	5	6	7	8	9	10
----------------------------------------
 
 ​	^
 
@@ -959,6 +958,114 @@ int main(void){
     }
     close(fd);
     re
+}
+```
+
+## 文件描述符的复制
+
+```c
+include<unistd.h>
+int dup(int oldfd);
+```
+
+功能：复制文件描述符表的特定条目到最小可用项
+参数：
+	oldfd:源文件描述符
+返回值：
+	失败 返回-1
+	成功 返回目标文件描述符
+int oldfd open ("a.txt");
+int newfd=dup(oldfd);//在文件描述符表找最小的未使用的文件描述符分配，存储的是oldfd标识的文件描述符表项
+					 //最终newfd和oldfd都会指向同一个文件表项，最终指向同一个文件
+代码：
+dup.c
+
+```c
+#include<sudio.h>
+#include<fcntl.h>
+#include<unistd.h>
+#include<string.h>
+int mian(void){
+    int fd1=open("dup.txt",O_RDWR|O_CREAT|O_TRUNC,0644);
+    printf("fd1=%d\n",fd1);
+    int fd2=dup(fd1);
+    printf("fd2=%d\n",fd2);
+    int fd3=dup(fd2);
+    const char* text="hello,world!";
+    write(fd2,text,strlen(text)*sizeof(text[0]));
+    return 0;
+}
+```
+
+```c 
+int dup2(int oldfd,int newfd);
+```
+
+功能：复制文件描述符表的特定条目到指定项
+参数:
+	oldfd:源文件描述符
+	newfd:目标文件描述符
+返回值:
+	失败返回-1
+	成功返回目标文件描述符(newfd)
+dup2函数在复制oldfd参数所标识的源文件描述符表项时，会检查由newfd	参数所标识的目标文件描述符表项
+	是否空闲.
+		若空闲则直接将前者复制给后者
+		若非空闲，先将目标文件描述符newfd关闭，使之成为空闲项，再行复制
+int fdl open ("a.txt");
+dup2(fd1,2);//将fd1的文件表项复制一份到文件描述符2对应的位置上
+代码：
+dup2.c
+
+```c
+#include<sudio.h>
+#include<fcntl.h>
+#include<unistd.h>
+#include<string.h>
+int mian(void){
+    int fd1=open("dup.txt",O_RDWR|O_CREAT|O_TRUNC,0644);
+    printf("fd1=%d\n",fd1);
+    int fd2=dup(fd1);
+    printf("fd2=%d\n",fd2);
+    int fd3=dup(fd2);
+    printf("fd3=%d\n",fd3);
+    const char* text="hello,world!";
+    write(fd2,text,strlen(text)*sizeof(text[0]));
+    off_t pos=lseek(fd2,-6,SEEK_CUR);
+    printf("%ld\n",pos);
+    text="linux";
+    fprintf(stderr,"%s",text);
+    return 0;
+}
+```
+
+不管使用的是dup函数，还是dup2函数，一样的是
+	oldfdi和newfd二者共享同一个文件表项-二者共享同一个读写位置
+打开一个文件
+	fd-文件表项指针-文件表项-v节点指针-v节点-v/i节点信息-文件
+
+多次打开同一个文件，文件表项各自独立，只是v节点共享
+	不同的文件描述符标识的文件读写位置各自独立
+代码：
+sane.c
+
+```c
+#include<unistd.h>
+#include<string.h>
+int mian(void){
+    int fd1=open("same.txt",O_RDWR|O_CREAT|O_TRUNC,0644);
+    printf("fd1=%d\n",fd1);
+    int fd2=open("same.txt",O_RDWR);
+    printf("fd2=%d\n",fd2);
+    int fd3=open("same.txt",O_RDWR);
+    printf("fd3=%d\n",fd3);
+    const char* text="hello,world";
+    write(fd1,text,strlen(text)*sizeof(text[0]));
+    off_t pos=lseek(fd2,-6,SEEK_CUR);
+    printf("pos=%ld\n",pos);
+    text="linux";
+    write(fd3,text,strlen(text)*sizeof(text[0]));
+    return 0;
 }
 ```
 
