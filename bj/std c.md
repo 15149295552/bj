@@ -357,6 +357,7 @@ int main(void){
     return 0;
 }
 ```
+```
 数组越界访问，会造成严重后果，往往程序崩溃
     打印数组中的所以元素：
     for(int i=0; i<5;i++){
@@ -388,7 +389,11 @@ int main(void){
     int i = 100
     char*pi = *& i;//&i = 0x1000
     pi++; //pi +=1 pi = 0x1004
+```
+
+
 代码:
+
 ```c
 #include<stdio.h>
 int main(void){
@@ -479,6 +484,7 @@ int main(void){
     return 0;
 }
 ```
+```
 结构体和函数
     结构体变量可以作为函数的参数进行传递
     结构体变量地址可以作为函数的参数进行传递
@@ -491,7 +497,11 @@ int main(void){
         printf("%s:%d\n",pst->name,pst->age);
         pst->age++;
     }
+```
+
+
 代码:
+
 ```c
 //01struct.c
 #include<stdio.h>
