@@ -686,3 +686,216 @@ int main(void){
 }
 ```
 
+函数指针
+	可以使用指针指向整型变量字符串数组，也可以指向一个函数
+	一个函数在编译的时候会被分配一个入口地址，这个入口地址就称为函数的指针(地址)
+
+```c
+int add(int a,int b){
+printf("enter $s\n",func )
+return a+b;
+```
+
+以上函数add在内存中的地址就是函数名add,add代表函数的入口地址
+
+__ func __：标准库提供的宏，表示当前函数名称
+
+函数指针变量的定义
+语法：返回值类型(*var_name)(形参列表)；
+
+举例 :
+    int (*pfunc)(int, int);
+      定义了一个指针变量 
+      该变量占据了4字节内存空间
+      该4字节内存空间存储一个函数的地址 
+      存储的函数有什么要求吗?
+      存储的函数 : 返回值为int类型, 参数为int,int类型的函数的地址
+
+  赋值 : 
+    函数指针 = 函数名 ;
+
+  举例 :
+    pfunc = add;
+
+  调用 :
+    函数指针(形参表);
+
+​    pfunc(10, 20); 
+​    == 
+​    add(10, 20);
+​    ==
+​    (*pfunc)(10, 20);
+
+​    int* pfunc(int, int); 
+​      定义了一个函数
+​      返回值是一个 int* 
+
+代码：
+pfunc.c
+
+```c
+#include<stdio.h>
+int add(int a,int b){
+	printf("enter %s\n",__func__)
+	return a+b;
+}
+int sub(int a,int b){
+	printf("enter %s\n",__func__)
+	return a-b;
+}
+int main(void){
+	printf("add函数的地址p\n"i,add);
+//定义函数指针
+	int (*pfunc)(int,int)NULL;
+	pfunc add;
+	int ret (*pfunc)(10,20);
+	printf("ret=%d\n",ret);
+    pfunc=sub;
+    printf("sub函数地址：%p %p %p %p\n",sub,*sub,pfunc,*pfunc);
+    ret =pfunc(20,10);
+    printf("ret=%d\n",ret);
+	return 0;
+}
+```
+
+typedef给函数指针类型起别名
+	typedef返回值类型(*type name)(形参列表)；
+		此时type_name 而是函数指针类型的数据类型
+
+举例 :
+    typedef int (*pfunc_t)(int, int);
+      起了个别名为 pfunc_t
+      给 int (*)(int) 起了个别名
+      给返回值为int, 参数为int,int的函数指针起了别名 
+      不分配内存空间的
+
+​    pfunc_t pfunc;
+​      定义了一个指针变量 
+​      该变量占据了4字节内存空间 
+​      该4字节内存空间存储一个函数的地址 
+​      存储的函数有什么要求吗?
+​      存储的函数 : 返回值为int类型, 参数为int,int类型的函数的地址
+
+​    pfunc = add;
+
+代码：
+02pfunc.c
+
+```c
+#include <stdio.h>
+typedef int (*pfunc_t)(int, int);
+int add(int a, int b){
+    printf("enter %s\n", __func__);
+    return a+b;
+}
+int sub(int a, int b){
+    printf("enter %s\n", __func__);
+    return a-b;
+}
+// 形参相当于局部变量
+// int a;
+// int b;
+// pfunc_t pfunc;
+// 调用实参
+// clac(100, 200, add);
+// int a= 100
+// int b= 200;
+// pfunc_t pfunc = add;
+// pfunc == add == NULL ?? 
+// return pfunc(a,b); == return add(a,b);
+int calc(int a, int b, pfunc_t pfunc){
+    if(NULL == pfunc){
+        return a*b;
+    }else{
+        return pfunc(a,b);
+    }
+}
+int main(void){
+    int ret = 0;
+    ret = calc(100, 200, add);
+    printf("ret=%d\n", ret);
+    ret = calc(100, 200, sub);
+    printf("ret=%d\n", ret);
+    ret = calc(100, 200, NULL);
+    printf("ret=%d\n", ret);
+    return 0;
+}
+```
+
+03pfunc.c
+
+```c
+#include <stdio.h>
+typedef int (*pfunc_t)(int, int);
+int add(int a, int b){
+    printf("enter %s\n", __func__);
+    return a+b;
+}
+int sub(int a, int b){
+    printf("enter %s\n", __func__);
+    return a-b;
+}
+int mul(int a, int b){
+    printf("enter %s\n", __func__);
+    return a*b;
+}
+int div(int a, int b){
+    printf("enter %s\n", __func__);
+    return a/b;
+}
+int mod(int a, int b){
+    printf("enter %s\n", __func__);
+    return a%b;
+}
+// 定义函数指针数组 数组中每个元素都是一个函数的地址
+pfunc_t arr[] = {add, sub, mul, div, mod};
+int main(void){
+    int len = sizeof(arr) / sizeof(arr[0]);
+    pfunc_t pfunc = NULL;
+    int ret = 0;
+    for(int i=0; i<len; i++){
+        pfunc = arr[i];
+        ret = pfunc(200, 20);
+        printf("ret=%d\n", ret);
+    }
+    return 0;
+}
+```
+
+函数指针的经典使用场景 
+  利用函数指针数组实现遍历调用所有的指定函数 
+
+  嵌入式中一般系统上电 先做一系列的硬件初始化功能 
+    cpu dram time net flash ...
+
+代码：
+04pfunc.c
+
+```c
+```
+
+
+
+多级指针 : 二级指针 
+回顾 一级指针 
+  指向普通变量的内存区域 
+  int a = 200;
+  int* p = &a; //p保存了变量a的地址 p指向a 
+  int b = *p; //读取p指向内存中的数据 
+  *p = 100; //修改p指向内存中的数据 
+
+二级指针 
+  指向一级指针变量的指针 
+  也就是二级指针存储一级指针变量的地址 
+
+  语法格式 :
+    数据类型 **二级指针变量名 = 一级指针变量的地址;
+
+  举例 :
+    int a = 200;
+    int *p = &a;
+    //pp:二级指针 
+    // 存储的是指针变量p的地址 
+    int **pp = &p;
+    //*pp = p 
+    **pp = 100; // 等价于 a = 100, *p = 100

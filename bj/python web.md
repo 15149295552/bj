@@ -67,7 +67,7 @@ Hyper Text Markup Language
   单标记：只有一个标记，技能表示开始，也能表示结束
   <标记>或者<标记/>
 
-```
+```html
 1.<br> 或者 <br/> ：换行
 <hr> 或者 <hr/> : 水平线
 <img> 或者 <img/>: 一幅图像
@@ -76,7 +76,7 @@ Hyper Text Markup Language
 嵌套:在一对标记中，再嵌套其他的标记，相当于是功能的嵌套
 加粗的超链接
 
-```
+```html
 <a><b>百度</b></a>
 <b><a>百度</a></b>
 ```
@@ -102,7 +102,7 @@ Hyper Text Markup Language
 ```
 
 ```html
-<htmL>--父元素/父标记
+<html>--父元素/父标记
 	<head></head>--子元素/子标记
 	<body></body>--子元素/子标记
 </html>
@@ -133,6 +133,334 @@ Hyper Text Markup Language
         <p align="center" id="p1">
             this is p
         </p>
+    </body>
+</html>
+```
+
+HTML中的注释
+<!-- -->
+注意：
+注释不能出现在<>中
+~~<p<!---->></p>~~
+注释不能嵌套
+
+### 文档结构
+
+文档声明
+
+出现在网页的最顶端的第一个标记
+作用：告诉浏览器使用HTML的版本
+
+```html
+<!DOCTYPE html>或者<!doctype html> - 使用HTML5版本
+```
+
+HTML页面
+在文档类型声明之下，使用一对html根标记组成
+<html></html>
+在html中包含两对子元素
+
+```html
+<head></head> - 表示网页的头部
+<body></body> - 表示网页的主题
+```
+
+练习：
+01_text.html
+
+```html
+<!doctype html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <p>&nbsp;
+            这是一段文本
+        </p>
+    </body>
+</html>
+```
+
+标记
+特殊字符
+
+```html
+&nbsp;  表示一个空格
+&lt;	表示 <
+&gt		表示 >
+&copy;  表示 ©
+&yen;	表示 ￥
+```
+
+样式标记
+作用：修改文本在网页中的表现形式
+
+```html
+<i></i> :斜体显示文本
+<u></u> :下划线显示文本
+<s></s> :删除线的方式显示文本
+<b></b> :加粗显示文本
+<sup></sup>:以上标的形式显示文本
+<sub></sub>:以下标的形式显示文本
+```
+
+标题标记
+作用：以不同的文章大小以及加粗的方式显示文本
+语法：
+
+```html
+<h#></h#>
+#:1-6
+h1:一级标题
+h2:二级标题
+...
+h6:六级标题
+```
+
+```html
+<!doctype html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <p>&nbsp;
+            这是一段文本
+        </p>
+        <h1 align="left">
+           静夜思
+        </h1>
+        <h3 align="center">
+            李白
+        </h3>
+        <h2 align="right">
+            床前明月光
+        </h2>
+        <h2>
+            疑是地上霜
+        </h2>
+		<h2>
+            举头望明月
+        </h2>
+		<h2>
+            低头思故乡
+        </h2>
+    </body>
+</html>
+```
+
+段落元素
+作用：突显一段文本，每段文本独占一行/块，并且每个段落都会具备一小段的垂直空白距离
+语法：
+
+```html
+<p></p>
+属性：align
+取值：left/center/right
+```
+
+练习：
+```html
+<p align="center">
+    天长地久有时尽
+	<br>此恨绵绵无绝期
+</p>
+```
+
+换行元素
+```html
+<br>或</br>
+```
+
+分区元素
+快分区
+
+```html
+<div>
+    
+</div>
+```
+
+特点：独占一行/块
+作用：在网页中做布局（配合css)
+
+行内分区元素
+
+```html 
+<span></span>
+```
+
+特点：允许在一行内显示多个span,并能够与其他的文本在一行内显示
+作用：设置同一行文本的不同样式（配合css)
+
+```html
+<div>
+    这是快分区元素
+</div>
+<span>这是行内分区元素</span>
+```
+
+行内元素与块级元素
+
+块元素：只要能在网页中能独占一行的元素就都是块元素
+div,p,h1…h6
+所以元素都具备align属性，取值为left/center/right
+
+行内元素：多个元素能够在一行内显示，就是行内元素
+span,i,b,s,u,sup,sub
+
+列表
+类型
+有序 - <ol></ol>
+无序 - <ul></ul>
+
+列表项 - <li></li>
+```html
+<ol>
+    <li>内容</li>
+</ol>
+<ul>
+    <li>内容</li>
+</ul>
+```
+
+练习：
+```html
+<!doctype html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <ol>
+            <li>西游记</li>
+    		<l1>三国演义</Li>
+			<1i>红楼梦</Li>
+			<1i>水浒传</Li>
+		</ol>
+		<ul>
+            <li>金毛狮王</li>
+			<li>白眉鹰王</li>
+   			<li>青翼蝠王</li>
+			<li>紫衫龙王</li>
+		</ul>
+    </body>
+</html>
+```
+
+列表属性
+
+```html
+<ol>
+    
+</ol>
+```
+
+属性：type
+取值：
+1、1:按数字方式排列，默认值
+2、A:按大写英文字符方式排列
+3、a:按小写英文字符方式排列
+4、I:按大写罗马数字方式排列
+5、1:按小写罗马数字方式排列
+
+```html
+<ul>
+    
+</ul>
+```
+
+属性：type
+取值：
+1、disc:实心圆点，默认值
+2、circle:空心圆点
+3、square:实心方块
+4、none:不显示任何标识
+
+列表的嵌套：在一个列表项中，又出现一个列表
+```html
+<ul>
+    <li><ol>
+        <li></li>
+        </ol>
+    </li>
+</ul>
+```
+
+图像和超链接
+
+URL
+Uniform Resource Locator
+  统一	资源	定位符
+用于标识网络中资源的位置，俗称路径
+
+URL分类
+绝对路径：访问互联网上的资源时，使用绝对路径
+相对路径：从当前文件所在的位置处去查找资源文件所经过的路径
+	1.同目录下
+	2.在子目录下
+	3.在父目录刊
+	./ 表示当前路径 ../ 表示上一级路径
+
+注意：
+UrL中不能出现中文
+UrL是严格分区大小写
+
+图像
+标记：<img>
+属性：
+src：指定要显示的图片的URT
+width：宽度，以px为单位的数值（允许省略px)
+height：高度，以px为单位的数值（允许省略px)
+
+```html
+<img src="img/1.jpg"width="600",height="400">
+```
+
+练习：
+```html
+<!doctype html>
+<html long="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Title</title>      
+    </head>
+    <body>
+        <h1 align="center">HTML5 &lt;Day02&gt;</h1>
+		<hr>
+        <h2>
+            1 HTML 文档片段
+        </h2>
+        <h3>
+            1.1 问题
+        </h3>
+        <p>
+            创建如图-1所示的html页面
+        </p>
+        <div>
+            <img src="img/page,JPG">
+        </div>
+        <h4>
+            图-1
+        </h4>
+		<h3>
+            1.2方案
+        </h3>
+		<p>
+            使用HTML完成效果
+        </p>
+        <div align="center">
+            <a href="https://www.baidu.com/"target="_blank">
+			<img src="img/page_struct.JPG">
+			</a>
+			<h4>
+                图-2
+            </h4>
+		</div>
     </body>
 </html>
 ```

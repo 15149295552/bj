@@ -757,5 +757,84 @@ void uart_init(void){
 	//n.打开uart时钟
 }
 
-vim uart.h //声明
-vim main.c //调用
+代码：
+uart.h
+
+```c
+#ifndef  _UART_H
+#define  _UART_H
+//寄存器声明 
+//uart
+#define     ULCON0       (*(unsigned long *)0XC00A1000)
+#define     UCON0        (*(unsigned long *)0XC00A1004)
+#define     UTRSTAT0     (*(unsigned long *)0XC00A1010)
+#define     UTXH0        (*(unsigned long *)0XC00A1020)
+#define     URXH0        (*(unsigned long *)0XC00A1024)
+#define     UBRDIV0      (*(unsigned long *)0XC00A1028)
+#define     UFRACVAL0    (*(unsigned long *)0XC00A102C)
+//gpio
+#define     GPIODALTFN0  (*(unsigned long *)0XC001D020)
+#define     GPIODALTFN1  (*(unsigned long *)0XC001D024)
+//时钟
+#define     UARTCLKENB   (*(unsigned long *)0XC00A9000)
+#define     UARTCLKGEN0L (*(unsigned long *)0XC00A9004)
+//函数声明
+extern void uart_init(void);
+extern void uart_putc(char c);
+extern void uart_puts(char* str);
+#endif
+```
+
+uart.c
+
+```c
+#include"uart.h"
+void uart_init(void){
+    //关闭uart时钟
+    UARTCLKENB &= ~(1<<2);
+    //配置复用功能
+    GPIODALTFN1 &= ~(3<<4);
+    GPIODALTFN1 |= (1<<4);
+    GPIODALTFN0 &= ~(3<<28);
+    GPIODALTFN0 |= (1<<28);
+    //配置ULCON0
+    ULCON0=3;
+    //配置UCON0
+    UCON0=5;
+    //配置波特率
+    //配置SCLK_UART 50MHz
+    UARTCLKGEN0L &= ~(0x7<<2);
+    UARTCLKGEN0L &= ~(0xff<<5);
+    //配置UBRDIV0
+    UBRDIV0=26;
+    UFRACVAL0=2;
+    //打开uart时钟
+    UARTCLKENB |= (1<<2);
+}
+void uart_putc(char c){
+    whil(!(UTRSTAT0 & 0X02))
+    //将要发送的字符放到发送缓冲区寄存器中
+    UTXH0=0;
+    //追加回车字符
+    if('\n'==c)
+        uart_putc('\r');
+}
+//发送字符串函数定义
+void uart_puts(char* str){
+    while(*str){
+        uart_putc(*str);
+        str++;
+    }
+}
+```
+
+```c
+#include "uart.h"
+void main(void){
+    uart_init();
+    while(1){
+        uart_puts("hello, everyone\n");
+    }
+}
+```
+
