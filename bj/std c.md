@@ -907,3 +907,95 @@ int main(void){
     int **pp = &p;
     //*pp = p 
     **pp = 100; // 等价于 a = 100, *p = 100
+
+代码：
+ppointer.c
+
+```c
+#include<stdio.h>
+int main(void){
+    int a=200;
+    int *p=&a;
+    int **pp=&p;
+    printf("a=%d,%d",a,*p,**pp);
+    int b 20;
+	p=&b;
+	printf("%d\n",**pp);//20
+	int *pl &b;
+	pp &p1;
+	printf("%d\n",**pp);//20
+	pp &p;
+	*pp &a;
+	printf("%d\n",**pp);//200
+	return 0;
+}
+```
+
+使用场景
+定义函数swap 实现字符串的交换
+char* pa=“hello”;
+char* pb=“world”;
+
+定义swap函数，效果：
+	pa -> “world”;
+	pb -> “hello”;
+代码：
+swap.c
+
+```c
+#include<stdio.h>
+void swap(char** ps1,char** ps2){
+    char* tmp=*ps1;
+    *ps1=*ps2;
+    *ps2=tmp;
+}
+int main(void){
+    char* pa="hello";
+    char* pb="world";
+    swap(&pa,&pb);
+    printf("pa=%s\n", pa);
+    printf("pb=%s\n", pb);
+    return 0;
+}
+```
+
+实现两个数据的交换：
+实现变量的交换 - 一级指针
+实现指针的交换 - 二级指针
+
+二级指针和字符数组
+char* arr[]={"hello", "world"};
+	arr[0] char* 类型的数据，也就是“hello”字符串的首地址
+	arr[1] char* 类型的数据，也就是“world”字符串的首地址
+
+数组中每个元素都是char*类型的指针(地址)
+arr是数组中第0元素的地址，char*类型的地址
+	arr存储的是char*类型的地址，具有二级指针的意思
+
+所以，可以定义一个二级指针变了来保存字符指针数组的首地址
+char** parr = arr;
+
+代码：
+ppstring.c
+
+```c
+#include <stdio.h>
+int main(void){
+    char* arr[] = {"hello", "world"};
+    //char** p = arr[0];//p指向了"hello"
+    char** p = arr;//p指向了arr数组
+    printf("%s %s\n", arr[0], arr[1]);// hello world
+    printf("%s %s\n", p[0], p[1]);// hello world
+    printf("%s %s\n", *(arr+0), *(arr+1));
+    printf("%s %s\n", *(p+0), *(p+1));
+    return 0;
+}
+```
+
+p++; ok 
+arr++; //error 
+
+sizeof(arr) / sizeof(arr[0])
+数组总字节数    第一个元素字节数  数组元素个数
+sizeof(p) / sizeof(p[0])  error 
+   4/8      4

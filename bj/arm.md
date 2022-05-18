@@ -838,3 +838,321 @@ void main(void){
 }
 ```
 
+main.c
+
+```c
+#include "uart.h"
+static char buf[32];
+void main(void){
+	uart init();
+	while(1){
+		uart puts("\n shell#")
+		uart gets(buf,32);
+		uart puts("\n you input msg is ");
+		uart puts(buf);
+        return 0;
+    }
+}
+```
+
+char buf[] = {'h' 'e' 'l' 'l' 'o'};
+  此时buf数组中存储的并不是字符串, 一串字符
+
+代码：
+2.0
+uart.h
+
+```c
+#ifndef  _UART_H
+#define   _UART_H
+//寄存器声明 
+//uart
+#define     ULCON0      (*(unsigned long *)0XC00A1000)
+#define     UCON0       (*(unsigned long *)0XC00A1004)
+#define     UTRSTAT0    (*(unsigned long *)0XC00A1010)
+#define     UTXH0       (*(unsigned long *)0XC00A1020)
+#define     URXH0       (*(unsigned long *)0XC00A1024)
+#define     UBRDIV0     (*(unsigned long *)0XC00A1028)
+#define     UFRACVAL0   (*(unsigned long *)0XC00A102C)
+//gpio
+#define     GPIODALTFN0 (*(unsigned long *)0XC001D020)
+#define     GPIODALTFN1 (*(unsigned long *)0XC001D024)
+//时钟
+#define     UARTCLKENB  (*(unsigned long *)0XC00A9000)
+#define     UARTCLKGEN0L (*(unsigned long *)0XC00A9004)
+//函数声明
+extern void uart_init(void);
+extern void uart_putc(char c);
+extern void uart_puts(char* str);
+extern char uart_getc(void); // 读取一个字符
+extern void uart_gets(char buf[], int len); // 读取一个字符串,存储起来
+#endif
+```
+
+uart.c
+```c
+#include "uart.h"
+// 初始化函数定义 
+void uart_init(void){
+    // 1. 关闭uart时钟
+    UARTCLKENB &= ~(1<<2);
+    // 2. 配置复用功能 
+    GPIODALTFN1 &= ~(3<<4);
+    GPIODALTFN1 |= (1<<4);
+    GPIODALTFN0 &= ~(3<<28);
+    GPIODALTFN0 |= (1<<28); 
+    // 3. 配置 ULCON0
+    // 7654 3210
+    //  000 0011
+    ULCON0 = 3;// 0000 0011
+    // 4. 配置 UCON0
+    // 7654 3210
+    // 0000 0101
+    UCON0 = 5;
+    // 5. 配置波特率 
+    // 5.1.配置SCLK_UART 50MHz
+    // [4:2]=000
+    UARTCLKGEN0L &= ~(0x7<<2);
+    // [12:5]=0000 1111 ->n = 16 -> 50MHz 
+    UARTCLKGEN0L &= ~(0XFF<<5);//[12:5]=00000000
+    UARTCLKGEN0L |= (0XF<<5);//[12:5]=00001111 15
+    // 5.2.配置 UBRDIV0 UFRACVAL0 
+    // 115200bps
+    // B + F/16 = (S/(bps*16)) -1  公式3
+    // B + F/16 = (50000000/(115200*16)) - 1 
+    //          = 26.13
+    // B = 26
+    // F/16 = 0.13 
+    // F = 2
+    UBRDIV0 = 26;
+    UFRACVAL0 = 2;
+    // 6. 打开uart时钟
+    UARTCLKENB |= (1<<2);
+}
+//发送字符函数定义
+void uart_putc(char c){
+    // 当发送缓冲区为空,发送数据
+    // 非空, 死等
+    while(!(UTRSTAT0 & 0X02));
+
+    // 将要发送的字符放到发送缓冲区寄存器中
+    UTXH0 = c;
+
+    //追加回车字符
+    if('\n' == c)
+        uart_putc('\r');
+}
+// 发送字符串函数定义
+// char * str = "hello,world\n";
+void uart_puts(char* str){
+    while(*str){
+        uart_putc(*str);
+        str++;
+    }
+}
+// 为什么参数为void,而非char类型??
+char uart_getc(void){
+    //前提:接收缓冲区中有有效数据
+    // UTRSTAT0 
+    // 为空, 死等
+    // 非空, 直接读取
+    while(!(UTRSTAT0 & 0X01));
+    //1.从接受缓冲区中读取一个字节的数据
+    //unsigned char data = URXH0;
+    //return data;
+    return URXH0 & 0XFF;
+}
+//接受字符串函数定义 
+//char buf[32]; 
+//uart_gets(buf, 32);
+void uart_gets(char buf[], int len){
+    int i;
+    for(i=0; i<(len-1); i++){
+        buf[i] = uart_getc();
+        // 添加回显
+        uart_putc(buf[i]);
+        // 添加回车退出
+        if('\r' == buf[i])
+            break;
+    }
+    buf[i] = '\0';
+}
+```
+
+main.c
+```c
+#include "uart.h"
+static char buf[32];
+void main(void){
+    uart_init();
+    while(1){
+        uart_puts("\n shell#");
+        uart_gets(buf, 32);
+        uart_puts("\n you input msg is : ");
+        uart_puts(buf);
+    }
+}
+```
+
+
+编译程序：
+arm-cortex_a9-linux-gnueabi-gcc -nostdlib -c -o main.o main.c
+arm-cortex_a9-linux-gnueabi-gcc -nostdlib -c -o uart.o uart.c
+arm-cortex_a9-linux-gnueabi-ld -nostartfiles -nostdlib -Ttext=0x48000000 -emain -o shell.elf main.o uart.o
+arm-cortex_a9-linux-gnueabi-objcopy -O binary shell.elf shell.bin
+
+下位机->上位机
+上位机->下位机
+终端
+->终端->1获取输入的字符串1s-匹配->1显示目录的内容
+
+通过上位机给下位机发送一个字符串->"1ed on”->下位机接收字符串->判断匹配->上位机给下位机发送的是"1ed on"->开灯
+
+给shell裸板程序添加硬件操作功能
+上位机通过UART串口给下位机发送硬件操作命令，下位机一旦接收到了操作命令，会操作硬件
+
+明确：
+不管是在串口工具还是Liux终端，只要输入了信息，这些信息最终都是以字符串的形式存在的
+
+代码：
+3.0
+uart.h
+
+```c
+#ifndef  _UART_H
+#define   _UART_H
+//寄存器声明 
+//uart
+#define     ULCON0      (*(unsigned long *)0XC00A1000)
+#define     UCON0       (*(unsigned long *)0XC00A1004)
+#define     UTRSTAT0    (*(unsigned long *)0XC00A1010)
+#define     UTXH0       (*(unsigned long *)0XC00A1020)
+#define     URXH0       (*(unsigned long *)0XC00A1024)
+#define     UBRDIV0     (*(unsigned long *)0XC00A1028)
+#define     UFRACVAL0   (*(unsigned long *)0XC00A102C)
+//gpio
+#define     GPIODALTFN0 (*(unsigned long *)0XC001D020)
+#define     GPIODALTFN1 (*(unsigned long *)0XC001D024)
+//时钟
+#define     UARTCLKENB  (*(unsigned long *)0XC00A9000)
+#define     UARTCLKGEN0L (*(unsigned long *)0XC00A9004)
+//函数声明
+extern void uart_init(void);
+extern void uart_putc(char c);
+extern void uart_puts(char* str);
+extern char uart_getc(void); // 读取一个字符
+extern void uart_gets(char buf[], int len); // 读取一个字符串,存储起来
+#endif
+```
+
+uart.c
+```c
+#include "uart.h"
+// 初始化函数定义 
+void uart_init(void){
+    // 1. 关闭uart时钟
+    UARTCLKENB &= ~(1<<2);
+    // 2. 配置复用功能 
+    GPIODALTFN1 &= ~(3<<4);
+    GPIODALTFN1 |= (1<<4);
+    GPIODALTFN0 &= ~(3<<28);
+    GPIODALTFN0 |= (1<<28); 
+    // 3. 配置 ULCON0
+    // 7654 3210
+    //  000 0011
+    ULCON0 = 3;// 0000 0011
+    // 4. 配置 UCON0
+    // 7654 3210
+    // 0000 0101
+    UCON0 = 5;
+    // 5. 配置波特率 
+    // 5.1.配置SCLK_UART 50MHz
+    // [4:2]=000
+    UARTCLKGEN0L &= ~(0x7<<2);
+    // [12:5]=0000 1111 ->n = 16 -> 50MHz 
+    UARTCLKGEN0L &= ~(0XFF<<5);//[12:5]=00000000
+    UARTCLKGEN0L |= (0XF<<5);//[12:5]=00001111 15
+    // 5.2.配置 UBRDIV0 UFRACVAL0 
+    // 115200bps
+    // B + F/16 = (S/(bps*16)) -1  公式3
+    // B + F/16 = (50000000/(115200*16)) - 1 
+    //          = 26.13
+    // B = 26
+    // F/16 = 0.13 
+    // F = 2
+    UBRDIV0 = 26;
+    UFRACVAL0 = 2;
+    // 6. 打开uart时钟
+    UARTCLKENB |= (1<<2);
+}
+//发送字符函数定义
+void uart_putc(char c){
+    // 当发送缓冲区为空,发送数据
+    // 非空, 死等
+    while(!(UTRSTAT0 & 0X02));
+
+    // 将要发送的字符放到发送缓冲区寄存器中
+    UTXH0 = c;
+
+    //追加回车字符
+    if('\n' == c)
+        uart_putc('\r');
+}
+// 发送字符串函数定义
+// char * str = "hello,world\n";
+void uart_puts(char* str){
+    while(*str){
+        uart_putc(*str);
+        str++;
+    }
+}
+// 为什么参数为void,而非char类型??
+char uart_getc(void){
+    //前提:接收缓冲区中有有效数据
+    // UTRSTAT0 
+    // 为空, 死等
+    // 非空, 直接读取
+    while(!(UTRSTAT0 & 0X01));
+    //1.从接受缓冲区中读取一个字节的数据
+    //unsigned char data = URXH0;
+    //return data;
+    return URXH0 & 0XFF;
+}
+//接受字符串函数定义 
+//char buf[32]; 
+//uart_gets(buf, 32);
+void uart_gets(char buf[], int len){
+    int i;
+    for(i=0; i<(len-1); i++){
+        buf[i] = uart_getc();
+        // 添加回显
+        uart_putc(buf[i]);
+        // 添加回车退出
+        if('\r' == buf[i])
+            break;
+    }
+    buf[i] = '\0';
+}
+```
+
+main.c
+```c
+#include "uart.h"
+#include "led.h"
+static char buf[32];
+void main(void){
+    uart_init();
+    led_init();
+    while(1){
+        uart_puts("\n shell#");
+        uart_gets(buf, 32);// 从上位机获取操作命令 
+        if(!strcmp(buf, "led on"))
+            led_on();
+        else if(!strcmp(buf, "led off"))
+            led_off();
+        else 
+            uart_puts("please input vavid command!\n");
+    }
+}
+```
+
