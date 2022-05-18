@@ -630,7 +630,11 @@ int maint(){
 ```c
 #include<stdio.h>
 int main(){
-    
+    while(){
+        printf("%d",i);
+    i++;
+    }
+	return 0;
 }
 ```
 

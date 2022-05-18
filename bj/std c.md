@@ -730,6 +730,14 @@ __ func __：标准库提供的宏，表示当前函数名称
 ​      定义了一个函数
 ​      返回值是一个 int* 
 
+程序编译 
+
+arm-cortex_a9-linux-gnueabi-gcc -nostdlib -c -o uart.o uart.c
+arm-cortex_a9-linux-gnueabi-gcc -nostdlib -c -o main.o main.c
+arm-cortex_a9-linux-gnueabi-ld -nostartfiles -nostdlib -Ttext=0x48000000 -emain -o uart.elf main.o uart.o
+arm-cortex_a9-linux-gnueabi-objcopy -O binary uart.elf uart.bin
+cp uart.bin /tftpboot
+
 代码：
 pfunc.c
 

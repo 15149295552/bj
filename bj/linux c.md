@@ -1098,3 +1098,139 @@ int mian(void){
 }
 ```
 
+文件控制
+文件描述符的复制，fcntl
+
+```c
+#inlcude<fcntl.h>
+int fcntl(int oldfd,F_DUPFD,int new fd);
+```
+
+功能：复制文件描述符
+参数：
+	oldfd:源文件描述符
+	newfd:目标文件描述符
+返回值：
+	失败  返回-1
+	成功  返回目标文件描述符
+
+int fd =open(“hello.txt”);
+
+代码：
+fcntl.c
+
+```c
+#include<stdio.h>
+#include<unistd.h>
+#include<string.h>
+#include<fcntl.h>
+int main(void){
+    int fd1 open("fcntl.txt",0 RDWR|O CREAT|O TRUNC,0644);
+	printf("fd1=%d\n",fd1);//3
+	int fd2 dup(fdl);
+	printf ("fd2=%d\n",fd2);//4
+	//fcntl:文件描述符的复制
+	int fd3 fcntl(fd2,F DUPFD,2);
+	printf ("fd3=%d\n",fd3);//5
+	const char*text="Hello,world";
+    write(fd1,text,strlen(text)*sizeof(text[0]));
+    off_t pos=lseek(fd2,-6,SEEK_CUR);
+    printf("pos=%ld\n",pos);
+    text="linux";
+    write(fd3,text,strlen(text)*sizeof(text[0]));
+	return 0;
+}
+```
+
+fcntl(fd,F_DUPFD,2);dup2区别
+dup2(fd,2);//将fd的文件表项复制一份给到文件描述符2的位置上
+				如果2空闲，将d的文件表项复制过去
+				如果2不空闲，也会将fd的文件表项复制过去
+
+fcntl.c(fd,F_DUPFD,2);//将f的文件表项复制一份给到文件描述符2的位置上
+							如果2空闲，将fd的文件表项复制过去
+							如果2不空闲，不会将原有的文件描述符关闭，而是找另一个最小的空闲的文件描述符作为复制目标
+
+fd1=open(“fcntl.txt”);
+fd2=dup(fd1);
+
+const char*text="Hello,world";
+write(fd1,text,strlen(text)*sizeof(text[0]));
+off_t pos=lseek(fd2,-6,SEEK_CUR);
+	fd2的读写位置 - w位置上
+	fd3的读写位置 - w位置上
+
+text=“linux”;
+write(fd3 ,text,strlen(text))
+
+fd1 3 \
+fd2 4 ——文件表项指针 - 文件表项（读写位置，v节点指针） - v节点 - i节点 - 文件
+fd3 5 /
+
+文件锁
+
+读写冲突
+-写和写->有冲突
+如果两个或两个以上的进程同时向同一个文件的某个特定区域写入数据，最终写入文件的数据极有可能因为写操作的交错而产生混乱
+
+读和写->有冲突
+如果一个进程写而其他进程同时在读一个文件的某个特定区域，那么读出的数据有可能因为读写操作的交错而不完成
+
+-读和读->没冲突
+多个进程同时读取一个文件的某个特定区域，不会有任何问题，它们只是各自把文件中的数据拷贝到各自的缓冲区中，并不会改变文件的内容，相互之间就不会有冲突
+
+结论
+为了避免读写冲突
+	如果一个进程正在写，那么其他的进程不能读也不能写
+	如果一个进程正在读，那么其他的进程不能写，但是可以读
+
+为了避免多个进程在读写同一个文件的同一个区域发生冲突，Unix/Linux系统引入了文件锁机制，分为读锁和写锁
+区别：
+	对一个文件的特定区域可以加多把读锁
+	对一个文件的特定区域只能加一把写锁
+
+基于锁的操作模型
+读/写文件中的特定区域之前，先加读/写锁，锁成功了再读/写，读/写以后再解锁
+
+读锁：
+要读取内容，加一把锁，不要别人打扰
+写锁：要写入内容，加一把锁，不要别人打扰
+
+多把读锁：
+有多个进程在读取文件内容，在读取的时候加上了锁
+加读锁：
+新的进程要读取内容，并且加锁ok
+加写锁：新的进程要写入内容，并且加锁no
+
+读取内容 :
+加读锁 
+读取 
+解读锁 
+
+写入内容 :
+加写锁 
+写入 
+解写锁 
+
+进程A正在写, 进程B也想写 
+     进程A                   进程B 
+  打开文件,写A区        打开文件, 准备写B区
+  给A区加写锁, 成功          
+  写入A区             给B区加写锁, 失败, 阻塞
+  写完, 解锁A区       从阻塞中恢复, B区被加上写锁
+                               写B区 
+                            写完,解锁B区
+  关闭文件                     关闭文件 
+
+进程A正在写, 进程B想读
+      进程A                 进程B 
+  打开文件,写A区       打开文件, 准备读B区
+  给A区加写锁, 成功           
+  写入A区             给B区加读锁, 失败, 阻塞
+  写完, 解锁A区        从阻塞中恢复, B区被加上读锁
+                            读B区 
+                         读完,解锁B区
+  关闭文件                  关闭文件 
+
+进程A正在读, 进程B想写
+进程A正在读, 进程B想读

@@ -68,7 +68,7 @@ Hyper Text Markup Language
   <标记>或者<标记/>
 
 ```html
-1.<br> 或者 <br/> ：换行
+<br> 或者 <br/> ：换行
 <hr> 或者 <hr/> : 水平线
 <img> 或者 <img/>: 一幅图像
 ```
@@ -313,9 +313,9 @@ div,p,h1…h6
 span,i,b,s,u,sup,sub
 
 列表
-类型
-有序 - <ol></ol>
-无序 - <ul></ul>
+	类型
+	有序 - <ol></ol>
+	无序 - <ul></ul>
 
 列表项 - <li></li>
 ```html
