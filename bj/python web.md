@@ -614,3 +614,207 @@ placeholder:占位符，用户未输入任何数据时所显示的内容
 </html>
 ```
 
+按钮
+提交按钮：<input type="submit">
+将表单的数据提交给服务器
+
+重置按钮：<input type="reset">
+将表单的内容恢复到初始化状态
+
+普通按钮：<input type="button">
+允许通过js自定义按钮
+属性：
+value:指定按钮上的文本
+
+```html
+<button>
+    也可以定义为按钮
+</button>
+```
+
+属性：type
+	取值submit/reset/button
+
+单选框和复选框
+单选按钮：<input type="radio">
+复选按钮：<input type="checkbox">
+属性：
+name：除了定义名称，还可以分组
+		一组中的单选按钮或复选按钮,name属性必须一致
+
+value：值，提前声明好
+
+checked：设置预选中
+
+文件选择框：上传文件时使用
+语法：<input type="file">
+属性：name,控件名称
+
+多行文本域
+标记：
+
+```html
+<textarea></textarea>
+```
+
+属性：
+name：控件名称
+cols：指定文本域默认显示的列数
+rows：指定文本域默认显示的行数
+
+下拉选择框
+语法：
+
+```html
+<select>
+    <option>显示</option>
+    <option>1</option>
+</select>
+```
+
+属性：
+name
+value
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>bf</title>
+    </head>
+    <body>
+        <form action="" method="get">
+            <p>
+                用户名称:<input type="text" name="uname" placeholder="请输入用户名">
+            </p>
+            <p>
+                用户密码:<input type="password" name="upwd" placeholder="请输入密码">
+            </p>
+            <p>
+                <input type="checkbox" name="hobby" value="1">1
+                <input type="checkbox" name="hobby" value="2">2
+                <input type="checkbox" name="hobby" value="3">3
+                <input type="checkbox" name="hobby" value="4">4
+            </p>
+            <p>
+                上传头像：
+                <input type="file" name="uimg">
+            </p>
+            <p>
+                自我介绍：
+                <textarea name="intro" id="" cols="30" rows="10"></textarea>
+            </p>
+            <p>
+                <select name="city">
+                    <option value="0">北京</option>
+                    <option value="1">上海</option>
+                </select>
+            </p>
+            <p>
+                <input type="submit">
+                <input type="button">
+                <input type="reset">
+            </p>
+        </form>
+    </body>
+</html>
+```
+
+# CSS
+
+CSS - 样式表
+HTML：搭建网页结构
+CSS：修饰和美化网页
+
+内联方式
+将CSS的内容定义在单独的HTML标签中
+语法：
+
+```html
+<ANY style="样式声明"></ANY>
+```
+
+样式声明：由样式属性和样式值来组成
+属性和值之间使用：连接
+<ANY style="属性：值">
+在style中允许有多个样式声明，多个样式声明之间使用;隔开
+<ANY style="属性:值;属性:值">
+
+文字大小：font-size
+	取值：以px为单位的数字
+	ex:设置某元素的文字大小为18px
+	<ANY style="font-size:18px;">
+
+文本颜色：color
+	取值：颜色英语单词
+	ex:设置某元素的文字大小为18px,文本颜色为红色
+	<ANY style="font-size:18px;color:red;">
+
+背景颜色：background-color
+	取值：表示颜色的英文单词
+	<ANY style="background-color:yeLlow;">
+
+练习：
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>bf</title>
+    </head>
+    <body>
+        <div style="font-size:24px;color:red;background-color:yellow">
+            这是一个测试的div标记
+        </div>
+    </body>
+</html>
+```
+
+内部样式表：让定义好的样式能够使用在当前页面中的多个元素上
+语法：
+
+```html
+<head>
+    <style>
+        样式规则
+        样式规则
+        ...
+    </style>
+</head>
+```
+
+样式规则
+语法：由选择器和样式声明组成
+选择器：规范页面中哪些元素能够使用声明好的样式
+选择器{
+	属性1:值1
+	属性2:值2
+}
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>bf</title>
+        <style>
+            div{
+                font-size:24px;
+                color:red;
+                background-color:yellow;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            这是一个测试的div标记
+        </div>
+        <div>
+            这是一个又测试的div标记
+        </div>
+    </body>
+</html>
+```
+
+外部样式表

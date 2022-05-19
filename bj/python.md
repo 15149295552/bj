@@ -367,8 +367,85 @@ else:
 ## 条件表达式
 
 ```py
-
+num_a=int(input('请输入第一个整数'))
+num_b=int(input('请输入第二个整数'))
+if num_a>num_b:
+    print(num_a,'大于等于',num_b)
+else:
+    print(num_a,'小于'，num_b)
+print(str(num_a+'大于等于'+num_b) if num_a>=num_b else str(num_a+'小于'+num_b))
 ```
+
+## pass语句
+
+```py
+answer=input('你是会员吗？y/n')
+if answer=='y':
+    pass
+else:
+    pass
+```
+
+```py
+age=int(input('请输入年龄：'))
+if age:
+    print(age)
+else:
+    print('年龄为：',age)
+```
+
+## 内置函数
+
+range()
+```py
+r=range(10)#从0开始，一直到10(不包括10)，步长默认1
+print(r)
+print(list(r))
+r=range(1,10)#从1开始
+print(list(r))
+r=range(1,10,2)#步长为2
+print(list(r))
+print(10 in r)#False，10不在r整数列中
+print(9 in r)#True，9在r整数列中
+print(9 not in r)#False
+print(range(1,20,1))
+```
+
+## 循环结构
+
+```py
+sum=0
+a=0
+while a<5:
+    sum+=a
+    a+=1
+print(sum)
+```
+
+```py
+sum=0
+a=1
+while a<=100:
+    if not bool a%2:
+        sum+=a
+     a+=1
+print(sum)
+```
+
+```py
+for item in 'python':
+    print(item)
+for i in range(10):
+    print(i)
+for _ in range(5):
+    print()
+for item in range(1,10):
+    if item %2==0:
+        sum+=item
+print(sum)
+```
+
+
 
 # 类与对象
 
