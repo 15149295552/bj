@@ -998,4 +998,4 @@ arr++; //error
 sizeof(arr) / sizeof(arr[0])
 数组总字节数    第一个元素字节数  数组元素个数
 sizeof(p) / sizeof(p[0])  error 
-   4/8      4
+   4/8           4

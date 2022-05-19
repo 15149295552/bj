@@ -1232,5 +1232,161 @@ fd3 5 /
                          读完,解锁B区
   关闭文件                  关闭文件 
 
-进程A正在读, 进程B想写
-进程A正在读, 进程B想读
+进程A正在读，进程B想写
+进程A					进程B
+打开文件，准备读A区     打开文件，准备写B区
+给A区加读锁，成功
+读A区                  给B区加写锁，失败，阻塞
+读完解锁A区            从阻塞中恢复，B区被加上写锁
+						 写B区
+						写完，解锁B区
+关闭文件				 关闭文件
+进程A正在读，进程B想读
+进程A					进程B
+打开文件，准备读A区	打开文件，准备读B区
+给A区加读锁，成功
+读A区				  给B区读完解锁A区
+读完解锁A区				读B区
+						读完解锁B区
+关闭文件				  关闭文件
+
+加锁和解锁
+
+```c
+#include<unistd.h>
+#include<fcntl.h>
+int fcntl(int fd,int cmd,struct flock* lock);
+```
+
+功能：对某一文件或者某个特点区域加和解锁
+参数：
+fd：文件描述符
+cmd：锁模式
+	F_SETLKW - 阻塞模式
+		加不上锁不返回，什么时候加上什么时候返回
+	F_SETLK - 非阻塞模式
+		成功加锁返回0，加不上锁返回-1
+		errno == EAGAIN
+lock：锁的属性
+	struct flock{
+	short 1 type;
+	short 1 whence;
+	off t l start;
+	off t l len;
+	pid t 1 pid;
+	}；
+	1_type：锁操作类型
+		F_RDLCK:加读锁
+		F_WRLCK:加写锁
+		F_UNLCK:解锁
+	1_whence：锁区偏移起点
+		SEEK_SET
+		SEEK_CUR
+		SEEK_END
+	1_start - 相对于1_whence的锁区偏移
+	1_len - length - 锁区字节数，0表示锁到文件尾
+	1_pid - 加锁进程标识，加解锁置-1
+
+相对文件头10字节开始的20字节以阻塞模式加读锁 
+struct flock lock;
+lock.l_type = F_RDLCK;
+lock.l_whence = SEEK_SET;
+lock.l_start = 10;
+lock.l_len = 20;
+lock.l_pid = -1;
+fcntl(fd, F_SETLKW, &lock);
+
+相对当前位置10字节开始到文件尾以非阻塞模式加写锁
+struct flock lock;
+lock.1_type = F_WRLCK;
+lock.l_whence = SEEK_CUR;
+lock.l_start = 10;
+lock.l_len = 0;
+lock.l_pid = -1;
+fcntl(fd, F_SETLK, &lock);
+
+对整个文件解锁
+struct flock lock;
+lock.1_type = F_UNLCK;
+lock.1_whence = SEEK_SET;
+lock.l_start = 0;
+lock.l_len = 0;
+lock.l_pid = -1;
+fcntl(fd, F_SETLK, &lock);
+
+代码：
+wlock.c rlock.c
+
+```c
+#include<stdio.h>
+#include<string.h>
+#include<unistd.h>
+#include<fcntl.h>
+#include<errno.h>
+//加写锁
+int wlock(int fd ,int wait){
+    struct flock lock;
+    lock.l_type = F_WRLCK;
+    lock.l_whence = SEEK_SET;
+    lock.l_start = 0;
+    lock.l_len = 0;
+    lock.l_pid = -1;
+    return fcntl(fd, wait?F_SETLKW:F_SETLK, &lock);
+}
+//解锁
+int ulock(int fd){
+    struct flock lock;
+    lock.l_type = F_UNLCK;
+    lock.l_whence = SEEK_SET;
+    lock.l_start = 0;
+    lock.l_len = 0;
+    lock.l_pid = -1;
+    return fcntl(fd, F_SETLK, &lock);
+}
+int main(int argc,char** argv){
+    if(argc<2){
+        fprintf(stderr,"用法：%s<字符串>\n",argv[0]);
+        return -1;
+    }
+    int fd = open("shared.txt", O_WRONLY|O_CREAT|O_APPEND,0644);
+    if(-1 == fd){
+        perror("open");
+        return -1;
+    }
+    //阻塞模式加写锁
+    if(wlock(fd, 1) == -1){
+        perror("wlock");
+        return -1;
+    }
+    //以非阻塞的模式加写锁
+    while(wlock(fd, 0) == -1){
+        if(errno != EACCES && errno != EAGAIN){
+            perror("wlock");
+            return -1;
+        }
+        printf("该文件已经被锁定，稍后重试...\n");
+        //空闲处理
+    }
+    //写入数据
+    size_t i, len=strlen(argv[1]);
+    for(i=0; i<len; ++i){
+        if(write(fd, &argv[1][i], sizeof(argv[1][i])) == -1){
+            perror("write");
+            return -1
+        }
+        sleep(1);
+    }
+    //解锁
+    if(ulock(fd) == -1){
+        perror("ulock");
+        return -1;
+    }
+    close(fd);
+    return 0;
+}
+```
+
+写入数据：
+加写锁
+写入数据
+解锁

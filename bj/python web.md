@@ -108,6 +108,22 @@ Hyper Text Markup Language
 </html>
 ```
 
+起始格式
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>bf</title>
+    </head>
+    <body>
+        
+    </body>
+</html>
+```
+
+
+
 属性和值：在标记中，用来修饰标记显示效果的内容
 
 语法：
@@ -461,6 +477,139 @@ height：高度，以px为单位的数值（允许省略px)
                 图-2
             </h4>
 		</div>
+    </body>
+</html>
+```
+
+### 表格
+
+语法：
+```html
+<table>
+    <tr>表行</tr>
+    <td>单元格(列)</td>
+</table>
+```
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>bf</title>
+    </head>
+    <body>
+        <table border="1" width="400" height="300" align="center">
+            <tr align="center">
+                <td>姓名</td>
+                <td>语文</td>
+                <td>数学</td>
+                <td>英语</td>
+            </tr>
+            <tr align="center">
+                <td>老王</td>
+                <td>85</td>
+                <td>72</td>
+                <td>63</td>
+            </tr>
+            <tr align="center">
+                <td>张三</td>
+                <td>76</td>
+                <td>78</td>
+                <td>79</td>
+            </tr>
+            <tr align="center">
+                <td>李四</td>
+                <td>98</td>
+                <td>45</td>
+                <td>56</td>
+            </tr>
+        </table>
+    </body>
+</html>
+```
+
+属性
+table属性
+border：指定表格边框的宽度
+width：指定表格的宽度
+height：指定表格的高度
+align：指定表格在其父元素中的水平对齐方式
+	取值：left/center/right
+cellpadding：单元格内边距，内容与单元格边框之间的距离
+cellspacing：单元格外边距，单元格与单元格之间的距离
+
+tr属性
+align：控制当前行的内容的水平对齐方式
+	取值：left/center/right
+valign：控制当前行的内容垂直对齐方式
+	取值：top/middle/bottom
+bgcolor：指定当前行的背景颜色
+	取值：颜色的英文单词
+td属性：
+width
+height
+align
+valign
+bgcolor
+colspan:跨列/合并列
+rowspan:跨行/合并行
+
+行分组
+表头行分组：<thread></thread>
+表主题分组：<tbody></tbody>
+
+### 表单
+
+作用：用于接收用户的数据并提交给服务器
+
+要素：
+form元素 - 表单：收集用户的信息
+表单控件：提供能够与用户进行数据交互的可是黄组件
+
+form
+语法：
+
+```html
+<form>
+    
+</form>
+```
+
+属性：
+action：指定要提交给服务器程序的地址
+method：提交方式
+	get(默认方式)：表示向服务器要数据时使用
+		特点：会将提交的数据显示在地址栏上；安全性较低
+	post：表示要将数据提交给服务器进行处理时使用
+		特点：隐式提交，看不到提交的数据；安全性较高
+
+表单控件
+文本框：<input type="text">
+密码框：<input type="password">
+属性：
+name：定义控件的名称(提交给服务器使用，如果没有name的话则无法提交)
+value:值
+maxlength:限制输入的最大字符数
+readonly:只读
+placeholder:占位符，用户未输入任何数据时所显示的内容
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>bf</title>
+    </head>
+    <body>
+        <form action="" method="get">
+            <p>
+                用户名称:<input type="text" name="uname" placeholder="请输入用户名">
+            </p>
+            <p>
+                用户密码:<input type="password" name="upwd" placeholder="请输入密码">
+            </p>
+        </form>
     </body>
 </html>
 ```
