@@ -551,7 +551,12 @@ print(lst)
 
 ```py
 lst=['hello','world',98]
-lslist(['hello','world',98])
+lst2=list(['hello','world',98])
+```
+
+## 列表特点
+
+```py
 ```
 
 
