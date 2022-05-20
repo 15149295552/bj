@@ -445,6 +445,115 @@ for item in range(1,10):
 print(sum)
 ```
 
+```py
+for item in range(100,1000):
+    fe=item%10
+    shi=item
+    bai=item
+    print(bai,shi,ge)
+    if ge**3+shi**3+bai**3==item:
+        print(item)
+```
+
+## 流程控制语句
+
+```py
+for item in range(3):
+    pwd=input('请输入密码')
+    if pwd == '8888':
+        print('密码正确')
+        break
+    else:
+        print('密码不正确')
+```
+
+```py
+a=0
+while a<3:
+     pwd=input('请输入密码')
+    if pwd == '8888':
+        print('密码正确')
+        break
+    else:
+        print('密码不正确')
+```
+
+```py
+for item in range(1,51):
+    if item%5 == 0:
+        print(item)
+for item in range(1,51):
+    if item%5 != 0:
+        continue
+    print(item)
+```
+
+```py
+for item in range(3):
+    pwd=input('请输入密码')
+    if pwd=='8888':
+        print('密码正确')
+        break
+    else:
+        print('密码不正确')
+else:
+    print('三次密码均错误')
+```
+
+```py
+a=0
+while a<3:
+    pwd=input('请输入密码')
+    if pwd=='8888':
+        print('密码正确')
+        break
+    else:
+        print('密码不正确')
+    a+=1
+else:
+    print('三次密码均错误')
+```
+
+```py
+for i in range(1,4):
+    for j in range(1,5):
+        print('*',end='\t')
+    print()
+```
+
+```py
+for i in range(1,10):
+    for j in range(1,i+1):
+        print(i,'*',j,'=',i*j,end='\t')
+	print()
+```
+
+```py
+for i in range(5):
+    for j in range(1,11):
+        if j%2 == 0:
+            continue
+		print(j,end='\t')
+	print()
+```
+
+# 列表
+
+```py
+a=10
+lst=['hello','world',98]
+print(id(lst))
+print(type(lst))
+print(lst)
+```
+
+## 列表创建
+
+```py
+lst=['hello','world',98]
+lslist(['hello','world',98])
+```
+
 
 
 # 类与对象

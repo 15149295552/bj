@@ -999,3 +999,137 @@ sizeof(arr) / sizeof(arr[0])
 数组总字节数    第一个元素字节数  数组元素个数
 sizeof(p) / sizeof(p[0])  error 
    4/8           4
+
+二级指针和main函数
+int main (void){..
+int main(int argc,char**argv){...]
+等价于
+int main (int argc,char*argv[]){...]
+
+代码：
+main.c
+
+```c
+#include<stdio.h>
+int main(int argc,char** argv){
+    for(int i = 0; i<argc; i++){
+        printf("%s\n",argv[i]);
+    }
+    if(!(strcmp(argv[1],"add"))){
+        printf("add\n");
+    }
+    return 0;
+}
+```
+
+main2.c
+```c
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+int add(int a, int b){
+    return a+b;
+}
+int sub(int a, int b){
+    return a-b;
+}
+int mul(int a, int b){
+    return a*b;
+}
+int div2(int a, int b){
+    return a/b;
+}
+int calc(int a, int b,pfunc_t pfunc){
+    if(NULL == pfunc){
+        return 0;
+    }else{
+        pfunc(a, b);
+    }
+}
+int main(int argc, char** argv){
+    if(argc != 4){
+        printf("usage:<%s> add/sub/mul/div num1 num2\n", argv[0]);
+        return -1;
+    }
+    int ret = 0;
+    int val1 = strtoul(argv[2], 0, 10);
+    int val2 = strtoul(argv[3], 0, 10);
+    if(!(strcmp(argv[1], "add"))){
+        ret = add(val1, val2);
+        printf("%d+%d=%d\n", val1, val2, ret);
+    }else if(!strcmp(argv[1],"sub")){
+        ret = calc(val1, val2,sub);
+        printf("%d-%d=%d\n", val1, val2, ret);
+    }else if(!strcmp(argv[1],"mul")){
+        ret = calc(val1, val2,mul);
+        printf("%d*%d=%d\n", val1, val2, ret);
+    }else if(!strcmp(argv[1],"div2")){
+        ret = calc(val1, val2,div2);
+        printf("%d/%d=%d\n", val1, val2, ret);
+    }else{
+        printf("please input valid command!\n");
+    }
+    return 0;
+}
+```
+
+动态内存分配和释放
+int val = 100;
+int arr[10];
+
+结构体变量：都属于静态内存分配的方式
+占据的内存空间大小已经定死
+
+动态分配内存，自定义内存空间大小
+使用maalloc/free这一组函数
+
+mal1oc/free函数详解
+```c
+#include <stdlib.h>
+void *malloc(size t size);
+```
+
+功能：从堆区中分配内存
+参数：size:size_t,unsigned long
+	需要分配size个字节
+返回值：
+失败	返回NULL
+成功	返回该内存块的起始地址
+
+void free(void *ptr);
+功能：释放内存空间
+参数：ptr：malloc函数返回值
+	内存分配空间首地址
+
+注意：
+释放后记得p赋值为NULL，否则否则p就变为了野指针 
+  free(p);
+  p = NULL;
+申请了内存空间, 要记得释放内存
+申请一次, 释放一次, 切记不要释放两次, 导致段错误出现
+
+代码：
+malloc.c
+
+```c
+#include<stdlib.h>
+#include<stdio.h>
+int main(void){
+    int *p = NULL;
+    p = (int *)malloc(8);
+    if(NULL == p){
+        printf("失败\n");
+        return -1;
+    }
+    *(p+0) = 100;
+    *(p+1) = 200;
+    printf("%d %d\n", *(p+0), *(p+1));
+    free(p);
+    P = NULL;
+    return 0;
+}
+```
+
+malloc动态申请的内存空间的生命周期
+	malloc申请的内存，生命周期开始
+	当free或者程序结束后生命周期结束
