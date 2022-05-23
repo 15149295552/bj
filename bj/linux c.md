@@ -1315,7 +1315,7 @@ lock.l_pid = -1;
 fcntl(fd, F_SETLK, &lock);
 
 代码：
-wlock.c rlock.c
+wlock.c
 
 ```c
 #include<stdio.h>
@@ -1386,7 +1386,153 @@ int main(int argc,char** argv){
 }
 ```
 
-写入数据：
+加读锁 - 读 - 此时，再加读锁，ok - 其他进程再读
+加读锁 - 读 - 此时，再加写锁，no - 其他进程要写
+加写锁 - 写 - 此时，再加读锁，no - 其他进程要读
+加写锁 - 写 - 此时，再加写锁，no - 其他进程要写
+
+读取内容
+加读锁
+读取
+解读锁
+
+写入内容
 加写锁
-写入数据
-解锁
+写入
+解写锁
+
+代码：
+给文件加读锁
+rlock.c
+
+```c
+#include<stdio.h>
+#include<string.h>
+#include<unistd.h>
+#include<fcntl.h>
+#include<errno.h>
+//加读锁
+//wait=1,阻塞
+//wait=0.非阻塞
+int rlock(int fd ,int wait){
+    struct flock lock;
+    lock.l_type = F_RDLCK;
+    lock.l_whence = SEEK_SET;
+    lock.l_start = 0;
+    lock.l_len = 0;
+    lock.l_pid = -1;
+    return fcntl(fd, wait?F_SETLKW:F_SETLK, &lock);
+}
+//解锁
+int ulock(int fd){
+    struct flock lock;
+    lock.l_type = F_UNLCK;
+    lock.l_whence = SEEK_SET;
+    lock.l_start = 0;
+    lock.l_len = 0;
+    lock.l_pid = -1;
+    return fcntl(fd, F_SETLK, &lock);
+}
+int main(int argc,char** argv){
+    int fd = open("shared.txt", O_RDONLY);
+    if(-1 == fd){
+        perror("open");
+        return -1;
+    }
+    //加读锁
+    if(rlock(fd, 1) == -1){
+        perror("rlock");
+        retrun -1;
+    }
+    //读取内容
+    /*char buf[1024];
+    ssize_t readed;
+    while(readed = read(fd ,buf, sizeof(buf)) > 0)
+        write(STDOUT_FILENO, buf, readed);
+    printf("\n");*/
+    char buf[1];
+    ssize_t readed;
+    while((readed = read(fd, buf, sizeof(buf))) > 0){
+        write(STDOUT_FILENO, buf, readed);
+        sleep(1);
+    }
+    if(-1 == readed){
+        perror("read");
+        return -1;
+    }
+    //解锁
+    if(ulock(fd) == -1){
+        perror("ulock");
+        return -1;
+    }
+    close(fd);
+    return 0;
+}
+```
+
+读取文件读到文件末尾的时候，返回值为0
+
+write(STDOUT FILENO,buf,readed);
+	STDOUT FILENO:标准输出文件描述符
+	buf:要输出的缓冲区首地址
+	readed:要输出的字节个数
+
+想法：将文件中的内容，一个字符一个字符的读出来
+
+当一个文件加上写锁，写入内容，
+	如果此时要去读取文件内容的时候，无法读取该文件的内容
+	等到其写完内容，解锁，然后才能读取内容
+
+当一个文件加上读锁，读取内容
+	如果此时要去向文件中写入内容，无法向文件中写入内容
+	等到其读完内容，解锁，然后才能读取内容
+
+当一个文件加上读锁，读取内容
+	如果此时要去读取文件内容，可以读取文件的内容
+	同时加读锁，读取，二者是不冲突的
+
+总结：
+当通过c1os函数关闭文件描述符的时候，调用进程（程序）在该文件描述符上添加的一切锁都将被自动解除
+当程序（进程）终止的时候，该进程在所有文件描述符上添加的一切锁都将会自动解除
+文件锁仅仅在不同进程之间起作用，同一个进程的不同线程不能通过文件描述符来解决读写冲突问题
+
+为何文件锁可以避免读写冲突
+关键，参与读写的多个进程都会遵循一套标准：先加锁，再读写，再解锁-形成了一套协议
+只要参与者都遵循这套协议，读写就是安全的.
+反观之，如果哪个进程不遵循这套协议，完全无视锁的存在，想读就读，想写就写
+	就算是有锁，没有任何的约束作用
+锁的机制又称为劝谏锁或者协议锁
+
+每次给文件的特定区域加锁，都会通过fcntl函数向系统内核传递flock结构体，该结构体中包含了有关锁的一切细节
+系统内核会手机所有进程对该文件所加的所有锁，并且把这些f1ock结构体中的信息，以链表的形式组织成一张锁表
+此时任何一个进程想要通过fct1函数对该文件加锁，系统内核都会遍历这张锁表，一旦发现有和想要添加的锁沟通冲突的锁即阻塞或者报错
+	否则就将锁添加到锁表，而解锁的过程就是删除锁表中的相应节点
+锁表的起始地址保存在该文件的v节点中
+
+已经添加写锁：
+wlock(fd,1); -> 写锁
+
+想要添加读锁：
+	rlock(fd,1); -> 想要添加读锁 - 系统内核会遍历该文件的锁表 - 发现已经有进程给该文件添加了一般写锁 - 和想要添加的读锁 - 冲突 - 阻塞 - 或者 - 报错
+
+锁表：一个一个的锁节点
+	struct flock
+		short 1 type;
+		short 1 whence;
+		off t l start;
+		off t l len;
+		pid t 1 pid;
+		struct flock*pnext;
+	}；
+
+添加的三把锁
+struct flock fl;
+	f1.pnext &f2;
+struct flock f2;
+	f2.pnext &f3;
+struct flock f3;
+	f3.pnext NULL;
+
+[…|pnext=&f2]  […|pnext=&f3]  […|pnext=NULL]
+	  f1			 f2			 f3
+	  f1 -> pnext -> f2 -> pnext -> f3

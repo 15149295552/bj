@@ -237,7 +237,7 @@
     GPIOCOUT &= ~(1<<12);
 
 代码:
-    //led.h
+led.h
 
 ```c
 #ifdef _LED_H
@@ -265,7 +265,7 @@ extern void delay(int n);//延时函数声明
                 ->输出模式
 
 代码:
-    //led.c
+led.c
 
 ```c
 #include"led.h"
@@ -1014,6 +1014,35 @@ arm-cortex_a9-linux-gnueabi-objcopy -O binary shell.elf shell.bin
 明确：
 不管是在串口工具还是Liux终端，只要输入了信息，这些信息最终都是以字符串的形式存在的
 
+字符串
+char * str = "hello";
+str就是字符串的首地址，就是'h'字符的地址
+通过地址获取地址上的数据，*str
+
+str1 = "hello";
+str2 = "world";
+比较规则
+先比较两个字符串第一个字符, 不相等, 哪个字符大, 哪个字符串答;
+相等 -> 比较第二个字符 -> 不相等 -> 哪个字符大, 哪个字符串大 
+相等 -> 比较第三个字符 -> 直到遇到 '\0' 结束
+int my_strcmp(const char* str1, const char* str2){
+	while(*str1 == '\0'){
+		if( *str1 == *str2){
+			str1++;
+			str2++;
+			continue;
+		}
+		return *str1 - *str2;
+	}
+	return *str1 - *str2
+}
+
+if(strl == str2) return 0;
+if(strl > str2) return >0;
+if(strl < str2) return <0;
+
+特殊的字符'\0' 对应的ASCII码为0
+
 代码：
 3.0
 uart.h
@@ -1046,6 +1075,7 @@ extern void uart_gets(char buf[], int len); // 读取一个字符串,存储起�
 ```
 
 uart.c
+
 ```c
 #include "uart.h"
 // 初始化函数定义 
@@ -1135,10 +1165,91 @@ void uart_gets(char buf[], int len){
 }
 ```
 
+led.h
+```c
+#ifdef _LED_H
+#define _LED_H
+//寄存器的宏定义
+#define GPIOBOUT (*(unsigned long *)0XC001B000)
+#define GPIOBOUTENB (*(unsigned long *)0XC001B004)
+#define GPIOBALTFN1 (*(unsigned long *)0XC001B024)
+//声明操作函数
+extern void led_init(void);//初始化函数
+extern void led_on(void);//开灯
+extern void led_off(void);//关灯
+extern void delay(int n);//延时函数声明
+#endif
+```
+
+led.c
+
+```c
+#include"led.h"
+//作为整个程序的入口函数
+void led_test(void){
+    //硬件的初始化
+    led_init();
+    while(1)[
+        led_on();
+        delay(0x1000000);
+        led_off();
+        delay(0x1000000);
+    ]
+}
+void led_init(void){
+    //1.GPIO功能
+    GPIOBALTFN1 &= ~(1<<>21);//[21]=0
+    GPIOBANTFN1 |= (1<<20);//[20]=1
+    //2.输出模式
+    GPIOOUTENB |= (1<<26);//[26]=1
+    //3.输出高电平 - 灭
+    GPIOBOUT |= (1<<26);
+}
+void led_on(void){
+    GPIOBOUT &= ~(1<<26);//[26]=0
+}
+void led_off(void){
+    GPIOBOUT |= ~(1<<26);//[26]=1
+}
+//delay(10000);
+void delay(int n){
+    int i=n;
+    for(; i != 0;i--);
+    //while(i--); -> while(0);
+}
+```
+
+strcmp.h
+
+```c
+#ifndef STRCMP_H
+#define STRCMP_H
+extern int my_strcmp(const char* str1, const char* str2);
+#endif
+```
+
+strcmp.c
+```c
+#include "strcmp.h"
+int my_strcmp(const char* str1,const char* str2){
+    while(*str1){
+        if(*str1 == *str2){
+            str1++;
+            str2++;
+            continue;
+        }
+        return *str1 - *str2;
+	}
+	return *str1 - *str2
+}
+```
+
 main.c
+
 ```c
 #include "uart.h"
 #include "led.h"
+#inlclude "strcmp.h"
 static char buf[32];
 void main(void){
     uart_init();
@@ -1151,8 +1262,108 @@ void main(void){
         else if(!strcmp(buf, "led off"))
             led_off();
         else 
-            uart_puts("please input vavid command!\n");
+            uart_puts("please input valid command!\n");
     }
 }
+```
+
+编译
+arm-cortex_a9-linux-gnueabi-gcc -nostdlib -c -o main.o main.c
+arm-cortex_a9-linux-gnueabi-gcc -nostdlib -c -o led.o led.c
+arm-cortex_a9-linux-gnueabi-gcc -nostdlib -c -o uart.o uart.c
+arm-cortex_a9-linux-gnueabi-gcc -nostdlib -c -o strcmp.o strcmp.c
+arm-cortex_a9-linux-gnueabi-ld -nostartfiles -nostdlib -Ttext=0x48000000 -emain -o shell.elf main.o uart.o led.o strcmp.o
+arm-cortex_a9-linux-gnueabi-objcopy -O binary shell.elf shell.bin
+
+使用Makefile对程序进行优化
+Makefile功能：制定编译规则，将来程序就会按照规则进行编译，并且简化程序的编译流程
+Makefile的本质是普通的文本文件
+Makefile语法
+目标：依赖1 依赖2 依赖3 … 依赖n
+(tab键)编译命令1
+(tab键)编译命令2
+(tab键)编译命令3
+…
+(tab键)编译命令n
+
+注意：Makefile的注释使用"#"
+	  make后，自动到当前目录去寻找Makefile
+
+目标：hel1 oworld.c编译得到可执行程序he11 oworld
+此时目标：he11 oworld
+依赖：hel1 oworld.c
+思路：利用he11 oworld.c得到he11 oworld可执行程序
+vim Makefile
+编译规则
+helloworld:helloworld.c
+	gcc helloworld.c -o helloworld
+保存退出
+或者
+vim Makefile
+编译规则
+helloworld:helloworld.o
+gcc helloworld.o -o
+helloworld
+helloworld.o:helloworld.c
+gcc -c
+helloworld.c -o
+helloworld.o
+保存退出
+在终端同一目录执行make命令
+
+make命令后执行Makefile文件指定的规则的流程
+当执行make命令后，make命令首先在当前目录下找Makefile文件，一旦找到，打开该文件，然后make命令确认Makefile文件指定的所有的规则，然后确定最终的目标为：helloworld
+最终的源文件是helloworld.c
+1.如果helloworld不存在，make命令在当前目录下找helloworld的依赖文件helloworld.o，如果he11owor1d.o存在，直接gcc hel1 pworld.o-ohel1 oworld，如果helloworld.o不存在，make目录继续找helloworld.c，如果找到了.c文件，首先编译得到.o，然后再编译得到可执行程序
+2.如果helloworld存在，make再检查最终源文件helloworld.c的时间戳时候比helloworld的时间戳更新，如果he1 loworld.c的时间戳更新，说明he1 loworld.c被更新过，make目录重新根据编译的规则，重新执行一遍，如果发现he1 loworld.c没有更新过，无需重新编译
+
+Makefile小技巧
+变量：类似于c程序中#define宏，让Makefile便于修改
+
+OBJ=main.o#定义变量oBJ赋值为main.o
+使用变量的时候：$(OBJ) == main.o
+变量可以存储多个内容
+OBJ=main.o uart.o led.o strcmp.o
+
+$(OBJ) == main.o uart.o led.o strcmp.o
+
+2)多个文件编译(.c->.o)
+号.0：号.C
+gcc -c $-o $
+作用：将所有的.c文件生成对应的.o文件
+号.c所有的.c文件
+号.o所有的.o文件
+s@ 目标文件
+$< 依赖文件
+
+add.o:add.c
+gcc -c add.c -o add.o
+
+伪目标
+如果一个目标，没有任何的依赖，称这样的目标为伪目标
+最常用的伪目标clean
+
+clean:
+	rm *.elf *.bin …
+
+当执行make clean的时候，make命令会自动执行clean所指定的语句
+rm *.elf *.bin
+
+Makefile
+```
+OBJ=main.o led.o uart.o strcmp.o
+OBJCOPY=arm-cortex_a9-linux-gnueabi-objcopy
+LD=arm-cortex_a9-linux-gnueabi-ld
+GCC=arm-cortex_a9-linux-gnueabi-gcc
+shell.bin:shell.elf 
+	$(OBJCOPY) -O binary shell.elf shell.bin
+shell.elf:$(OBJ)
+	$(LD) -nostartfiles -nostdlib -Ttext=0x48000000 -emain -o shell.elf $(OBJ)
+main.o:main.c 
+	arm...gcc -nostdlib -c -o main.o main.c 
+%.o:%.c 
+	$(GCC) -c -o $@ %<
+clean:
+	rm *.elf *.bin *.o 
 ```
 
