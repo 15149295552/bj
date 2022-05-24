@@ -922,3 +922,174 @@ id作用：在HTML中，每个元素都允许设置一个1d属性，主要用于
 选择器1，选择器2，选择器3，…{
 
 }
+
+# Django框架
+
+web与服务器
+
+web：表示用户可以浏览的网页内容(HTML，CSS，JS)
+
+服务器：能够给用户提供的机器
+硬件范畴：一台机器
+软件范畴：一个能够接收用户请求并给出相应的程序
+作用：存储web所需要的信息(HTML，图片，音频)
+	  能够处理用户的请求request，并给出响应response
+	  执行服务器端的程序：查找数据库
+Django框架：使用Python语音开发服务器端处理程序
+
+框架：框架是一个为了解决开放性问题而存在的一种结构
+	框架本身提供一些最基本的功能，我们只需要在基础功能上搭建属于自己的操作即可
+
+Python中的框架
+Django：重量级的web框架
+Tornado：异步框架
+Flask：轻量级框架
+
+Django框架：是一个开源框架，采用Python语言开发
+模式 - MTV
+M:Models层
+	模型层，负责数据库的建模以及CRUD的操作
+T:Templatets层
+	模板层，用于处理显示用户显示的内容，录：html
+V:Views层
+	视图层，处理与用户交互的部分内容，从模型中获取数据，再将数据发送给模板，显示给用户
+
+使用
+创建Django
+django-admin startproject 项目名
+
+启动服务 用于访问
+在创建好的项目中，找到manage.py文件
+通过manage.py启动项目(服务)
+python3 manage.py runserver
+
+启动服务之后，在浏览器中，通过网址访问
+http://127.0.0.1:8000
+http://localhost:8000
+
+项目结构
+manage.py
+负责执行django中的各项操作的文件
+如：
+	启动服务
+	创建应用
+	数据库的同步
+
+2、主文件夹(名称与项目名称相同)
+__ init __.py
+项目初始化文件，每当服务器启动的时候，都会自动执行
+
+urls.py
+项目的基础url(路由)配置文件
+
+wsgi.py
+应用服务器配置文件，暂时不用
+
+settings.py
+项目的主设置文件:应用，模板，数据库，语言，时区，... ...
+BASE_DIR : 获取当前项目的绝对路径
+DEBUG : 调试模式
+	开发过程：推荐使用 True
+	上线运行：必须改为 False
+ALLOWED_HOSTS
+	设置允许访问本项目的地址列表。
+	如果不设置的话，只有本机(localhost/127.0.0.1)能访问。
+	推荐写 '*',任何表示该机器的地址都可以访问当前项目
+INSTALLED_APPS
+	指定已安装的应用，如果有自定义的应用的话，需要在此注册
+MIDDLEWARE:注册中间件
+ROOT_URLCONF:指定项目的基础路由配置文件
+TEMPLATES:指定模板的信息
+DATABASES:指定数据库的信息
+LANGUAGE_CODE:指定语言，允许修改为zh-Hans
+TIME_ZONE:指定时区，建议改为 Asia/Shanghai
+
+URL的使用
+urls.py
+默认在主文件夹中，主路由位置文件，包含所有的地址映射
+每一个请求到达之后，都会由urls.py中的urlpatterns列表中的url()进行匹配
+url()函数匹配上之后，可能将请求转交给其他的Views(视图)或其他的urls.py去处理
+
+python3 manage.py migrate
+
+创建超级管理员
+python3 manage.py createsuperuser
+1.用户名
+2.邮箱
+3.密码
+4.确认密码
+
+url函数的语法
+url(regex,views,kwargs=None,name=None)
+1.regex
+正则表达式模板，匹配请求的url
+2.views
+URL处理的视图函数
+3.kwargs
+字典，用来向views传参的，没有参数可以省略
+4.name
+字符串，给url()起别名，主要在模板中使用
+
+Django应用
+应用就是网站中的一个独立的模块程序
+在Django中，主目录一般不处理用户的请求，主要做的是项目的初始
+化以及请求的分发
+
+创建应用
+命令
+python3 manage.py startapp 应用名称
+
+在settings.py中进行注册
+在INSTALLED_APPS中追加应用名称
+INSTALLED_APPS =[
+'django.contrib.admin',
+'应用名称'
+]
+
+结构组成
+migrations目录
+存放数据库中间文件的目录（日志文件）
+
+\__init__.py
+应用的初始化文件
+
+admin.py
+应用的后台管理配置文件
+
+apps.py
+应用的属性配置文件，不需改动
+
+modets.py
+Models文件
+
+tests.py
+测试模块
+
+views.py
+定义视图的文件
+
+Django模板(Template)
+模板是要动态给用户呈现的网页内容
+可以由Views(视图)呈现给用户
+其实就是网页 - 前后端结合的一个网页
+
+模板设置
+在setting.py中TEMPLATES 变量
+TEMPLATES = [
+	{
+		'BACKEND':'... ...',
+		'DIRS':[... ..],
+		... ..
+	},
+]
+
+BACKEND:指定模板的搜索引擎，不用动
+DIRS:指定模板所存放的目录们
+DIRS ['index.temp','music.temp']
+
+模板加载方式
+使用render直接加载并返回模板
+from django.shortcuts import render
+def xxx_views(request):
+return render(request,'模板名称',{})
+

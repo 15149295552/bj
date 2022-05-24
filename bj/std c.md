@@ -1133,3 +1133,151 @@ int main(void){
 malloc动态申请的内存空间的生命周期
 	malloc申请的内存，生命周期开始
 	当free或者程序结束后生命周期结束
+
+代码：
+malloc.c
+
+```c
+#include<stdio.h>
+void* func (int size){
+    return malloc(size);
+}
+int main(void){
+    int *p = NULL;
+    p = func(8);
+    if( NULL == p){
+        printf("失败\n");
+        return -1;
+    }
+    *(p+0) = 100;
+    *(p+1) = 200;
+    printf("%d %d\n",*(p+0),*(p+1));
+    free(p);
+    return 0;
+}
+```
+
+02malloc.c
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+typedef struct student{
+    int age;
+    char name[20];
+}stu_t;
+stu_t* get_stu_info(void){
+    stu_t* p = (stu_t*)malloc(sizeof(stu_t));
+    if(NULL == p){
+        printf("分配内存失败.\n");
+        return NULL;
+    }
+    p->age = 18;
+    strcpy(p->name, "吕布");
+    return p;
+}
+int main(void){
+    stu_t* pstu = get_stu_info();
+    printf("%s : %d \n", pstu->name, pstu->age);
+    free(pstu);
+    pstu = NULL;
+    return 0;
+}
+```
+
+03malloc.c
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+typedef struct student{
+    int age;
+    char name[20];
+}stu_t;
+stu_t* get_stu_info(const char* name, int age){
+    stu_t* p = (stu_t*)malloc(sizeof(stu_t));
+    if(NULL == p){
+        printf("分配内存失败.\n");
+        return NULL;
+    }
+    p->age = age;
+    strcpy(p->name, name);
+    return p;
+}
+#define LEN (4)
+int main(void){
+    stu_t* arr[LEN] = {NULL};
+    char name[20] = {0};
+    for(int i = 0; i < LEN; i++){
+        printf("请输入学生的姓名:");
+        scanf("%s", name);
+        arr[i] = get_stu_info(name, i+18);
+    }
+    for(int i = 0; i < LEN; i++){
+        printf("%s : %d\n", arr[i]->name, arr[i]->age);
+    }
+    for(int i = 0; i < LEN; i++){
+        free(arr[i]);
+        arr[i] = NULL;
+    }
+    return 0;
+}
+```
+
+calloc函数 
+\#include <stdlib.h>
+void *calloc(size_t nmemb, size_t size);
+参数:
+  nmemb:n member,从堆区中分配包含nmemb个元素的数组
+  size:每个元素占据size个字节 
+返回值:
+  失败  返回NULL
+  成功  返回该数组的起始地址 
+
+和malloc最大的区别 :
+  calloc得到的内存的值被全部初始化为对应类型的0 
+  malloc得到的内存空间存储的值不可预知(随机数)
+
+calloc.c
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+int main(void){
+    int *a = (int *)calloc(5, sizeof(int));
+    if(NULL == a){
+        printf("失败\n");
+        return -1;
+    }
+    printf("成功，首地址%p\n",a);
+    a[0] = 520;
+    *(a+1) = 521;
+    for(int i = 0;i<5;i++){
+        printf("%d",a[i]);
+    }
+    printf("\n");
+    free(a);
+    a = NULL;
+    struct point{
+        int x;
+        int y;
+    }*p;
+    p = calloc(3, sizeof(struct point));
+    (p+0)->x = 1;
+    (p+0)->y = 2;
+    (p+1)->x = 10;
+    (p+1)->y = 20;
+    for(int i = 0; i < 3; i++){
+        printf("%d, %d\n", p[i].x, p[i].y);
+    }
+    free(p);
+    p = NULL;
+    return 0;
+}
+```
+
+
+

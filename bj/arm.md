@@ -1349,21 +1349,163 @@ clean:
 当执行make clean的时候，make命令会自动执行clean所指定的语句
 rm *.elf *.bin
 
-Makefile
+程序文件包含的三大段以及链接过程
+  代码段text / 数据段data / bss
+类比 : 
+  各种.o类似于做饭的原材料 
+  .elf文件就是饭菜
+  arm...ld 就是厨师 
+  -nostartfiles -nostdlib -Ttext=0x48000000 -emain 菜单 
+链接脚本功能 
+  本质就是一个菜单 
+  制定一个链接的规则, 将来给arm...ld使用,
+  将来arm...ld链接器根据规则将.o文件链接生成.elf文件 
+  链接脚本给链接器来使用 
+  本质上就是一个文本文件, 以.lds结尾
+链接脚本语法(链接规则)
+  cp 4.0 5.0 -fr 
+  添加上对于链接脚本的支持
+
+```c
+ENTRY(main)
+SECTIONS{
+    . = 0x48000000;
+    .text :
+    {
+        main.o(.text)
+        *.o(.text)
+    }
+    .data :
+    {
+        *.o(.data)
+    }
+    .bss :
+    {
+        *.o(.bss)
+    }
+}
+```
+
+//告诉链接器将来shell.elf入口函数为main 
+ENTRY(main)
+
+//告诉链接器将来shell.elf的各个段的内容如下
+SECTIONS
+{
+    // 告诉链接器将来shell.elf链接的起始地址为0x48000000
+    . = 0x48000000;
+	// 告诉链接器将来 shell.elf 中代码段的内容如下 
+	// .text后面一定要跟空格
+	.text : 
+	{
+    	// 告诉链接器将main.o的内容首先链接,因为
+    	// 入口函数main函数在main.c中
+    	main.o(.text)
+		// 然后将其他的.o都链接进来
+		*.o(.text)
+	}
+	// 告诉链接器将来数据段内容如下
+	// .data后面跟空格
+	.data :
+	{
+    	*.o(.data)
+	}
+	// 告诉链接器将来bss段内容如下
+	// .bss后面跟空格
+	.bss :
+	{
+    	*.o(.bss)
+	}
+}
+保存退出
+
+Makefile  
 ```
 OBJ=main.o led.o uart.o strcmp.o
 OBJCOPY=arm-cortex_a9-linux-gnueabi-objcopy
 LD=arm-cortex_a9-linux-gnueabi-ld
 GCC=arm-cortex_a9-linux-gnueabi-gcc
 shell.bin:shell.elf 
-	$(OBJCOPY) -O binary shell.elf shell.bin
+  $(OBJCOPY) -O binary shell.elf shell.bin
 shell.elf:$(OBJ)
-	$(LD) -nostartfiles -nostdlib -Ttext=0x48000000 -emain -o shell.elf $(OBJ)
-main.o:main.c 
-	arm...gcc -nostdlib -c -o main.o main.c 
+  $(LD) -nostartfiles -nostdlib -Tshell.lds -o shell.elf $(OBJ)
 %.o:%.c 
-	$(GCC) -c -o $@ %<
+  $(GCC) -nostdlib -c -o $@ $<
 clean:
-	rm *.elf *.bin *.o 
+  rm *.elf *.bin *.o 
+```
+
+优化shell裸板程序
+
+目前裸板程序的问题
+随着操作的硬件数量增多，whi1e(1)中的代码将会变得极其繁琐
+
+typedef
+使用形式
+	typedef char s8;
+	typedef int s32;
+	typedef float f32;
+	给函数指针类型起别名
+	typedef void(*cb_t)(void);
+	用法：cb_t callback = led_init;//定义函数指针callback指向led_init函数
+			callback();// == led_init();
+
+优化shell裸板程序
+裸板程序中有一个“事物”：命令有一个属性和一个方法
+属性：命令的名称，例如："led on"
+方法：命令对应的执行函数，例如：led_on()
+采用面向对象编程思想，c程序，立马想到结构体
+
+//声明描述命令操作函数的数据类型
+typedef void (*cb t)(void);
+//声明描述命令的数据结构
+typedef struct cmd{
+	//命令的名称
+	char *name;
+	//命令的执行函数
+	cb t callback;
+}cmd t;
+
+利用上述数据结构来初始化命令对象
+cmd t cmd {"led on",led on};
+cmd.cal1back();//相当于调用了1edon函数
+cmd t cmd tbl[]={
+	{"1edon",led on},/开灯命令对象
+	{"1 ed off",1 ed off)//关灯命令对象
+}
+
+代码：
+cmd.h
+
+```c
+#ifndef CMD_H
+#define CMD_H
+typedef void (*cb_t)(void);
+typedef struct _cmd{
+    const char* name;
+    cb+t callback;
+}cmd_t;
+cmd_t* find_cmd(const char* name);q
+#endif
+```
+
+cmd.c
+
+```c
+#include "cmd.h"
+#include "led.h"
+#inlucde "strcmp.h"
+cmd_t cmd_tbl[] = {
+    {"led on",led_on},
+    {"led off",led_off}
+};
+cmd_t* find_cmd(const char* name){
+    int i;
+    for(i = 0;i<2;i++){
+        if(!my_strcmp(cmd_tbl[i].name,name))
+            return &cmd_tbl[i];
+    }
+    return 0;
+}
 ```
 
