@@ -1536,3 +1536,184 @@ struct flock f3;
 […|pnext=&f2]  […|pnext=&f3]  […|pnext=NULL]
 	  f1			 f2			 f3
 	  f1 -> pnext -> f2 -> pnext -> f3
+
+访问测试
+\#include<unistd.h>
+int access{const char *pathname,int mode};
+功能：判断当前程序是否可以对某个特定的文件执行某种操作
+参数：
+pathname:path 路径 路径名，文件的路径
+	要给哪个文件判断某种操作
+mode：对于某个文件的特定操作
+	R_OK 是否可读
+	W_OK 是否可写
+	X_OK 是否可执行
+	F_OK 是否存在
+返回值
+成功 返回0
+失败 返回-1
+
+代码：
+access.c
+
+```c
+#include<stdio.h>
+#include<unistd.h>
+int main(int argc, char** argv){
+    if(argc<2){
+        fprintf(stderr,"usage:%s<文件名>\n",argv[0]);
+    }
+    printf("访问测试的文件为：%s\n",argv[1]);
+    if(access(argv[1],F_OK)==1){
+        printf("不存在");
+    }else{
+        if(access(argv[1],R_OK) == -1)
+            printf("不可读\n");
+        else
+            printf("可读\n");
+        if(access(argv[1],W_OK) == -1)
+            printf("不可写\n");
+        else
+            printf("可写\n");
+        if(access(argv[1],X_OK) == -1)
+            printf("不可执行\n");
+        else
+            printf("可执行\n");
+    }
+    return 0;
+}
+```
+
+权限掩码
+一个文件的权限
+三个部分
+			r	w	x
+个人用户	 1	1	0	6
+组用户	   1	0	0	4
+其他用户	 1	0	0	4
+八进制的方式来表示权限：0644
+
+权限掩码：默认0002
+文件的权限：给定的权限&~权限掩码
+
+\#include<sys/types.h>
+\#include<sys/stat.h>
+mode_t umask(mode_t mask);
+功能：设置调用程序的权限掩码
+参数：
+mask：新的权限掩码
+返回值：
+返回原来的权限掩码
+代码：
+umask.c
+
+```c
+#include<stdio.h>
+#include<unistd.h>
+#include<sys/types.h>
+#include<sys/stat.h>
+int main(void){
+    mode_t old = umask(0333);
+    int fd = open("./umask.txt",O_RDONLY|O_CREAT|O_TRUNC,0777);
+    if(-1 == fd){
+        perror("open");
+        return -1;
+    }
+    close(fd);
+    umask(old);
+    return 0;
+}
+```
+
+修改文件大小
+truncate
+\#include<unistd.h>
+\#include<sys/types.h>
+int truncate(const char *path,off_t length);
+功能：设置文件的大小
+参数：
+path：文件路径
+length：文件大小
+返回值：
+成功 返回0
+失败 返回-1
+
+int fturncate(int fd, off_t length);
+功能：设置文件的大小
+参数：
+fd:文件描述符
+length：文件大小
+返回值：
+成功 返回0
+失败 返回-1
+
+代码：
+trunc.c
+
+```c
+#include<stdio.h>
+#include<string.h>
+#include<unistd.h>
+#include<sys/types.h>
+int main(void){
+    int fd = open("./truncate.txt",O_WRONLY|O_CREAT|O_TRUNC,0644);
+    if(-1 == fd){
+        perror("open");
+        return -1;
+    }
+    char* buf = "hello world";
+    if(write(fd,buf,strlen(buf)) == -1){
+        perror("write");
+        return -1;
+    }
+    if(truncate("./truncate.txt",3) == -1){
+        perror("truncate");
+        return -1;
+    }
+    if(ftruncate(fd, 5) == -1){
+        perror("ftruncate");
+        return -1;
+    }
+    close(fd);
+    return 0;
+}
+```
+
+该函数可以将文件截断，也可以将文件加长，所有的变化都发生在文件的尾部
+	新增加的部分使用数字0填充
+
+文件的元数据 - stat
+文件的元数据就是文件的属性信息 - 存在于i节点中
+\#include<sys/types.h>
+\#include<sys/stat.h>
+\#include<unistd.h>
+int stat(const char *pathname, struct stat *buf);
+int fstat(int fd, struct stat *buf);
+int lstat(const char *pathname, struct stat *buf);
+功能：从i节点中提取文件的元数据
+参数：
+pathname：文件路径
+fd：文件描述符
+buf：文件元数据结构
+返回值：
+成功 返回0
+失败 返回-
+
+lstat：link stat遇到软链接文件
+	lstat不跟踪符号链接
+
+struct stat{
+		dev_t   st_dev;     	 /\* 设备ID */
+        ino_t   st_ino;     	 /\* i节点号 */
+        mode_t  st_mode;    	 /\* 文件的类型和权限 */
+        nlink_t  st_nlink;       /\* 硬链接数 */
+        uid_t   st_uid;     	 /\* 拥有者用户ID */
+        gid_t   st_gid;     	 /\* 拥有者组ID */
+        dev_t   st_rdev;    	 /\* 特殊设备ID */
+        off_t   st_size;    	 /\* 总字节数 */
+        blksize_t st_blksize;    /\* I/O块字节数 */
+        blkcnt_t st_blocks;      /\* 存储块数 */
+        struct timespec st_atim; /\* 最后访问时间 */
+        struct timespec st_mtim; /\* 最后修改时间 */
+        struct timespec st_ctim; /\* 最后状态改变时间 */
+}
