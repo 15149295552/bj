@@ -1093,3 +1093,58 @@ from django.shortcuts import render
 def xxx_views(request):
 return render(request,'模板名称',{})
 
+标签：允许将服务器端的一些功能嵌入到模板中
+语法：{% 标签内容 %}
+常用标签：for
+	{% for 变量 in 列表|元组|字典 %}
+	{% endfor %}
+
+​		if
+​	{% if 条件 %}
+​		\<p></p>
+​	{% endif %}
+
+​		if ..else...
+​	{% if 条件 %}
+​		满足条件执行的内容
+​	{% else %}
+​		不满足条件执行的内容
+​	{% endif %}
+
+​		if ...elif ..elif ...else
+​	{% if 条件 %}
+​		满足条件1运行的内容
+​	{% elif 条件2 %}
+​		满足条件2运行的内容
+​	{% else %}
+​		以上条件都不满足时运行的内容
+​	{% endif %}
+
+静态文件：模板中所需要用到的到的css,js,image等一些资源文件都是静态文件
+
+Django中静态文件的处理
+需要在settings,py中设置静态文件的访问路径和存储路径
+STATIC_URL
+	指定静态文件的访问路径
+	STATIC_URL='/static/'
+作用：
+当访问路径是Localhost:8000/static/***
+一律都去静态文件存储路径中搜索静态文件
+
+存储路径
+STATICFILES_DIRS
+指定静态文件存储路径
+STATICFILES_DIRS=(BASE_DIR,static')
+'static':当前项目存放静态文件的目录名
+在项目的sta中c目中以及所有应用的static目录中存放就是静态文件
+
+访问静态文件
+直接使用L0 calhost:8000/static/***
+\<img src="/static/img/timg.jpeg">
+
+使用{% static %}访问静态资源
+在模板的最顶层增加
+{% load static %}
+在使用静态资源时
+{% static %}表示的就是静态资源访问路径
+\<img src="{% static 'img/timg.jpeg' %}">
