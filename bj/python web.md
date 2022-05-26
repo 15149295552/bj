@@ -1148,3 +1148,266 @@ STATICFILES_DIRS=(BASE_DIR,static')
 在使用静态资源时
 {% static %}表示的就是静态资源访问路径
 \<img src="{% static 'img/timg.jpeg' %}">
+
+练习：
+创建项目
+django-admin startproject fruitday
+python3 manage.py startapp login
+创建文件
+login/static/css/login.css
+login/static/img/huiyuan.jpg
+login/templates/login.html
+
+代码：
+fruitday/urls.py
+
+```py
+from django.conf.urls import url,include
+from django.contrib import admin
+urlpatterns = [
+url(r'^admin/',admin.site.urls),
+url(r'login/',include('login.urls')),
+]
+```
+
+login/urls.py
+```py
+from django.conf.urls import url
+from .views import login_views
+urlpatterns=[
+    url(r'^$',login_views)
+]
+```
+
+login/views.py
+```py
+from django.shortcuts import render
+# Create your views here.
+
+def login_views(request):
+    return render(request,'login.html')
+```
+
+login.html
+```html
+{% load static %}
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>天天果园-会员登录</title>
+     <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    </head>
+    <body>
+        <div id="container">
+            <!-- 上 ：会员登录 -->
+			<h2>会员登录</h2>
+			<!-- 下左：登录图像 -->
+			<p>
+				<img src="{% static 'img/huiyuan.jpg' %">
+				<a href="#">会员注册&gt;</a>
+			</p>
+			<!-- 下右：登录表单 -->
+            <div id="login">
+                <form action="login" method="post">
+                    <!-- 第一行：手机号 -->
+                    <div class="form-line">
+                        <p>手机号</p>
+                        <div>
+                            <input type="text" name="uphone" class="form-control">
+                        </div>
+                    </div>
+                    <!-- 第二行：密码 -->
+                    <div class="form-line">
+                        <p>密码</p>
+                        <div>
+							<input type="password" name="upwd" class="form-control" placeholder="请输入密码">
+						</div>
+					</div>
+                    <!-- 第三行：记住密码，忘记密码-->
+                    <div class="form-line">
+						<p></p>
+                        <div>
+							<!-- 右浮动 -->
+							<p>
+                                <a href="#">忘记密码</a>
+								<a href="#">快捷登录</a>
+							</p>
+							<!-- 不浮动 -->
+							<input type="checkbox" name="isSaved" class="isSaved" checked>记住密码
+						</div>
+                    </div>
+					<!-- 第四行：登录按钮-->
+					<div class="form-line">
+						<p></p>
+						<div>
+							<!-- 右：超链接  -->
+							<a href="#" class="goReg">注册会员</a>
+							<!-- 左：登录按钮 -->
+							<input type="submit" value="登录" class="btnLogin">
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+ 	</body>
+</html>
+```
+
+login.css
+```css
+p,h2{
+	margin:0;
+}
+
+#container{
+	width:990px;
+	margin:0 auto;
+}
+
+#container>h2{
+	color:#999;
+	font-weight:normal;
+	border-bottom:1px solid #ccc;
+	padding-bottom:20px;
+	margin-bottom:20px;
+}
+
+#container>p{
+	float:left;
+}
+#login{
+	float:right;
+}
+
+#login .form-line>p{
+	float:left;
+	font-size:16px;
+	color:#999;
+	width:64px;/*每个文字16px的宽，按照4个文字的宽度给*/
+	text-align:right;
+	margin-right:20px;
+	/*行高：为了与文本框垂直居中对齐*/
+	line-height:40px;
+	/*高度：为了把自己给撑起来*/
+	height:40px;
+}
+
+#login .form-line>div{
+	float:left;
+	width:300px;
+}
+
+#login .form-control{
+	/*宽度，高度，边框，box-sizing，取消轮廓，左右内边距*/
+	width:300px;
+	height:40px;
+	border:1px solid #ccc;
+	box-sizing:border-box;
+	outline:none;
+	padding:0 15px;
+}
+#login .form-control:focus{
+	/*边框颜色，边框阴影*/
+	border-color:#64a131;
+	box-shadow:0 0 5px #64a131;
+}
+
+#login .form-line{
+	margin-bottom:25px;
+	/*overflow：hidden : 目的是将 .form-line 的高度撑起来*/
+	overflow:hidden;
+}
+
+#login .form-line>div>p{
+	float:right;
+}
+#login .form-line>div>p a{
+	color:#999;
+	text-decoration:underline;
+}
+#login .isSaved{
+	width:18px;
+	height:18px;
+	vertical-align:middle;
+}
+
+#login .goReg{
+	/*145*38*/
+	/*右浮动，宽度，高度，边框(#64a131)，边框倒角，box-sizing，文本水平居中对齐，垂直居中对齐(行高)，取消下划线，文本颜色(#7BAE55)，文字大小，背景颜色(#F5FFED)*/
+	float:right;
+	width:145px;
+	height:38px;
+	border:1px solid #64A131;
+	border-radius:5px;
+	box-sizing:border-box;
+	text-align:center;
+	line-height:38px;
+	text-decoration:none;
+	color:#7BAE55;
+	font-size:18px;
+	background-color:#f5ffed;
+}
+#login .btnLogin{
+	/*宽度，高度，取消边框，边框倒角，背景颜色，文本颜色，文字大小*/
+	width:145px;
+	height:38px;
+	border:none;
+	border-radius:5px;
+	background-color:#64a131;
+	color:#fff;
+	font-size:18px;
+}
+
+/*会员注册超链接*/
+#container>p{
+	/*相对定位：配合着里面的超链接做绝对定位*/
+	position:relative;
+}
+#container>p>a{
+	/*绝对定位，要在 p 元素中 实现位置的偏移*/
+	position:absolute;
+	bottom:25px;
+	left:173px;
+	/*宽度，高度，边框，box-sizing，倒角，文字大小，文字颜色，水平居中，垂直居中(行高)*/
+	width:154px;
+	height:48px;
+	border:1px solid #64A131;
+	box-sizing:border-box;
+	border-radius:5px;
+	font-size:18px;
+	color:#64A131;
+	text-align:center;
+	line-height:48px;
+}
+```
+
+模型 - Models
+模型是根据数据库中表结构来创建出来的class
+每一张表到编程语言中就是一个class
+表中的每一列，到编程语言中就是class中的一个属性
+在模型中完成对数据的CRUD操作
+C:Create
+R:Retrieve
+U:Update
+D:Delete
+
+创建和使用模型 - ORM创建
+ORM:Object Relational Mapping(对象关系映射)
+三大特征
+数据表到类(class)的映射
+	将数据表自动生成一个class类
+	将class类自动生成数据库中的一张表
+数据类型的映射
+	允许将表中字段的数据类型自动映射成编程语言中对应的数据类型
+	也允许将编程语言的数据类型自动映射成表中的字段的数据类型
+关系映射
+	数据库中表的关联关系：一对一，一对多，多对多
+
+ORM的优点
+提高了开发效率，能够自动完成表到对象的映射，可以省略庞大的数据访问层
+不用SQL编码，也能够完成对数据的CRUD操作
+
+创建和配置数据库
+创建数据库（支持中文）
+create database数据库default charset utf8 collate utf8_general_ci;
