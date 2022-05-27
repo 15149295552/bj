@@ -1162,11 +1162,12 @@ login/templates/login.html
 fruitday/urls.py
 
 ```py
-from django.conf.urls import url,include
+from django.conf.urls import url, include
 from django.contrib import admin
+
 urlpatterns = [
-url(r'^admin/',admin.site.urls),
-url(r'login/',include('login.urls')),
+    url(r'^admin/', admin.site.urls),
+    url(r'login/', include('login.urls')),
 ]
 ```
 
@@ -1204,7 +1205,7 @@ login.html
 			<h2>会员登录</h2>
 			<!-- 下左：登录图像 -->
 			<p>
-				<img src="{% static 'img/huiyuan.jpg' %">
+				<img src="{% static 'img/huiyuan.jpg' %}">
 				<a href="#">会员注册&gt;</a>
 			</p>
 			<!-- 下右：登录表单 -->
@@ -1411,3 +1412,63 @@ ORM的优点
 创建和配置数据库
 创建数据库（支持中文）
 create database数据库default charset utf8 collate utf8_general_ci;
+
+连接MySQL的配置：
+ENGINE:引擎
+	django.db.backends.mysql
+NAME:要连接到的数据库名称
+USER:用户名称，通常为root
+PASSWORD:密码，123456
+HOST:要连接的主机，本机的话localhost或127.0.0.1
+PORT:端口，MYSQL的是3306
+
+```PY
+DATABASES = {
+    'default':{
+        'ENGINE':'django.db.backends.mysql',
+        'NAME':'fruitdaydb',
+        'USER':'root',
+        'PASSWORD':'',
+        'HOST':'localhost',
+        'PORT':'3306'
+    }
+}
+```
+
+\__init__.py
+import pymysql
+pymysql.install_as_MySQLdb()
+
+编写Models
+Models中的每个class都称为模型类(Model类)或实体类(Entry)
+	实体：表示的就是数据表中的一条记录
+	实体完整性：约束表中的记录不完全重复
+Models中的每个类都必须继承自models.Model
+
+同步数据库
+python3 manage.py makemigrations
+python3 manage.py migrate
+
+5Dang0中提供的数据子段和子段选项
+语法：
+属性=models.数据字段（字段选项）
+数据字段(Field Type)
+1、BooleanField(
+2、CharField()
+3、DateField)
+4、DateTimeField()
+5、DecimalField()
+6、EmailField()#存电子邮件-varchar
+7、FLoatField()
+8、ImageField()#存图片路径-varchar
+9、IntegerField()
+10、URLField()#存网站地址-varchar
+11、TextField()#存大量数据-text
+
+字段选项(Field Options)
+max_length
+指定数据的最大长度
+default
+为当前属性（字段）指定默认值
+null
+指定当前属性（字段）是否允许为空，默认是false

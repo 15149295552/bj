@@ -1279,5 +1279,149 @@ int main(void){
 }
 ```
 
+realloc函数
+void *realloc(void *ptr,size t size);
+功能：将ptr所指向的动态内存大小调整为size字节，原内存保持不变，对新增内容不做初始化
+返回值：
+成功 返回调整后内存块的起始地址
+失败 返回NULL
+ptr必须是之前malloc/calloc函数的返回值
+realloc.c
+int *p malloc(8);
+realloc (p,0);
+将malloc分配的8直接内存统统释放
+起到了free(p)的效果
 
+代码：
+realloc.c
 
+```c
+#include<stdio.h>
+#include<stdlib.h>
+int main(void){
+    int *p = NULL;
+    p = (int *)malloc(8);
+    if(NULL == p){
+        printf("失败\n");
+        return -1;
+    }
+    printf("成功，内存的首地址%p\n",p);
+    *(p+0) = 520;
+    *(p+1) = 521;
+    realloc(p,16);
+    for(int i = 0;i<4;i++)
+        p[i] = i + 1;
+    for(int i = 0;i<4;i++)
+        printf("%d",p[i]);
+    printf("\n");
+    printf("realloc后内存首地址%p\n",p);
+    free(p);
+    p = NULL;
+    return 0;
+}
+```
+
+I/O流和标准库 - c标准库提供的文件操作函数
+可以实现操作硬盘中的数据
+标准库函数一系列操作文件函数：fopen fclose fread fwrite fseek ftell rewind
+f:file
+
+fopen和open的区别
+来源不同
+	open是Unix系统调用函数返回文件描述符
+	fopen是ANSIC标准中的c标准库函数，在不用的系统中调用不同 内核api，返回指向文件结构的指针
+移植性
+	fopen函数是c标准库函数，具有良好的移植性
+	open函数是Unix/Linux下系统调用，移植性有限
+使用范围
+	fopen只要操作普通文件
+	open函数可以操作一切文件
+文件I/O层次
+	open函数低级I/O，低级I/O运行在内核态
+	fopen函数高级I/O，高级I/O运行在用户态
+缓冲区
+	open没有缓冲区
+	fopen有缓冲区
+
+文件的打开和关闭
+FILE *fopen(const char *path, const char *mode);
+功能：打开/创建文件
+参数：
+path：要打开/创建的文件名称（可以包含路径信息）
+	"./a.txt"
+	"/home/tarena/a.txt"
+mode：打开文件的形式
+	r： 以只读的方式打开文件，前提：文件必须存在
+	r+：以读写的方式打开文件，前提：文件必须存在
+	w： 以只写的方式打开文件，如果文件存在将文件清空，如果文件不存在，会创建新文件
+	w+：以读写的方式打开文件，如果文件存在将文件清空，如果文件不存在，会创建新文件
+	a： append追加 以追加的方式打开只写文件，如果文件不存在，会创建新文件，如果文件存在，把新文件内容追加到文件末尾
+	a+：以追加的方式打开读/写文件，如果文件不存在，会创建新文件，如果文件存在，把新文件内容追加到文件末尾
+-->以上都是以文本的方式打开文件
+还有一种以二进制方式打开文件b,binary
+rb r+b wb w+b ab a+b
+Linux系统中以文本方式和以二进制方式操作没有区别
+Windows系统中：
+文本方式写入 - 将\n ———— \r\n写入
+文本方式读取 - 将\r\n ———— \n写入
+返回值：
+失败 返回NULL
+成功 返回描述文件信息的结构体指针FILE\*
+
+int fclose(FILE *stream);
+功能：关闭文件
+参数：stream fopenl函数的返回值
+返回值：
+成功 返回0
+失败 返回EOF
+
+代码：
+file.c
+
+```c
+#include<stdio.h>
+int mian(void){
+    FILE* fp = fopen("a.txt","w");
+    if(NULL == fp){
+        printf("失败\n");
+        return -1;
+    }
+    printf("成功\n");
+    fclocse(fp);
+    return 0;
+}
+```
+
+系统为每个进程缺省打开了三个标准I/O流
+标准输入：stdin
+标准输出：stdout
+标准错误输出：stderr
+
+格式化输出
+int fprintf(FILE *stream, const char *format,...);
+功能：向I/O流输出内容
+参数:
+stream:I/O流指针
+format:格式字符串
+.\.\.:输出数据
+返回值：
+失败 返回负数
+成功 返回输出字符数
+printf("号d",520):
+
+fprintf (stdout,"%d",520);
+f：file stdout也是一个I/O流指针就可以将stdout转换为其他的I/o流指针，表示其他的文件，意味着可以向其他文件输出内容
+
+FILE* fp fopen ("a.txt");
+fprintf (fp,"8d",520);
+
+格式化输入
+int fscanf (FILE *stream,const char *format,...)
+功能：从I/O流读取内容
+参数：
+stream:I/O流指针
+format:格式字符串
+.\.\.:输入数据
+返回值：
+失败/到文件尾 返回EOF
+成功 返回实际输入的数据项数
