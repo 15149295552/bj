@@ -1472,3 +1472,10 @@ default
 为当前属性（字段）指定默认值
 null
 指定当前属性（字段）是否允许为空，默认是false
+
+模型中的CRUD
+所有的操作均在视图中(Views)执行
+通过ORM向DB中增加数据
+Entry.objects.creat(属性=值，属性=值)
+Entry：具体要操作的Models类
+
