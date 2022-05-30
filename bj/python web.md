@@ -1479,3 +1479,147 @@ null
 Entry.objects.creat(属性=值，属性=值)
 Entry：具体要操作的Models类
 
+查询指定列操作
+语法：value('列1','列2',.\.\.)
+用法：Entry.objects.values('列1','列2')
+返回：QuerSet
+
+注意：
+values()可以用在所有的查询结果集的方法的后面
+Author.objects.alL().values('列1'，'列2')
+
+order_by()
+作用：排序
+语法：order_by('-列1'，'列2'，...)
+	列前加"-"表示降序
+用法：
+Entry.objects.order_by()
+Entry.objects.al().order_by(')
+
+根据条件查询部分行数据（重难点）
+语法：filter(参数)
+用法：Entry.objects.filte(参数)
+
+通过Filed Lookups(查询谓词)完成复杂条件
+查询谓词：每个查询谓词都是一个独立的查询条件，可以用在所有的有查询条件的
+、位置处
+\_\_exact
+作用：等值判断
+用法：Enty.objects.filter(属性\_\_exact=值)
+select from author where id=1
+\_\_contains
+作用：判断属性中是否包含指定关键字
+\_\_lt
+作用：判断属性值小于指定值的所有数据
+\_\_lte:
+作用：判断属性值小于等于指定值的
+\_\_gt:
+作用：判断属性值大于指定值的
+\_\_gte:
+作用：判断属性值大于等于指定值的
+\_\_startwith
+作用：判断属性值是以**开头的
+用法：Entry.objects.filter(列__startwith='XX')
+sql:select from author where Like xx%'
+查询只返回一条数据
+语法：get(条件)
+用法：Entry.objects.get(查询条件/谓词)
+注意：该函数只适用于返回一条记录时使用
+
+修改数据
+修改单个数据
+通过get()得到要修改的实体对象
+通过实体对象的属性修改属性值
+再通过实体对象的save()保存回数据库
+au Author.objects.get(id=1)
+au.name='王宝强'
+au.age 35
+au.save()
+
+批量修改数据
+调用查询结果集的update()即可
+Author.objects.aLL).update(属性=值，属性=值)
+Author.objects.all().update(age=75)
+
+删除数据
+调用实体对象/查询结果集的delete()即可
+删除单个对象
+obj Author.objects.get(id=1)
+obj.delete()
+删除多个对象（结果集）
+authors Author.objects.all()
+authors.delete()
+
+F操作和Q操作
+F()
+update author set age=age+10
+Author.objects.all().update(age=age+10)#错误
+作用：用于任执行中获取某列的值
+语法：F('列名')
+from django.db.models import F
+Author.objects.all().update(age=F('age')+10)
+
+Q()
+Author.objects.filter(id=1,age=35)
+select from author where id=1 and age=35
+作用：在查询条件中，可以完成或(or)的操作
+语法：
+from django.db.models import Q
+Q(表达式)|Q〔表达式
+\#查询1d为1或年龄大于等于85的人的信息
+Author.objects.filter(Q(id=1)Q(age__gte=85))
+select from author wehre id=1 or age >85
+
+高级管理
+在admin.py中创建高级管理类
+定义EntryAdmin类，继承自admin.ModelAdmin
+cLass AuthorAdmin(admin.ModelAdmin):
+	pass
+
+注册高级管理类
+admin.site.register(Entry,EntryAdmin)
+
+允许在EntryAdmin中增加的属性
+list_display
+作用：指定在列表页中能够显示的字段们
+取值：由属性名组成的元组或列表
+ex:
+List_display ('name','age','email')
+
+List_display_links
+作用：定义在列表也中能够连接到详情页的字段们
+取值：由属性名组成的元组或列表
+注意：取值必须出现在List_display中
+
+list_editable
+作用：指定在列表页中就允许修改的字段们
+取值：由属性名组成的列表或元组
+注意：取值不能出现在list_display_links 中
+
+search_fields
+作用：添加允许被搜索的字段们
+取值：由属性名组成的元组或列表
+
+list_filter
+作用：在列表页的右侧增加过滤器，实现快速筛选
+取值：有属性名组成的元组或列表
+
+date_hierarchy
+作用：在列表页顶部增加时间选择器，所以取值必须是DateField或DateTimeField的列
+
+fields
+作用：在详情页面中，指定显示哪些字段们，并按照什么样的顺序显示
+取值：由属性名组成的元组或列表
+
+fieldsets
+作用：在详情页面中，对字段们进行分组显示
+注意：fieldsets 不能与 fields 共存的
+语法：
+fieldsets = (
+	(
+		'分组名称',{
+			'fields':('属性1','属性2'),
+			'classes':('collapse'),
+         }
+	),
+)
