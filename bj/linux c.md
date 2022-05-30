@@ -1717,3 +1717,118 @@ struct stat{
         struct timespec st_mtim; /\* 最后修改时间 */
         struct timespec st_ctim; /\* 最后状态改变时间 */
 }
+
+一块为512字节
+mode t	st mode;	/*文件的类型和权限*/
+数据类型：mode_t 原始类型 unsigned int(32位系统下)
+	32位的无符号整数
+	只有其中的低16位是有意义的
+
+B15-B0
+15-12:文件类型
+11-9:1设置用户ID,组ID,粘滞
+8-6:个人用户的读，写和执行权限
+5-3:组用户的读，写和执行权限
+2-0:其他用户的读，写和执行权限
+
+11-9:
+程序运行-进程
+两个用户ID-实际用户ID-有效用户ID
+	实际用户ID-继承其父进程的实际用户ID-当一个用户使用合法的用户名和密码登录，
+		系统为其启动一个shel1进程，shel1的进程的实际用户的ID就是该登录用户的ID,
+		该用户在shel1下启动的任何进程都是shel1的子进程，继承了实际用户ID
+	一个进程的用户身份-决定-可以访问哪些资源-文件 读/写/执行权限
+		但真正权限验证的是有效用户ID,而非实际用户ID
+	有效用户ID：一般情况下，有效用户ID取自于实际用户ID,认为二者等价
+		但是如果自己设置用户ID位，B11 - 1，该进程的有效用户ID就不是
+	粘滞：带有粘滞位(9)的可执行文件，与其首次运行并结束后，代码区会被连续的保存在磁盘交换区中，而一般的磁盘文件都是你上存放的，下次运行该程序的时候可以获取较快的载入速度
+
+S_ISREG()	是否普通文件
+S_ISDIR()	是否目录文件
+S_ISSOCK()   是否本地套接字
+S_ISCHR()	是否字符设备
+S_ISBLK()	是否块设备
+S_ISLNK()	是否符号链接
+S_ISFIFO()   是否有名管道
+
+```c
+struct tm *localtime(const time_t *timep);
+struct tm {
+               int tm_sec;    /* Seconds (0-60) */
+               int tm_min;    /* Minutes (0-59) */
+               int tm_hour;   /* Hours (0-23) */
+               int tm_mday;   /* Day of the month (1-31) */
+               int tm_mon;    /* Month (0-11)  */
+               int tm_year;   /* Year - 1900 */
+               int tm_wday;   /* Day of the week (0-6, Sunday = 0) */
+               int tm_yday;   /* Day in the year (0-365, 1 Jan = 0) */
+               int tm_isdst;  /* Daylight saving time */
+           };
+```
+
+代码：
+stat.c
+
+```c
+#include<stdio.h>
+#include<string.h>
+#include<time.h>
+#include<unistd.h>
+#include<sys/stat.h>
+char* mtos(mode_t m){
+    static char s[11];
+    if(S_ISDIR(m))
+        strcpy(s,"d");
+    else if(S_ISSOCK(m))
+        strcpy(s,"s");
+    else if(S_ISCHR(m))
+        strcpy(s,"c");
+    else if(S_ISBLK(m))
+        strcpy(s,"b");
+    else
+        strcpy(s,"-");
+    strcat(s , m & S_IRUSR ? "r" : "-");
+    strcat(s , m & S_IWUSR ? "w" : "-");
+    strcat(s , m & S_IXUSR ? "x" : "-");
+    strcat(s , m & S_IRGRP ? "r" : "-");
+    strcat(s , m & S_IWGRP ? "w" : "-");
+    strcat(s , m & S_IXGRP ? "x" : "-");
+    strcat(s , m & S_IROTH ? "r" : "-");
+    strcat(s , m & S_IWOTH ? "w" : "-");
+    strcat(s , m & S_IXOTH ? "x" : "-");
+    return s;
+}
+char* ttos(time_t time){
+    static char t[20];
+    struct tm * l = localtime(&time);
+    sprintf(t, "%04d-%02d-%02d %02d-%02d-%02d", l->tm_year+1900, l->tm_mon+1, l->tm_mday, 
+                    l->tm_hour, l->tm_min, l->tm_sec);
+    return t;
+}
+int main(int argc, char** argv){
+    if(argc < 2){
+        fprintf(stderr, "用法:./a.out <文件名>.\n");
+        return -1;
+    }
+    struct stat buf;
+    if(stat(argv[1], &buf) == -1){
+        perror("stat");
+        return -1;
+    }
+    printf("设备ID:%lu\n",buf.st_dev);
+    printf("i节点号:%ld\n",buf.st_ino);
+    printf("类型和权限:%s",mtos(buf.st_mode));
+    printf("硬链接数:%lu\n",buf.st_nlink);
+    printf("用户ID:%u\n",buf.st_uid);
+    printf("组ID:%u\n",buf.st_gid);
+    printf("特殊设备ID:%lu\n",buf.st_rdev);
+    printf("总字节数:%ld\n",buf.st_size);
+    printf("I/O字节数:%ld\n",buf.st_blksize);
+    printf("存储块数:%ld\n",buf.st_blocks);
+    printf("最后访问时间:%s\n",ttos(buf.st_atime));
+    printf("最后修改时间:%s\n",ttos(buf.st_mtime));
+    printf("最后改变时间:%s\n",ttos(buf.st_ctime));
+    return 0;
+}
+```
+

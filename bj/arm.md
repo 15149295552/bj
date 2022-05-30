@@ -1421,7 +1421,7 @@ SECTIONS
 
 Makefile  
 ```
-OBJ=main.o led.o uart.o strcmp.o
+OBJ=main.o led.o uart.o strcmp.o cmd.o
 OBJCOPY=arm-cortex_a9-linux-gnueabi-objcopy
 LD=arm-cortex_a9-linux-gnueabi-ld
 GCC=arm-cortex_a9-linux-gnueabi-gcc
@@ -1494,14 +1494,15 @@ cmd.c
 ```c
 #include "cmd.h"
 #include "led.h"
-#inlucde "strcmp.h"
+#include "strcmp.h"
 cmd_t cmd_tbl[] = {
     {"led on",led_on},
     {"led off",led_off}
 };
+#define ARRAY_SIZE(x)	(sizeof(x) / sizeof(x[0]))
 cmd_t* find_cmd(const char* name){
     int i;
-    for(i = 0;i<2;i++){
+    for(i = 0;i<ARRAY_SIZE(cmd_tbl);i++){
         if(!my_strcmp(cmd_tbl[i].name,name))
             return &cmd_tbl[i];
     }
@@ -1509,3 +1510,121 @@ cmd_t* find_cmd(const char* name){
 }
 ```
 
+main.c
+```c
+#include "uart.h"
+#include "led.h"
+#include "strcmp.h"
+#include "cmd.h"
+static char buf[32];
+void main(void){
+    cmd_t* pcmd;
+    uart_init();
+    led_init();
+    while(1){
+        uart_puts("\n shell#");
+        uart_gets(buf, 32);
+        pcmd = find_cmd(buf);
+        if(pcmd == 0)  
+            uart_puts("please input valid command!\n");
+        else
+            pcmd->callback();
+    }
+}
+```
+
+I2C总线
+GPIO/UART/I2C/SPI、1—Wire/.\.\.
+
+七个字：两线式串行总线
+两线式：说明CPU和外设只需要两根信号线
+分别是数据线SDA(serial data)和时钟控制信号线SCL(serial clock)
+	数据线SDA：用于实现CPU和外设之间的数据交互
+		当CPU给外设发送数据，SDA由CPU来控制
+		当外设给CPU发送数据，SDA由外设来控制
+	时钟控制信号线SCL：用于实现CPU和外设之间的数据同步
+		特点：会定期发送一个方波信号
+			方波信号：高电平和低电平的宽度是一样的，时间是一样的
+				一个高电平 + 一个低电平 的时间 = 一个时钟周期
+				一个低电平 + 一个高电平 的时间 = 一个时间周期
+		工作原理：底放高取
+			CPU给LM77发送数据1和0：
+			1.CPU在CLK为低电平的时候，将数据1放到数据线SDA上(拉高SDA)，然后LM77在同周期的CLK为高电平的时候，从数据线SDA上取出数据1(判断SDA高低电平)
+			2.CPU在CLK为低电平的时候，将数据0放到数据线SDA上(拉低SDA)，然后LM77在同周期的CLK为高电平的时候，从数据线SDA上取出数据0(判断SDA高低电平)
+	SCL和SDA必须分别连接了上拉电阻，默认SCL好SDA为高电平
+
+​	总结：
+​		谁配输出谁控制
+​		谁配输入谁释放
+​		可以同时配输入
+​		不能同时配输出
+
+串行：说明CPU和外设数据传输的时候是一个bit一个bit的传输
+	注意：
+		1.I2C总线传输从高位开始
+			0x95(1001 0101)
+				UART：1010 1001 从低位开始
+				I2C： 1001 0101 从高位开始
+		2.I2C总线传输是一次传输一个字节，如果是多个字节需要分拆传输
+		3.由于I2C总线具有时钟控制信号线，I2C总线传输时一个时钟周期传输一个b1t位
+		4.数据传输的速度由SCL来决定，SCL又有外设来决定
+	总结：
+		一次一字节
+		一位一周期
+		传输从高位
+		速度看时钟
+		时钟看外设
+
+总线 :说明SDA和SCL两根信号线可以挂接多个外设 
+  理论上也可以挂接多个CPU, 比较少见, 一般都是一个CPU挂接多个外设
+
+I2C总线中的相关概念
+START信号：起始信号
+如果CPU要访问外设，CPU首先要向总线上发送一个START信号
+该信号只能由CPU发起
+信号时序：SCL为高电平，SDA由高电平向低电平跳变 -> START信号
+
+STOP信号：结束信号
+如果CPU要停止对外设的访问，CPU最后向总线发送一个STOP信号
+该信号只能由CPU发起
+信号时序：SCL为高电平，SDA由低电平向高电平跳变 -> STOP信号
+
+读写位(R/W):用于表示CPU是向外设写入数据还是从外设读取数据
+lbit
+如果CPU要向外设写入数据，R/W = 0
+如果CPU要从外设读取数据，R/W = 1
+
+设备地址：用于表示外设在同一个总线上的唯一性
+同一个总线上，每个外设都会有一个唯一的设备地址
+类似于外设的身份证号
+如果CPU要访问某个外设，CPU只需要向[总线]发送某个外设的设备地址即可
+类似于老师叫某个同学的名字
+如果外设在当前总线上，会向CPU回复的
+注意：设备地址的有效位数为7位（常见）或者10位（几乎见不到）
+
+问：如何来确定设备地址呢？
+答：通过外设的芯片手册来确定
+举例：获取MMA8653三轴加速度传感器的设备地址
+打开mma8653fcr1.pdf - p17:
+The MMA8653FC's standard slave address is 0011101 or 0x01D
+MMA8653的设备地址 = 0011101(7bit) = 0x1D(十六进制)
+
+问题：
+概念1.I2C总线传输是一次传输一个字节
+概念2.设备地址的有效位数为7位（常见）
+	将设备地址好读写位结合起来
+
+读设备地址 = 设备地址<<1 | 1; //1读写位，读
+写设备地址 = 设备地址<<1 | 0; //0读写位，写
+举例：MMA8653的设备地址 0X1D
+	0011101 << 1 = 00111010
+	00111010 | 1 = 00111011
+	00111011 = 0011101 1
+	[7:1] = 设备地址
+	[0] = 读写位
+设备地址：向哪个设备发送/接收
+读写位：读/写
+
+ack信号：应答信号 acknowledge
+用于表示I2C总线数据传输是否发生了错误
+有效位数为1位，低电平有效
