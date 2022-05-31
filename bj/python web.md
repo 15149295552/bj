@@ -1623,3 +1623,55 @@ fieldsets = (
          }
 	),
 )
+
+关系映射
+
+1. 一对一映射
+
+   A表中的一条记录只能与B表中的一条记录相关联
+   典型代表：一夫一妻制
+   数据库中实现：
+   	A表：设置主键
+   	B表：增加一列，并引用自A表的主键
+   语法：属性=models.OneTo0 neField(Entry)
+   cLass Wife(models.Model):
+   author models.OneToOneField(Author)
+   
+
+2. 一对多映射
+   A表中的一条数据可以与B表中的任意多条数据关联
+   B表中的一条数据只能与A表中的一条数据关联
+   在数据库中的体现
+   通过　外键 (Foreign Key) 来体现一对多
+   在 "多" 表中增加外键(Foreign Key) 对 "一" 表的主键进行引用
+   语法
+   使用 外键(Foreign Key)
+   在 "多" 的实体中，增加：
+   属性 = models.ForeignKey(Entry)
+   查询
+   正向查询 - 通过 Book 查询 Publisher
+   book = Book.objects.get(id=1)
+   publisher = book.publisher
+   反向查询 - 通过 Publisher 查询 Book
+   Django默认会在Publisher中增加book_set属性
+   pub = Publisher.objects.get(id=1)
+   books = pub.book_set.all()
+
+3. 多对多映射
+   A表中的一条记录可以与B表中的任意多条记录匹配
+   B表中的一条记录可以与A表中的任意多条记录匹配
+   在数据库中体现
+   必须创建第三张表，关联涉及到的两张数据表
+   语法
+   在任何一个实体类中，增加：entry = models.ManyToManyField(Entry)
+   查询
+   正向查询 - 通过 Author 查询所有的 Book
+   author = Author.objects.get(id=1)
+   book_list = author.book.all()
+   通过 关联属性.all() 查询所有的关联数据
+   反向查询 - 通过 Book 查询所有的 Author
+   	book = Book.objects.get(id=1)
+
+   \#Django 会在 Book 表中增加一个隐式属性 author_set
+
+   ​	author_list = book.author_set.all()
