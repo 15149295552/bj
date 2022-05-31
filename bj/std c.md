@@ -1425,3 +1425,197 @@ format:格式字符串
 返回值：
 失败/到文件尾 返回EOF
 成功 返回实际输入的数据项数
+
+代码：
+file.c
+
+```c
+#include <stdio.h>
+int main(void){
+    FILE* fp =  NULL;
+    fp = fopen("a.txt", "r");
+    if(NULL == fp){
+        printf("文件打开失败\n");
+        return -1;
+    }
+    printf("打开文件成功.\n");
+    int i = 0;
+    char str[20] ={0};
+    double d = 0;
+    fscanf(fp, "%d%s%lf", &i, str, &d);
+    printf("i = %d, str = %s, d = %lg\n", i, str, d);
+    fclose(fp);
+    FILE* fpw = fopen("b.txt", "w+");
+    fprintf(fpw, "%d,%s,%lg\n", i, str, d);
+    fclose(fpw);
+    fscanf(stdin, "%d%s%lf", &i, str, &d);
+    fprintf(stdout, "%d, %s, %lg\n", i, str, d);
+    fprintf(stderr, "%d, %s, %lg\n", i, str, d);
+    return 0;
+}
+```
+
+非格式化I/O
+输出字符
+int fputc(int c,FILE *stream);
+c:字符
+stream:I/O流指针
+返回值：
+成功 返回实际输入的字符
+失败 返回EOF
+输入字符
+int fgetc (FILE *stream);
+stream:I/O流指针
+返回值：
+成功 返回实际输入的字符
+失败/遇到文件尾  返回E0F
+
+02file.c
+
+```c
+#include<stdio.h>
+int main(void){
+    FILE* fpr = fopen("c.txt","r");
+    FILE* fpw = fopen("d.txt","w+");
+    int ch;
+    while(1){
+        ch = fgetc(fpr);
+        if(ch == EOF)
+            break;
+        fputc(ch, fpw);
+    }
+    fclose(fpr);
+    fclose(fpw);
+    return 0;
+}
+```
+
+输出字符串
+int fputs(const char *s, FILE *stream);
+参数：
+s:字符串首地址 
+stream:I/O流指针 
+返回值 :
+成功  返回非负数 
+失败  返回EOF 
+
+输入字符串 
+char *fgets(char *s, int size, FILE *stream);
+参数:
+s:字符串缓冲区首地址
+size:字符串缓冲区大小
+stream:I/O流指针
+返回值 :
+  成功  返回s 
+  失败/遇到文件尾 返回EOFnull
+03file.c 
+
+```c
+#include <stdio.h>
+int main(void){
+    FILE* fpr = fopen("c.txt", "r");
+    FILE* fpw = fopen("d.txt", "w+");
+    char str[4]= {0};
+    while(fgets(str, 4, fpr) != NULL){
+        fputs(str, fpw);
+    }
+    fclose(fpr);
+    fclose(fpw);
+    return 0;
+}
+```
+
+二进制I/O 
+二进制输出
+size_t fwrite(const void *ptr, size_t size, size_t nmemb,FILE *stream);
+参数:
+ptr :缓冲区地址
+size :元素字节数
+nmemb :期望输出的元素数
+stream:I/O流指针 
+返回值:
+成功  返回实际输出元素数 
+失败  返回值比nmemb小或者为0
+
+二进制输入
+size t fread(void *ptr,size t size,size t nmemb,FILE *stream);
+参数
+ptr:缓冲区地址
+size:元素字节数
+nmemb:期望输入元素数
+stream:I/O流指针
+返回值：
+成功 返回实际输入元素数
+失败 返回o或者比nmemb小的值
+
+04file.c
+
+```c
+#include <stdio.h>
+int main(void){
+    FILE* fp = fopen("e.txt", "w+");
+    int a[] = {1,2,3,4,5,6,7,8};
+    int len = sizeof(a)/sizeof(a[0]);
+    int size = 0;
+    size = fwrite(a, sizeof(int), len, fp);
+    printf("实际写入了%d个数据.\n", size);
+    rewind(fp);
+    int b[8] = {0}; 
+    size = fread(b, sizeof(int), 10, fp);
+    printf("实际读取了%d个数据.\n", size);
+    for(int i = 0; i < size; i++)
+        printf("%d ", b[i]);
+    printf("\n");
+    fclose(fp);
+    return 0;
+}
+```
+
+设置文件位置：
+void rewind(FILE*stream);//将文件的读写位置调整到文件开头
+int fseek(FILE *stream,long offset,int whence);
+参数：
+stream:I/O流指针
+offset:偏移字节数
+whence:偏移起点
+SEEK SET:文件头
+SEEK CUR:从当前位置
+SEEK END:从文件尾
+返回值：
+成功 返回0
+失败 返回-1
+
+```c
+#include <stdio.h>
+int main(void){
+    FILE* fp = fopen("e.txt", "w+");
+    int a[] = {1,2,3,4,5,6,7,8};
+    int len = sizeof(a)/sizeof(a[0]);
+    int size = 0;
+    size = fwrite(a, sizeof(int), len, fp);
+    printf("实际写入了%d个数据.\n", size);
+    rewind(fp);
+    int b[8] = {0};
+    size = fread(b, sizeof(int), 10, fp);
+    printf("实际读取了%d个数据.\n", size);
+    for(int i = 0; i < size; i++)
+        printf("%d ", b[i]);
+    printf("\n");
+    int c[2] = {0};
+    fseek(fp, 8, SEEK_SET);
+    fread(c, sizeof(int), 2, fp);
+    printf("%d %d\n", c[0], c[1]);
+    fseek(fp, 8, SEEK_CUR);
+    fread(c, sizeof(int), 2, fp);
+    printf("%d %d\n", c[0], c[1]);
+    printf("当前的位置在:%ld\n", ftell(fp));
+    fclose(fp);
+    return 0;
+}
+
+```
+
+long ftell(FILE* stream);
+stream:I/O流指针
+成功:返回当前文件读写位置 
+失败:返回-1
