@@ -1832,3 +1832,139 @@ int main(int argc, char** argv){
 }
 ```
 
+进程：进程就是一个程序执行是的一个实例
+程序是被存储在磁盘上，包括机器指令和数据的文件
+当这些指令和数据被装在到内存并被CPU所执行，形成了进程
+一个程序可以用啥被运行为多个进程
+在Linux源码中常常将进程称为任务(task)
+从内核的观点看，进程的目的就是为了担当分配系统资源(CPU时间，内存)的实体
+
+相关命令
+pstree - 进程树，以树状结构显示当前所有进程的关系
+ps -aux - 以详细的方式将当前终端的进程信息都输出打印
+
+进程的信息
+pid:进程的id,用于标识进程
+STAT:status
+状态描述进程的状态
+S:sleep可唤醒修改
+R:run运行状态
+D:dead死亡，不可唤醒休眠
+
+父子进程
+Unix系统中的进程存在父子关系
+	一个父进程可以创建一到多个子进程
+	但是每个子进程只有一个父进程
+整个系统中只有一个根进程，即p1d为0的调度进程
+init - 1号进程 - 隐藏 - systemd
+
+进程标识
+每个进程都会有一个非负整数形式的唯一编号，叫PID(process identification,进程标识)
+PID在任意时刻都是唯一的，但是可以重用，当进程终止并且被回收后，他的即id就可以被其他进程所有
+系统中有些pid是专用的
+0号进程-调度进程
+1号进程-init进程
+除了调度进程之外，系统中的每一个进程都有唯一的父进程，对任意一个子进程而言，其父进程的id就是他的ppid
+相关函数
+pid t getpid(void);
+获取当前进程的pid
+pid t getppid(void);
+获取当前进程的父进程的pid
+
+进程的创建-fork函数
+\#include <unistd.h>
+pid t fork(void);
+功能：创建调用进程的子进程
+返回值：
+失败 返回-1
+成功 父进程返回子进程的pid,子进程返回0
+
+明确
+程序运行变为了进程，进程会占据0-3G所有的内存空间，
+从微观的角度上来讲，在同一个时刻只能由一个进程在运行
+
+结果
+调用完成fork函数后，创建一个新的进程，此时新的进程就是已有进程的子进程，此时两个进程的内容是完全一样的
+此时父进程和子进程的执行顺序是随机的
+创建子进程成功的那一刻，父子进程的执行位置是一样的
+
+代码：
+fork.c
+
+```c
+#include<stdio.h>
+#include<unistd.h>
+int main(void){
+    printf("%d进程：我是父进程，我要创建子进程\n",getpid());
+    pid_d pid = fork();
+    if(-1 == pid){
+        perror("fork");
+        return -1;
+    }
+    if(pid == 0){
+        printf("%d进程：我是子进程\n",getpid());
+    }else{
+        printf("%d进程：我是父进程\n",getpid());
+    }
+    printf("%d进程：哈哈哈\n",getpid());
+    return 0;
+}
+```
+
+为父进程和子进程设计先不同后相同的执行过程
+  pid_t pid = fork();
+  if(-1 == pid){
+    perror("fork");
+    return -1;
+  }
+
+  if(pid == 0){
+    printf("%d进程:我是子进程.\n", getpid());
+  }else{
+    printf("%d进程:我是父进程.\n", getpid());
+  }
+  printf("%d进程:哈哈哈哈.\n", getpid());
+
+为父子进程设计不同的执行过程
+  pid_t pid = fork();
+  if(-1 == pid){
+    perror("fork");
+    return -1;
+  }
+
+  if(pid == 0){//子进程执行代码
+    printf("%d进程:我是子进程.\n", getpid());
+    return 0;
+  } 
+  //父进程执行代码
+  printf("%d进程:我是父进程.\n", getpid());
+  printf("%d进程:哈哈哈哈.\n", getpid());
+
+
+为父子进程设计相同的执行过程
+  pid_t pid = fork();
+  if(-1 == pid){
+    perror("fork");
+    return -1;
+  }
+  //父子进程执行代码
+  printf("%d进程:我是父/子进程.\n", getpid());
+  printf("%d进程:哈哈哈哈.\n", getpid());
+
+思考 :
+  以下代码总共产生了多少个进程
+  for(int i = 0; i < 3; i++)
+  {
+    fork();
+  }
+
+  for() -父进程 - fork - 父进程 - fork - 父进程 
+                      \- 子进程
+             \- 子进程 - fork - 子进程 
+                     \- 子进程的子进程 
+      
+        -子进程 - fork - 子进程 - fork - 子进程 
+                     \- 子进程的子进程 
+              \- 子进程的子进程 fork - 子进程的子进程 
+                       \- 子进程的子进程的子进程
+    最终产生了8个进程
