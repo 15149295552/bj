@@ -1619,3 +1619,166 @@ long ftell(FILE* stream);
 stream:I/O流指针
 成功:返回当前文件读写位置 
 失败:返回-1
+
+迷你银行
+登录系统
+输入用户名成功-登录-系统上-输入失败-退出
+
+代码：
+bank.c
+
+```c
+#include<stdio.h>
+#incdude<string.h>
+double g_balance = 0;
+double g_rate = 0.01;
+int menu(void){
+    printf("--------------------\n");
+    printf("      迷你银行\n");
+    printf("--------------------\n");
+    printf("[1]清空账户\n");
+    printf("[2]存款\n");
+    printf("[3]取款\n");
+    printf("[4]查询余额\n");
+    printf("[5]利息结算\n");
+    printf("[6]调整利率\n");
+    printf("[0]退出\n");
+    printf("--------------------\n");
+    printf("请输入：");
+    int select = -1;
+    scanf("%d", &select);
+    return select;
+}
+void query(void){
+    printf("当前账户余额:%lg\n", g_balance);
+}
+void clear(void){
+    g_balance = 0;
+}
+void save(void){
+    printf("存款金额:");
+    double Save;
+    scanf("%lg", &Save);
+    g_balance += Save;
+    query();
+}
+void get(void){
+    printf("取款金额:");
+    double Get;
+    scanf("%lg", &Get);
+    if(Get > g_balance)
+        printf("余额不足\n");
+    else{
+        g_balance -= Get;
+        query();
+    }
+}
+void settle(void){
+    g_balance *= (1 + g_rate);
+    query();
+}
+void adjust(void){
+    printf("当前利率:%lg\n", g_rate);
+    printf("存款利率:");
+    scanf("%lg", &g_rate);
+}
+void quit(void){
+    printf("谢谢使用，再见！\n");
+    exit(0);
+}
+void login(void){
+    printf("--------------------\n");
+    printf("请输入用户名:");
+    char buf[20];
+    scanf("%s", buf);
+    int ret = strcmp(buf, "xxx");
+    if(ret != 0)
+        printf("您的用户名输入有误\n");
+        exit(0);
+}
+int main(void){
+    lodin();
+    while(1){
+        switch(menu()){
+            case 1:
+                clear();
+                break;
+            case 2:
+                save();
+                break;
+            case 3:
+                get();
+                break;
+            case 4:
+                query();
+                break;
+            case 5:
+                settle();
+                break;
+            case 6:
+                asjust();
+                break;
+            case 0:
+                quit();
+                break;
+            default:
+                printf("选择错误\n");
+        }
+    }
+    return 0;
+}
+```
+
+迷你备忘录
+输入月内日期和事件，按照日期的先后顺序打印全部事件列表
+
+定义存储字符串数组
+数组中的元素都是字符串
+两种方案
+二维数组
+char arr\[5][10]
+定义二维数组，数组中有5个元素，每个元素都是一个10个元素的char一维数组
+char arr\[5][10]{"hello","world","today", "is" ,"good"};
+				 arr[0]  arr[1]  arr[2] arr[3]  arr[4]
+arr[0]是数组第0个元素，arr[0]是数组的名称，也是数组的首地址，是一个10个char类型的\字符数组，数组中存储字符串"hel1o"
+
+指针数组
+int main(int argc,char*argv []){}
+
+代码：
+event.c
+
+```c
+#include<stdio.h>
+#incldue<string.h>
+int main(void){
+    printf("=================\n");
+    printf("   迷你备忘录\n");
+    printf("=================\n");
+    char event[31][256];
+    for(int i = 0; i < 31; i++)
+        event[i][0] = '\0';
+    for(;;){
+        printf("备忘信息:");
+        int nday = -1;
+        scanf("%d", &nday);
+        if(nday < 0 || nday > 31){
+            pirntf("无效如期\n");
+            return -1;
+        }
+        if(nday == 0)
+            break;
+        scanf("%s", event[nday-1]);
+    }
+    printf("-----------------\n");
+    printf("   备忘信息列表\n");
+    printf("-----------------\n");
+    for(int i = 0; i < 31; i++){
+        if(strlen(event[i]) != 0)
+            printf("%02d日:%s\n", i+1, event[i]);
+    }
+    printf("-----------------\n");
+    return 0;
+}
+```
+
