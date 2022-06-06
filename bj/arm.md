@@ -1750,7 +1750,7 @@ unsigned char data = *(char\*)0x02;//no
                	   1 - 中断已经到来
                WRITE: 0 - 将该b1t清0清除中断到来位
                判断数据是否发生成功或者接收完毕的轮训代码：
-               whi1e( ! (I2CCoN & (1 << 4))):
+               whi1e( ! (I2CCON & (1<<4)));
                [5] = 1 使能中断产生
                [6] = 1 I2C CLK = PCLK / 256 PCLK = 200MHZ
                [7] = 0 让CPU产生一个无效的ACK信号(高电平)
@@ -1802,7 +1802,95 @@ unsigned char data = *(char\*)0x02;//no
                P302
                I2CCLKENB 0XC00B0000
                [3]=1永远使能PCLK时钟源
+            
             4. 复位寄存器
                IPRESETO 0XC0012000
                [22] = 1 复位
                     = 0 取消复位
+
+代码：
+iic.h
+
+```c
+#ifndef IIC_H
+#define IIC_H
+#define GPIOD_ALTFN0    *((volatile unsigned int *)0xC001D020)
+#define I2CCLKENB2      *((volatile unsigned int *)0xC00B0000)
+#define IPRESET0        *((volatile unsigned int *)0xC0012000)
+#define I2CCON          *((volatile unsigned int *)0xC00A6000)
+#define I2CSTAT         *((volatile unsigned int *)0xC00A6004)
+#define I2CADD          *((volatile unsigned int *)0xC00A6008)
+#define I2CDS           *((volatile unsigned int *)0xC00A600C)
+#define I2CLC           *((volatile unsigned int *)0xC00A6010)
+extern void iic_init(void);
+extern void iic_start(unsigned char, unsigned int);
+extern void iic_stop(void);
+extern void iic_tx(unsigned char* , unsigned char);
+extern void iic_rx(unsigned char* , unsigned char);
+#endif
+```
+
+iic.c
+```c
+#include "iic.h"
+void iic_init(void){
+    GPIOD_ALTFN0 &= ~(0XF<<12);
+    GPIOD_ALRFN0 |= (1<<14);
+    GPIOD_ALTFN0 |= (1<<12);
+    I2CCLKENB2 |= (1<<3);
+    IPRESET0 &= ~(1<<22);
+    IPRESET0 |= (1<<22);
+    I2CCON = (1<<8)|(1<<7)|(1<<6)|(1<<5)|0X0F;
+    I2CLC = (1<<2)|1;
+}
+void iic_start(unsigned char slave_addr, unsigned int rdwr){
+    I2CSTAT |= (1<<4);
+    I2CCON |= (1<<8)|(1<<7)|(1<<5);
+    if(rdwr == 1){
+        I2CSTAT &= ~(3<<6);
+        I2CSTAT |= (1<<6);
+        slave_addr = (slave_addr<<1) | 1;
+    }else{
+        I2CSTAT |= (3<<6);
+        slave_addr = (slave_addr<<1) | 0;
+    }
+    I2CDS = slave_addr;
+    I2CCON &= ~(1<<4);
+    I2CSTAT |= (1<<5);
+    whi1e( ! (I2CCON & (1<<4)));
+    if(I2CSTAT & 0X01)
+        uart_puts("\nnot received ACK signal");
+}
+void iic_stop(void){
+    I2CSTAT &= ~(1<<4);
+}
+void iic_tx(unsigned char* buf, unsigned char len){
+    int count = 0;
+    for(; count < len; count++){
+        I2CCON &= ~(1<<4);
+        I2CDS = buf[count];
+        while( ! (I2CCON & (1<<4)) );
+        if(I2CSTAT & 0X01)
+            uart_puts("\nnot received ACK signal");
+    }
+}
+void iic_rx(unsigned char* buf, unsigned char len){
+}
+```
+
+分析我外设的芯片手册
+单字节读取的时序
+CPU - mma8653是外设
+开始信号 + 设备地址(读/写)
+	读设备地址
+		if(R/W == 1)
+			主接收模式
+		if(R/W == 0)
+			主发送模式
+发送开始信号
+主设备发送：0XF0 -> I2CSTAT
+主设备接收：0XB0 -> I2CSTAT
+
+结束信号
+CPU向外设发送单/多个字节
+CPU从外设读取单/多个字节

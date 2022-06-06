@@ -1675,8 +1675,9 @@ fieldsets = (
 
    ​	author_list = book.author_set.all()
 
-项目：
-二手车交易平台
+# 项目练习
+
+## 二手车交易平台
 
 1. 判断项目的可行性
 2. 分析项目功能
@@ -1768,6 +1769,7 @@ INSTALLED_APPS = [
     'userinfo',
     'buy',
     'sale',
+    'front'
 ]
 
 MIDDLEWARE = [
@@ -1845,6 +1847,7 @@ USE_L10N = True
 
 USE_TZ = True
 
+AUTH_USER_MODEL = 'userinfo.Userifon'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
@@ -1861,6 +1864,7 @@ userinfo/models.py
 
 ```py
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
 SEX_CHOICES = (
     (0, "男"),
@@ -1952,3 +1956,156 @@ class Carinfo(models.Model):
 
 python3 manage.py makemigrations
 python3 manage.py migrate
+python3 manage.py createsuperuser
+
+userinfo/admin.py
+
+```py
+from django.contrib import admin
+from .models import *
+admin.site.register(UserInfo)
+```
+
+sale/admin.py
+```py
+from django.contrib import admin
+from .models import *
+admin.site.register(Brand)
+admin.site.register(Carinfo)
+```
+
+注册和登录
+注册功能
+
+1. html页面：用户名和密码的文本框，用户输入用户名和密码
+2. 数据需提交到后台(接收、处理、保存)
+3. 返回结果
+
+python3 manage.py startapp front
+配置settings.py
+
+front/templates/register.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% load static %}
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        <form action="{% url 'register_in' %}" method="post">
+            {% csrf_token %}
+            <p>
+                <b>用户注册</b> <b>{{message}}</b>
+            </p>
+            <p>
+                用户名:<input type="text" name="username" placeholder="请输入用户名">
+            </p>
+            <p>
+                密码:<input type="password" name="userpwd" placeholder="请输入密码">
+            </p>
+            <p>
+                确认密码:<input type="password" name="reuserpwd" plaveholder="请输入确认密码">
+            </p>
+            <p>
+                <button name="toregister">
+                    注册
+                </button>
+            </p>
+        </form>
+    </body>
+</html>
+```
+
+usedcar/urls.py
+```py
+from django.conf.urls import url, include
+from django.confrib import admin
+urlpatterns = [
+    url(r'^admin/', admin.site.urls),
+    url(r'^user/', include('userinfo.urls')),
+]
+```
+
+userinfo/urls.py
+```py
+from django.conf.urls import url
+from userinfo import views
+urlpatterns = [
+    url(r'register/', views.register, name='register'),
+    url(r'registerin/', views.register_, name='register_in'),
+    url(r'login/', views.login, name='login'),
+    url(r'loginin/', views.login_, name)
+]
+```
+
+userinfo/views.py
+```py
+from django.shortcuts import render
+from .models import *
+from django.contrib.auth.hashers impor make_password
+def register(request):
+    return render(request, 'register.html')
+def register_(request):
+    user_name = request.POST.get("username")
+    olduser = UserInfo.objects.filter(username=user_name)
+    if len(olduser) > 0:
+        return render(request, 'register.html', {'message':'用户名已经存在'})
+    user_pwd = request.POST.get("userpwd")
+    re_user_pwd = request.POST.get("reuserpwd")
+    if user_pwd != re_user_pwd:
+        return render(request, 'register.html', {'message':'两次输入的密码不一致'})
+    user_pwd = make_password(user_pwd, 'MarcelArhut', 'pbkdf2_sha1')
+    new_user = UserInfo()
+    new_user.username = user_name
+    new_user.password = user_pwd
+    new_user.save()
+    return rnder(request, 'register.html', {'message':'注册成功'})
+def login(request):
+    return render(request, 'login.html')
+def login_(request):
+    user_name = request.POST.get("username")
+    user_pwd = request.POST.get("userpwd")
+    user = UserInfo.objects.filter(username=user_name)[0]
+    if not user:
+        return render(requseet, 'login.html', {'message':"用户未注册"})
+    ret = check_password(user_pwd, user.password)
+    if not ret:
+        return render(request, 'login.html', {'message':"密码错误"})
+    return render(request, 'login.html', {'message':"登陆成功"})
+```
+
+templates/login.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        <form action="{% url 'register_in' %}" method="post">
+            {% csrf_token %}
+            <p>
+                <b>用户登录</b> <b>{{message}}</b>
+            </p>
+            <p>
+                用户名:<input type="text" name="username" placeholder="请输入用户名">
+            </p>
+            <p>
+                密码:<input type="password" name="userpwd" placeholder="请输入密码">
+            </p>
+            <p>
+                <button name="login">
+                    登录
+                </button>
+            </p>
+        </form>
+    </body>
+</html>
+```
+
+python3 manage.py makemigrations
+python3 manage.py migrate
+python3 manage.py createsuperuser

@@ -934,7 +934,7 @@ print(ma.a)
 #使用import方式导入时，只能跟包名或模块名,使用from...import导入包，模块，函数，变量
 ```
 ## 常用模块
-```py
+```-py
 import sys
 import time
 import urllib.request
@@ -945,3 +945,5 @@ print(time.time())
 print(time.localtime(time.time()))
 print(urllib.request.urlopen('http://www.baidu.com').read)
 ```
+
+
