@@ -1852,6 +1852,7 @@ AUTH_USER_MODEL = 'userinfo.Userifon'
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = (BASE_DIR, 'static')
 ```
 
 usedcar/\__init__.py
@@ -2022,10 +2023,14 @@ usedcar/urls.py
 ```py
 from django.conf.urls import url, include
 from django.confrib import admin
+from sale import views
+from django.conf.urls.static import static
+from django.conf import settings
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    urel(r'^$', views.index, name='index'),
     url(r'^user/', include('userinfo.urls')),
-]
+] + static(settings.STATIC_URL,document_root=settings.STATICFILES_DIRS)
 ```
 
 userinfo/urls.py
@@ -2036,7 +2041,8 @@ urlpatterns = [
     url(r'register/', views.register, name='register'),
     url(r'registerin/', views.register_, name='register_in'),
     url(r'login/', views.login, name='login'),
-    url(r'loginin/', views.login_, name)
+    url(r'loginin/', views.login_, name='loginin'),
+    url(r'infomes', view.infomes, name='infomes'),
 ]
 ```
 
@@ -2045,6 +2051,7 @@ userinfo/views.py
 from django.shortcuts import render
 from .models import *
 from django.contrib.auth.hashers impor make_password
+from django.contrib import auth
 def register(request):
     return render(request, 'register.html')
 def register_(request):
@@ -2067,16 +2074,19 @@ def login(request):
 def login_(request):
     user_name = request.POST.get("username")
     user_pwd = request.POST.get("userpwd")
-    user = UserInfo.objects.filter(username=user_name)[0]
-    if not user:
-        return render(requseet, 'login.html', {'message':"用户未注册"})
-    ret = check_password(user_pwd, user.password)
-    if not ret:
-        return render(request, 'login.html', {'message':"密码错误"})
-    return render(request, 'login.html', {'message':"登陆成功"})
+    user = auth.authenticate(username=user_name, password=user_pwd)
+    if user is not None:
+        auth.login(request, user)
+    	return render(request, 'login.html', {'message':"登陆成功"})
+    else:
+        return render(request, 'login.html', {'message':"登录失败"})
+def infomes(request):
+    return render(request, 'info-message.html')
+def infomes_(request):
+    pass
 ```
 
-templates/login.html
+front/templates/login.html
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -2109,3 +2119,128 @@ templates/login.html
 python3 manage.py makemigrations
 python3 manage.py migrate
 python3 manage.py createsuperuser
+
+首页展示：
+车辆照片、品牌、车名、期望售价、行驶公里数
+
+1. 在数据库中添加一个车辆品牌、一个车辆信息
+2. views中查询数据库中的车辆信息，返回给前端的页面
+3. templates中搭建页面，展示给后端返回回来的车辆信息
+4. 配置url地址
+
+front/templates/index.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% load static %}
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        {% for car in carlist %}
+            <P>
+                <img src="{{car.picture.url}}" alt="">
+            </P>
+            <p>
+                车辆品牌:{{car.brand}}
+            </p>
+            <p>
+                车辆名称:{{car.ctitle}}
+            </p>
+            <p>
+                车辆售价:{{car.price}}
+            </p>
+            <p>
+                行驶公里数:{{car.mileage}}
+            </p>
+        {% endfor %}
+    </body>
+</html>
+```
+
+sale/views.py
+```py
+from django.shortcuts import render
+from .models import *
+import random
+def index(request):
+    carlist = Carinfo.objects.filter()
+    return render(request, 'index.html', {'carlist':locals()})
+```
+
+front/templates/info-message.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        <form action="">
+            <div>
+                <p>
+                    <b>车辆品牌</b>
+                    <select name="brands" id="brands">
+                        <option value="奔驰">奔驰</option>
+                        <option value="宝马">宝马</option>
+                        <option value="奥迪">奥迪</option>
+                    </select>
+                </p>
+                <p>
+                    <b>车辆名称</b>
+                    <input type="text" name="ctitle">
+                </p>
+                <p>
+                    <b>车辆上牌日期</b>
+                    <input type="text" name="regist_date">
+                </p>
+                <p>
+                    <b>发动机编号</b>
+                    <input type="text" name="engineNo">
+                </p>
+                <p>
+                    <b>形式公里数</b>
+                    <input type="text" name="mileage">
+                </p>
+                <em>
+                    <b>是否有维修记录</b>
+                    <input type="radio" name="isService" value="true">是
+                    <input type="radio" checked name="isService" value="false">否
+                </em>
+                <p>
+                    <b>期望售价</b>
+                    <input type="text" name="price">(万元)
+                </p>
+                <p>
+                    <b>新车价格</b>
+                    <input type="text" name="newprice">(万元)
+                </p>
+                <p>
+                    <b>上传车辆照片</b>
+                    <input type="file" name="pic">
+                </p>
+                <em>
+                    <b>是否手续齐全</b>
+                    <input type="radio" checked name="formalities" value="false">是
+                    <input type="radio" name="formalities" value="true">否
+                </em>
+                <em>
+                    <input type="radio" name="i" value="true">是
+                    <input type="radio" checked name="isService" value="false">否
+                </em>
+                <p>
+                    <b>卖家承诺</b>
+                    <textarea name="promise" id="" cols="30" rows="10"></textarea>
+                </p>
+                <button>
+                    提交
+                </button>
+            </div>
+        </form>
+    </body>
+</html>
+```
+
