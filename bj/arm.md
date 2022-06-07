@@ -1875,6 +1875,16 @@ void iic_tx(unsigned char* buf, unsigned char len){
     }
 }
 void iic_rx(unsigned char* buf, unsigned char len){
+    int count = 0;
+    while(count < len){
+        if(count == (len-1)){
+            I2CCON &= ~(1<<7);
+        }
+        I2CCON &= ~(1<<4);
+        while(!(I2CCON&(1<<4)));
+        buf[count] = I2CDS;
+        count++;
+    }
 }
 ```
 
@@ -1889,8 +1899,91 @@ CPU - mma8653是外设
 			主发送模式
 发送开始信号
 主设备发送：0XF0 -> I2CSTAT
+	将0XF0写入到I2CSTAT，启动了开始信号，配置了主发送模式
 主设备接收：0XB0 -> I2CSTAT
 
 结束信号
 CPU向外设发送单/多个字节
 CPU从外设读取单/多个字节
+
+读取数据
+读取到最后一个字节，CPU回复nack 不应答 - 无效的ack信号
+
+mma8653.h
+```c
+#ifndef _IIC_H
+#define _IIC_H
+extern void mma8653_id(void);
+#endif
+```
+
+mma8653.c
+```c
+#include "mma8653.h"
+#include "iic.h"
+#include "itoa.h"
+#define SLA_ADDR	(0X1D)
+#define WFLAG		(0)
+#define RFLAG		(1)
+void mma8653_read(unsigned char reg_addr,unsigned char* buf,int len){
+    iic_start(SLA_ADDR， WFLAG);
+    iic_tx(&reg_addr, 1);
+    iic_start(SLA_ADDR, RFLAG);
+    iic_rx(buf, len);
+    iic_stop();
+}
+#define WHO_AM_I	(0X0D)
+void mma8653_id(void){
+    unsigned char id = 0;
+    unsigned char itoa_buf[11] = {0};
+    mma8653_read(WHO_AM_I, &id, 1);
+    itoa(itoa_buf, id);
+    uart_puts("\nID:");
+    uart_puts(itoa)
+}
+```
+
+明确-寄存器0X0D中存储了想要读取的设备ID-0X5A
+明确一数据在传递的时候传递的都是字符串
+hel1o,world -> 实际 -> "he11o,wor1d"
+读取到了0x5a -> 发送 -> 将数据0x5a转换为字符串 -> 字符'Z' -> 发送
+如果去发送数据的话 -> 将数据0x5a -> 'Z' -> 发送给上位机
+
+转换 -> 数字 -> 字符串
+ 0x5a -> "0x5a"
+
+itoa.h
+
+```c
+#ifndef _ITOA_H
+#define _ITOA_H
+extern void itoa(char buf[], unsigned int num);
+#endif
+```
+
+itoa.c
+```c
+#include "itoa.h"
+void itoa(char* buf, unsigned int num){
+    buf[0] = '0';
+    buf[1] = 'X';
+    int i = 9;
+    unsigned int tmp;
+    i = 9;
+    while(num){
+        tmp = num % 16;
+        if(tmp >= 10){
+            buf[i] = tmp - 10 + 'A';
+        }else{
+            buf[i] = tmp + '0';
+        }
+        i--;
+        num /= 16;
+    }
+    while(i >= 2){
+        buf[i--] = '0';
+    }
+    buf[10] = 0;
+}
+```
+

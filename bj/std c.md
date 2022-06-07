@@ -1782,3 +1782,143 @@ int main(void){
 }
 ```
 
+通讯录系统
+contact.h
+
+```c
+#ifndef CONTACT_H
+#define CONTACT_H
+#include<stdio.h>
+#incldue<string.h>
+#inlcude<stdli
+typedef struct{
+    char name[20];
+    char tel[20];
+    char addr[20];
+}intro_t;
+typedef struct{
+    intro_t data[100];
+    int size;
+}contact_t;
+void init_contact(contact_t*);
+void add(contact_t*);
+void show(contact_t*);
+void del(contact_t*);
+void find(contact_t*);
+void mod(contact_t*);
+#enfif
+```
+
+contact.c
+```c
+#incldue "contact.h"
+void init_contact(contact_t* p){
+    p->size = 0;
+    memset(p->data, 0, sizeof(p->data));
+}
+void add(contact_t* p){
+    printf("请输入名字:");
+    scanf("%s",p->data[p->size].name);
+    printf("请输入电话:");
+    scanf("%s",p->data[p->size].tel);
+    printf("请输入住址:");
+    scanf("%s",p->data[p->size].addr);
+    p->size++;
+    printf("添加成功\n")
+}
+void show(contact_t* p){
+    int i = 0;
+    printf("%-10s\t%-10s\t%-10s\t\n","名字", "电话", "地址");
+    for(i = 0; i < p->size; i++){
+        printf("%-10s\t%-10s\t%-10s\t\n", p->data[p->size].name, p->data[p->size].tel, p->data[p->size].addr);
+    }
+}
+int search(contact_t* p, char name[]){
+    int i = 0;
+    for(i = 0; i < p->size; i++){
+        if(strcmp(p->data[i].name, name))
+            return i;
+    }
+    return -1;
+}
+void del(contact_t* p){
+    int i = 0;
+    char name[10];
+    printf("请输入要删除人的名字:");
+    scanf("%s",name);
+    int is_exist = search(p, name);
+    if(is_exist == -1){
+        printf("没找到联系人\n");
+    }else{
+        for(i = is_exist; i < p->size-1; i++){
+            p->data[i] = p->data[i+1];
+        }
+        p->size--;
+        printf("删除成功")
+    }
+}
+void find(contact_t* p){
+    char name[10];
+    printf("请输入名字:\n");
+    scanf("%s", name);
+    int is_exist = search(p, name);
+    if(is_exist == -1){
+        printf("没有该名字\n");
+    }else{
+        printf("要查找的人的信息为:\n");
+        printf("%-10s\t%-10s\t%-10s\t\n","名字", "电话", "地址");
+        printf("%-10s\t%-10s\t%-10s\t\n", p->data[p->is_exist].name, p->data[p->is_exist].tel, p->data[p->is_exist].addr);
+    }
+}
+void mod(contact_t* p){
+    printf("\n")
+}
+```
+
+main.c
+```c
+#include "contact.h"
+void menu(void){
+    printf("-------------------\n");
+    printf("       通讯录\n");
+    printf("     [1]添加联系人\n");
+    printf("     [2]删除联系人\n");
+    printf("     [3]查找联系人\n");
+    printf("     [4]修改联系人\n");
+    printf("     [0]退出\n");
+    printf("-------------------\n");
+}
+int main(void){
+    int sel = 0;
+    contact_t c;
+    init_contact(&c);
+    do{
+        menu();
+        printf("请用户选择:");
+    	scanf("%d", &sel);
+        switch(sel){
+            case 1:
+                add(&c);
+                break;
+            case 2:
+                del(&c);
+                break;
+            case 3:
+                find(&c);
+                break;
+            case 4:
+                mod(&c);
+                break;
+            case 0:
+                printf("退出\n")
+                break;
+            default:
+                printf("输入有误\n")
+        }
+    }while(sel){
+        
+    }
+    return 0;
+}
+```
+

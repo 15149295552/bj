@@ -554,12 +554,6 @@ lst=['hello','world',98]
 lst2=list(['hello','world',98])
 ```
 
-## 列表特点
-
-```py
-
-```
-
 # 类与对象
 
 ## 定义类
