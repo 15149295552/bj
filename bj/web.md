@@ -19,4 +19,41 @@ python3 manage.py runserver 端口号
 
 python3 manage.py - 查看所有子命令
 
-##项目同名文件夹
+##URL
+
+###构成
+
+protocol(协议)
+
+1. http://
+2. https://
+3. file:/// - 本地文件
+
+hostname(主机名)
+
+port(端口)
+:80 - 默认端口
+
+path(路由地址)
+由零个或多个"/"隔开的字符串
+
+query(查询字符串)
+"?"开头后面的都是用于给动态网页传递参数，可有多个参数，用“&”符号隔开，每个参数的名和值用“=”符号隔开。
+
+fragment(信息断片)
+"#"开始
+
+###URL请求处理
+
+主路由 - urls.py
+找urlpatterns变量(包含许多路由的数组)：从上到下逐一匹配，找到直接截止
+
+### 视图函数
+
+用于接收一个浏览器请求(HttpRequest对象)并通过HttpResponse对象返回响应的函数
+语法
+def xxx_view(request[,其他参数.\.\.]):
+	return HttpResponse(对象)
+
+# 框架
+
