@@ -55,5 +55,5 @@ fragment(信息断片)
 def xxx_view(request[,其他参数.\.\.]):
 	return HttpResponse(对象)
 
-# 框架
+
 

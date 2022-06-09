@@ -1421,7 +1421,7 @@ SECTIONS
 
 Makefile  
 ```
-OBJ=main.o led.o uart.o strcmp.o cmd.o
+OBJ=main.o led.o uart.o strcmp.o cmd.o iic.o mma8653.o itoa.o
 OBJCOPY=arm-cortex_a9-linux-gnueabi-objcopy
 LD=arm-cortex_a9-linux-gnueabi-ld
 GCC=arm-cortex_a9-linux-gnueabi-gcc
@@ -1495,9 +1495,11 @@ cmd.c
 #include "cmd.h"
 #include "led.h"
 #include "strcmp.h"
+#include "mma8653.h"
 cmd_t cmd_tbl[] = {
     {"led on",led_on},
-    {"led off",led_off}
+    {"led off",led_off},
+    {"showid", mma8653_id}
 };
 #define ARRAY_SIZE(x)	(sizeof(x) / sizeof(x[0]))
 cmd_t* find_cmd(const char* name){
@@ -1941,6 +1943,25 @@ void mma8653_id(void){
     uart_puts("\nID:");
     uart_puts(itoa)
 }
+void mma8653_write(unsigned char reg_addr,const unsigned char* buf,int len){
+    iic_stop(SLA_ADDR, WFLAG);
+    iic_tx(&reg_addr, 1);
+    iic_tx(buf, len);
+    iic_stop();
+}
+#define CTRL_REG1	(0X2A)
+void enter_active(void){
+    unsigned char data = 0;
+    mma8653_read(CTRL_REG1, &data, 1);
+    data |= 1;
+    mma8653_write(CTRL_REG1, &data, 1);
+}
+#define OUT_X_MSB	(0X01)
+void mma8653_acc(void){
+    unsigned char acc[6] = {0};
+    enter_active();
+    mma8653_read();
+}
 ```
 
 明确-寄存器0X0D中存储了想要读取的设备ID-0X5A
@@ -1984,6 +2005,134 @@ void itoa(char* buf, unsigned int num){
         buf[i--] = '0';
     }
     buf[10] = 0;
+}
+```
+
+升级 - 读取mma8653三轴加速度的加速度值
+
+底板原理图 + 核心板原理 + 芯片手(外设/CPU)
+外设芯片手册：寄存器 + 读写时序
+
+外设芯片手册分析
+
+1. 10bit - 三轴加速度传感器读取到的数据为10bit
+
+2. 芯片的车辆范围
+   +-2g(默认)
+   +-4g
+   +-8g
+   gravity 重力加速度
+   在测量范围不断增大的时候，减小了灵敏度
+
+3. 芯片的工作模式
+   OFF      关机
+   STANBY   待机
+   ACTIVE   运行
+
+   读取mma8653的设备id
+   待机 - 可以读取
+   运行 - 可以读取
+   读取mma8653的加速度值
+   待机 - 不可以读取
+   运行 - 可以读取
+
+4. 可以有8bit/10bit的加速度值
+   F_READ - 8bit数据
+   fast read快速读取
+
+5. mma8653的设备id为0x1d
+
+6. 读写时序
+
+7. 该芯片大概有50个寄存器
+   0x00 ~ 0x31
+   0x31 = 49
+   0 ~ 49 = 50个寄存器
+
+8. 设备ID存储在0X0D寄存器中
+
+9. 加速度值存储在哪个寄存器中
+   X方向:
+   0x01寄存器[7:0] 是10bit数据的高8位 [9:2]
+   0x02寄存器[7:6] 是10bit数据的低2位 [1:0]
+      |9-------2|1-------0|   X方向10bit数据
+      \|0x01[7:0]|0x02[7:6]|
+   Y方向:
+   0x03寄存器[7:0] 是10bit数据的高8位 [9:2]
+   0x04寄存器[7:6] 是10bit数据的低2位 [1:0]
+      |9-------2|1-------0|   Y方向10bit数据
+      \|0x03[7:0]|0x04[7:6]|
+   Z方向:
+   0x05寄存器[7:0] 是10bit数据的高8位 [9:2]
+   0x06寄存器[7:6] 是10bit数据的低2位 [1:0]
+      |9-------2|1-------0|   Z方向10bit数据
+      \|0x05[7:0]|0x06[7:6]|
+   如果要读取mma8653的设备加速度值, 需要读取地址0x01-0x06寄存器的值
+
+10. 1
+    如果想要读取0x01~0x06的值，将寄存器的地址给0x01,然后读取6个字节即可
+    char buf[6]=(0);
+    mma8653 read(0x01,buf,6)
+
+如何让mma8653处于运行状态：
+CTRL_REG1	0X2A
+[0] 0:STANBY模式
+    1:ACTIVE模式
+
+只能向mma8653的寄存器中写入数据
+
+如果想要修改0X2A寄存器中的值~写入
+mma8653 write()
+
+组合起来
+void print acc(char){}
+
+```c
+void print_acc(char *buf){
+    int x = 0;
+    int y = 0;
+    int z = 0;
+    int flag = 0;
+    char itoa_buf[11] = {0};
+    x = buf[0]<<24|buf[1]<<16;
+    x = x>>22;
+    if(x&(1<<31)){
+        flag = 1;
+        x = 0 -x;
+    }
+    itoa(itoa_buf, x);
+    uart_puts("\nX: ");
+    if(flag){
+        uart_puts("-");
+        flag = 0;
+    }
+    uart_puts(itoa_buf);
+    y = buf[2]<<24|buf[3]<<16;
+    y = y>>22;
+    if(y&(1<<31)){
+        flag = 1;
+        y = 0 -y;
+    }
+    itoa(itoa_buf, y);
+    uart_puts("\nY: ");
+    if(flag){
+        uart_puts("-");
+        flag = 0;
+    }
+    uart_puts(itoa_buf);   
+    z = buf[4]<<24|buf[5]<<16;
+    z = z>>22;
+    if(z&(1<<31)){
+        flag = 1;
+        z = 0 -z;
+    }
+    itoa(itoa_buf, z);
+    uart_puts("\nZ: ");
+    if(flag){
+        uart_puts("-");
+        flag = 0;
+    }
+    uart_puts(itoa_buf);
 }
 ```
 

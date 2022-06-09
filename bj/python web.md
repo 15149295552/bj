@@ -2,7 +2,8 @@
 
 web就是互联网上的一种应用程序 - 网页
 
-## 典型的程序：
+## 典型的程序： [python web.md](python web.md)
+
 ​	1.C/S
 ​		C:Client(客户端)
 ​		S:Server(服务端)
@@ -1853,6 +1854,8 @@ AUTH_USER_MODEL = 'userinfo.Userifon'
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (BASE_DIR, 'static')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media').replace('\\', '/')
+MEDIA_URL = '/media/'
 ```
 
 usedcar/\__init__.py
@@ -2030,7 +2033,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     urel(r'^$', views.index, name='index'),
     url(r'^user/', include('userinfo.urls')),
-] + static(settings.STATIC_URL,document_root=settings.STATICFILES_DIRS)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 ```
 
 userinfo/urls.py
@@ -2050,6 +2053,7 @@ userinfo/views.py
 ```py
 from django.shortcuts import render
 from .models import *
+from sale.model import *
 from django.contrib.auth.hashers impor make_password
 from django.contrib import auth
 def register(request):
@@ -2083,7 +2087,52 @@ def login_(request):
 def infomes(request):
     return render(request, 'info-message.html')
 def infomes_(request):
-    pass
+    brands = request.POST.getlist("brands")[0]
+    model = request.POST.get("model")
+    ctitle = request.POST.get("ctitle")
+    regist_date = request.POST.get("regist_date")
+    engineNo = request.POST.get("engineNo")
+    isService = request.POST.getlist("isService")[0]
+    if isService:
+        isService = 1
+    else:
+        isService = 0
+    price = request.POST.get("price")
+    newprice = request.POST.get("newprice")
+    picture = request.FILES.get("picture")
+    formalities = request.POST.getlist("formalities")[o]
+    if formalities:
+        formalities = 1
+    else:
+        formalities = 0
+    isDebt = request.POST.getlist("isDebt")[0]
+    if isDebt:
+        isDebt = 1
+    else:
+        isDebt = 0
+    promise = request.POST.get("peomise")
+    car = Carinfo()
+    car.serbran = model
+    car.ctitle = ctitle
+    car.regist_date = regist_date
+    car.engine_no = engineNo
+    car.mileage = mileage
+    car.is_record = isService
+    car.price = price
+    car.new_price = newprice
+    car.picture = picture
+    car.formalites = formalites
+    car.debt = isDebt
+    car.promise = promise
+    bradn = Brand.objects.get(btitle=brands)
+    car.brand = brand
+    user = UserInfo.objects.get(username="qwer")
+    car.user = user
+    car.save
+    print(brands,model,ctitle,regist_date,engineNo)
+	print(mileage,isService,price,newprice)
+	print(picture,formalities,isDebt,promise)
+	return render(request,info-message.html')
 ```
 
 front/templates/login.html
@@ -2139,9 +2188,19 @@ front/templates/index.html
         <title>Title</title>
     </head>
     <body>
-        {% for car in carlist %}
+        <div>
+            <p>
+                {% if request.user.username %}
+                	欢迎您:{{request.user.username}}
+                {% else %}
+                <a href="{% url 'register' %}">注册</a>
+                <a href="{% url 'login' %}">登录</a>
+                {% en %}
+            </p>
+        </div>
+        {% for car in carlist.carlist %}
             <P>
-                <img src="{{car.picture.url}}" alt="">
+                <img src="{{ car.picture.url }}" alt="">
             </P>
             <p>
                 车辆品牌:{{car.brand}}
@@ -2179,7 +2238,8 @@ front/templates/info-message.html
         <title>Title</title>
     </head>
     <body>
-        <form action="">
+        <form action="{% url 'infomes_in' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
             <div>
                 <p>
                     <b>车辆品牌</b>
@@ -2207,8 +2267,8 @@ front/templates/info-message.html
                 </p>
                 <em>
                     <b>是否有维修记录</b>
-                    <input type="radio" name="isService" value="true">是
-                    <input type="radio" checked name="isService" value="false">否
+                    <input type="radio" name="isService" value="1">是
+                    <input type="radio" checked name="isService" value="0">否
                 </em>
                 <p>
                     <b>期望售价</b>
@@ -2224,12 +2284,12 @@ front/templates/info-message.html
                 </p>
                 <em>
                     <b>是否手续齐全</b>
-                    <input type="radio" checked name="formalities" value="false">是
-                    <input type="radio" name="formalities" value="true">否
+                    <input type="radio" checked name="formalities" value="1">是
+                    <input type="radio" name="formalities" value="0">否
                 </em>
                 <em>
-                    <input type="radio" name="i" value="true">是
-                    <input type="radio" checked name="isService" value="false">否
+                    <input type="radio" name="i" value="1">是
+                    <input type="radio" checked name="isService" value="0">否
                 </em>
                 <p>
                     <b>卖家承诺</b>
@@ -2244,3 +2304,6 @@ front/templates/info-message.html
 </html>
 ```
 
+在首页上显示：
+如果用户处于登录状态显示欢迎：xxx(用户名)
+如果用户处于未登录状态显示：注册|登录
