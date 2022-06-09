@@ -1922,3 +1922,205 @@ int main(void){
 }
 ```
 
+扫雷
+
+sweep1.c
+```c
+#include<stdio.h>
+int main(void){
+    char v11 = 9, v12 = 1, v13 = 0,
+    	 v21 = 2, v22 = 3, v23 = 1,
+    	 v31 = 9, v32 = 2, v33 = 9;
+    printf("%hhd", v11);
+    printf("%hhd", v12);
+    printf("%hhd\n", v13);
+    printf("%hhd", v21);
+    printf("%hhd", v22);
+    printf("%hhd\n", v23);
+    printf("%hhd", v31);
+    printf("%hhd", v32);
+    printf("%hhd\n", v33);
+    return 0;
+}
+```
+
+sweep2.c
+
+```c
+#include<stdio.h>
+int main(void){
+    char map[] = {9, 0x11, 0x10,
+                  2, 0x13, 0x11,
+                  9, 2, 9
+                 };
+    int i = 0;
+    for(i = 0; i < 9; i++){
+        if(map[i] & 0xf0){
+            if((map[i] & 0xf) == 9)
+                printf("X");
+            else if((map[i] & 0xf) == 0)
+                printf(" ");
+            else
+                printf("%u", arr[i] & 0xf);
+        }else{
+            printf("*");
+        }
+        if(((i+1) % 3) == 0)
+            printf("\n");
+    }
+    return 0;
+}
+```
+
+sweep3.c
+```c
+#include<stdio.h>
+#includ<stdlib.h>
+#include<time.h>
+int main(void){
+    char map[10][10] = {0};
+    int del[][2] = {-1,-1, -1,0, -1,1,
+                     0,-1, 		  0,1,
+                     1,-1,  1,0,  1,1
+    };
+    int row = 0, col = 0;
+    int cnt = 0;
+    int num = 0;
+    int tmp_r = 0, tmp_c = 0;
+    srand(time(0));
+    for(row = 0; row < 10; row++){
+        for(col = 0; col < 10; col++)
+            map[rpw][col] = 0x10;
+    }
+    do{
+        row = rand() % 10;
+        col = rand() % 10;
+        if((map[row][col] & 0xf) != 9){
+            map[row][col] &= 0xf0;
+            map[row][col] |= 9;
+            cnt++;
+        }
+    }while(cnt < 10);
+    for(row = 0; row < 10; row++){
+        for(col = 0; col < 10; col++){
+            if((map[row][col & 0xf]) == 9)
+                continue;
+            for(num = 0; num < 8; num++){
+                tmp_r = row + del[num][0];
+                tmp_c = col + del[num][1];
+                if(tmp_r<0 || tmp_r>9)
+                    continue;
+                if(tmp_c<0 || tmp_c>9)
+                    continue;
+                if((map[tmp_r][tmp_c] & 0xf) == 9)
+                    map[row][col]++;
+            }
+        }
+    }
+    return 0;
+}
+```
+
+sweep4.c
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+void plant(char map[][10], int rows){
+    int row = 0, col = 0, cnt = 0;
+    do{
+        row = rand() % rows;
+        col = rand() % 10;
+        if((map[row][col] & 0xf) != 9){
+            map[row][col] &= 0xf0;
+            map[row][col] |= 9;
+            cnt++;
+        }
+    }while(cnt < 10);
+}
+void mark(char map[][10], int rows){
+    int row = 0, col = 0, num = 0;
+    int tmp_r = 0, tmp_c = 0;
+    int del[8][2]= {-1,-1,  -1,0,  -1,1,
+                     0,-1,  /*c*/   0,1,
+                     1,-1,   1,0,   1,1};
+    for(row = 0; row < 10; row++){
+        for(col = 0; col < 10; col++){
+            if((map[row][col]&0xf) == 9)
+                continue;
+            for(num = 0; num < 8; num++){
+                tmp_r = row + del[num][0];
+                tmp_c = col + del[num][1];
+                if(tmp_r<0 || tmp_r>9)
+                    continue;
+                if(tmp_c<0 || tmp_c>9)
+                    continue;
+                if((map[tmp_r][tmp_c] & 0xf) == 9)
+                    map[row][col]++;
+            }
+        }
+    }
+}
+void show(char map[][10], int rows){
+    int row = 0, col = 0, num = 0;
+    printf("  ");
+    for(num = 1;num <= 10;num++){
+        if(num < 10){
+            printf("%d", num);
+        }
+        else{
+            printf("%c", num - 10 + 'a');
+        }
+    }
+    printf("\n");
+    printf(" ");
+    for(num = 1;num <= 12;num++){
+        printf("+");
+    }
+    printf("\n");
+    for(row = 0;row <= 9;row++){
+        if (row < 9){
+            printf("%d", row + 1);
+        }
+        else{
+            printf("%c", row - 9 + 'a');
+        }
+        printf("+");
+        for(col = 0;col <= 9;col++){
+            if(map[row][col] & 0xf0){
+                if((map[row][col] & 0xf) == 9){
+                    printf("X");
+                }
+                else if(!(map[row][col] & 0xf)){
+                    printf(" ");
+                }
+                else{
+                    printf("%u", map[row][col] & 0xf);
+                }
+            }
+            else{
+                printf("*");
+            }
+        }
+        printf("+\n");
+    }
+    printf(" ");
+    for(num = 1;num <= 12;num++){
+        printf("+");
+    }
+    printf("\n");
+}
+int main(void){
+    char map[10][10] = {0};
+    int row = 0, col = 0;
+    srand(time(0));
+    for(row = 0; row < 10; row++){
+        for(col = 0; col < 10; col++)
+            map[row][col] = 0x10;
+    }
+    plant(map, 10);
+    mark(map, 10);
+    show(map, 10);
+    return 0;
+}
+```

@@ -2046,12 +2046,13 @@ urlpatterns = [
     url(r'login/', views.login, name='login'),
     url(r'loginin/', views.login_, name='loginin'),
     url(r'infomes', view.infomes, name='infomes'),
+    url(r'logout/', views.logout, name='logout'),
 ]
 ```
 
 userinfo/views.py
 ```py
-from django.shortcuts import render
+from django.shortcuts import render, redirectq
 from .models import *
 from sale.model import *
 from django.contrib.auth.hashers impor make_password
@@ -2081,7 +2082,7 @@ def login_(request):
     user = auth.authenticate(username=user_name, password=user_pwd)
     if user is not None:
         auth.login(request, user)
-    	return render(request, 'login.html', {'message':"登陆成功"})
+    	return redirect('/')
     else:
         return render(request, 'login.html', {'message':"登录失败"})
 def infomes(request):
@@ -2132,7 +2133,10 @@ def infomes_(request):
     print(brands,model,ctitle,regist_date,engineNo)
 	print(mileage,isService,price,newprice)
 	print(picture,formalities,isDebt,promise)
-	return render(request,info-message.html')
+	return render(request, 'info-message.html')
+def logout(request):
+    auth.logout(request)
+    return render(request, 'index.html')
 ```
 
 front/templates/login.html
@@ -2192,6 +2196,7 @@ front/templates/index.html
             <p>
                 {% if request.user.username %}
                 	欢迎您:{{request.user.username}}
+                	<a href="{% url 'logout' %}">退出</a>
                 {% else %}
                 <a href="{% url 'register' %}">注册</a>
                 <a href="{% url 'login' %}">登录</a>
@@ -2225,7 +2230,8 @@ from django.shortcuts import render
 from .models import *
 import random
 def index(request):
-    carlist = Carinfo.objects.filter()
+    carlist = Carinfo.objects.filter(examine=2, is_purchase=False, isDelte=False)
+    carlist = random.sample(list(carlist), 3)
     return render(request, 'index.html', {'carlist':locals()})
 ```
 
