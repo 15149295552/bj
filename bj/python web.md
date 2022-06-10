@@ -1724,7 +1724,7 @@ python3 manage.py startapp sale
 
 创建数据库Usedcar
 mysql -uroot -p
-create database Usedcar default character set utf8 collate utf8_general_ci
+create database Usedcar default character set utf8 collate utf8_general_ci;
 
 代码：
 usedcar/settings.py
@@ -1811,10 +1811,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'Usedcar',
-        'USER': 'root',
+        'USER': 'bf',
         'HOST': '127.0.0.1',
         'POST': 3306,
-        'PASSWORD': '123456',
+        'PASSWORD': 'q.727626',
     }
 }
 
@@ -1999,31 +1999,31 @@ front/templates/register.html
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    {% load static %}
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <form action="{% url 'register_in' %}" method="post">
-        {% csrf_token %}
-        <p>
-            <b>用户注册</b>　<b>{{message}}</b>
-        </p>
-        <p>
-            用户名: <input type="text" name="username" placeholder="请输入用户名">
-        </p>
-        <p>
-            密码: <input type="password" name="userpwd" placeholder="请输入密码">
-        </p>
-        <p>
-            确认密码: <input type="password" name="reuserpwd" placeholder="请输入确认密码">
-        </p>
-        <p>
-            <button name="toregister">注册</button>
-        </p>
-    </form>
-</body>
+    <head>
+        {% load static %}
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        <form action="{% url 'register_in' %}" method="post">
+            {% csrf_token %}
+            <p>
+                <b>用户注册</b>　<b>{{message}}</b>
+            </p>
+            <p>
+                用户名: <input type="text" name="username" placeholder="请输入用户名">
+            </p>
+            <p>
+                密码: <input type="password" name="userpwd" placeholder="请输入密码">
+            </p>
+            <p>
+                确认密码: <input type="password" name="reuserpwd" placeholder="请输入确认密码">
+            </p>
+            <p>
+                <button name="toregister">注册</button>
+            </p>
+        </form>
+    </body>
 </html>
 ```
 
@@ -2036,11 +2036,11 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url(r'^$', views.index, name='index'),
-    url(r'^user/', include('userinfo.urls')),
-    url(r'^sale/', include('sale.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+                  url(r'^admin/', admin.site.urls),
+                  url(r'^$', views.index, name='index'),
+                  url(r'^user/', include('userinfo.urls')),
+                  url(r'^sale/', include('sale.urls')),
+              ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 ```
 
 userinfo/urls.py
@@ -2177,27 +2177,27 @@ front/templates/login.html
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <form action="{% url 'loginin' %}" method="post">
-        {% csrf_token %}
-        <p>
-            <b>用户登录</b> <b>{{message}}</b>
-        </p>
-        <p>
-            用户名: <input type="text" name="username" placeholder="请输入用户名">
-        </p>
-        <p>
-            密码: <input type="password" name="userpwd" placeholder="请输入密码">
-        </p>
-        <p>
-            <button name="login">登录</button>
-        </p>
-    </form>
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        <form action="{% url 'loginin' %}" method="post">
+            {% csrf_token %}
+            <p>
+                <b>用户登录</b> <b>{{message}}</b>
+            </p>
+            <p>
+                用户名: <input type="text" name="username" placeholder="请输入用户名">
+            </p>
+            <p>
+                密码: <input type="password" name="userpwd" placeholder="请输入密码">
+            </p>
+            <p>
+                <button name="login">登录</button>
+            </p>
+    	</form>
+    </body>
 </html>
 ```
 
@@ -2218,44 +2218,44 @@ front/templates/index.html
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    {% load static %}
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <div align="right">
+    <head>
+        {% load static %}
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        <div align="right">
+            <p>
+                {% if request.user.username %}
+                欢迎您:{{request.user.username}}
+                <a href="{% url 'logout' %}">退出</a>
+                {% else %}
+                <a href="{% url 'register' %}">注册</a>|
+                <a href="{% url 'login' %}">登录</a>
+                {% endif %}
+            </p>
+        </div>
+        {% for car in carlist.carlist %}
         <p>
-            {% if request.user.username %}
-            欢迎您:{{request.user.username}}
-            <a href="{% url 'logout' %}">退出</a>
-            {% else %}
-            <a href="{% url 'register' %}">注册</a>|
-            <a href="{% url 'login' %}">登录</a>
-            {% endif %}
+            <img src="{{ car.picutre.url }}" alt="">
         </p>
-    </div>
-    {% for car in carlist.carlist %}
-    <p>
-        <img src="{{ car.picutre.url }}" alt="">
-    </p>
-    <p>
-        车辆品牌: {{car.brand}}
-    </p>
-    <p>
-        车辆名称: {{car.ctitle}}
-    </p>
-    <p>
-        期望售价: {{car.price}}
-    </p>
-    <p>
-        行驶公里数: {{car.mileage}}
-    </p>
-    <p>
-        <a href="{{car.get_absolute_url}}">查看详情</a>
-    </p>
-    {% endfor %}
-</body>
+        <p>
+            车辆品牌: {{car.brand}}
+        </p>
+        <p>
+            车辆名称: {{car.ctitle}}
+        </p>
+        <p>
+            期望售价: {{car.price}}
+        </p>
+        <p>
+            行驶公里数: {{car.mileage}}
+        </p>
+        <p>
+            <a href="{{car.get_absolute_url}}">查看详情</a>
+        </p>
+        {% endfor %}
+	</body>
 </html>
 ```
 
@@ -2290,77 +2290,77 @@ front/templates/info-message.html
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <form action="{% url 'infomes_in' %}" method="post" 　class="form" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div>
-            <p>
-                <b>车辆品牌</b>
-                <select name="brands" id="brands">
-                    <option value="奔驰">奔驰</option>
-                    <option value="宝马">宝马</option>
-                    <option value="奥迪">奥迪</option>
-                </select>
-            </p>
-            <p>
-                <b>车辆型号</b>
-                <input type="text" name="model">
-            </p>
-            <p>
-                <b>车辆名称</b>
-                <input type="text" name="ctitle">
-            </p>
-            <p>
-                <b>车辆上牌日期</b>
-                <input type="text" name="regist_date">
-            </p>
-            <p>
-                <b>发动机编号</b>
-                <input type="text" name="engineNo">
-            </p>
-            <p>
-                <b>行驶公里数:</b>
-                <input type="text" name="mileage">
-            </p>
-            <em>
-                <b>是否有维修记录</b>
-                <input type="radio" name="isService" value="1">是
-                <input type="radio" checked name="isService" value="0">否
-            </em>
-            <p>
-                <b>期望售价</b>
-                <input type="text" name="price">(万元)
-            </p>
-            <p>
-                <b>新车价格</b>
-                <input type="text" name="newprice">(万元)
-            </p>
-            <p>
-                <b>上传车辆照片</b>
-                <input type="file" name="picture">
-            </p>
-            <em>
-                <b>是否手续齐全</b>
-                <input type="radio" checked name="formalities" value="1">是
-                <input type="radio" name="formalities" value="0">否
-            </em>
-            <em>
-                <b>是否有债务</b>
-                <input type="radio" name="isDebt" value="1">是
-                <input type="radio" checked name="isDebt" value="0">否
-            </em>
-            <p>
-                <b>卖家承诺:</b>
-                <textarea name="promise" id="" cols="30" rows="10"></textarea>
-            </p>
-            <button type="submit">提交</button>
-        </div>
-    </form>
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        <form action="{% url 'infomes_in' %}" method="post" 　class="form" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div>
+                <p>
+                    <b>车辆品牌</b>
+                    <select name="brands" id="brands">
+                        <option value="奔驰">奔驰</option>
+                        <option value="宝马">宝马</option>
+                        <option value="奥迪">奥迪</option>
+                    </select>
+                </p>
+                <p>
+                    <b>车辆型号</b>
+                    <input type="text" name="model">
+                </p>
+                <p>
+                    <b>车辆名称</b>
+                    <input type="text" name="ctitle">
+                </p>
+                <p>
+                    <b>车辆上牌日期</b>
+                    <input type="text" name="regist_date">
+                </p>
+                <p>
+                    <b>发动机编号</b>
+                    <input type="text" name="engineNo">
+                </p>
+                <p>
+                    <b>行驶公里数:</b>
+                    <input type="text" name="mileage">
+                </p>
+                <em>
+                    <b>是否有维修记录</b>
+                    <input type="radio" name="isService" value="1">是
+                    <input type="radio" checked name="isService" value="0">否
+                </em>
+                <p>
+                    <b>期望售价</b>
+                    <input type="text" name="price">(万元)
+                </p>
+                <p>
+                    <b>新车价格</b>
+                    <input type="text" name="newprice">(万元)
+                </p>
+                <p>
+                    <b>上传车辆照片</b>
+                    <input type="file" name="picture">
+                </p>
+                <em>
+                    <b>是否手续齐全</b>
+                    <input type="radio" checked name="formalities" value="1">是
+                    <input type="radio" name="formalities" value="0">否
+                </em>
+                <em>
+                    <b>是否有债务</b>
+                    <input type="radio" name="isDebt" value="1">是
+                    <input type="radio" checked name="isDebt" value="0">否
+                </em>
+                <p>
+                    <b>卖家承诺:</b>
+                    <textarea name="promise" id="" cols="30" rows="10"></textarea>
+                </p>
+                <button type="submit">提交</button>
+            </div>
+        </form>
+    </body>
 </html>
 ```
 
@@ -2372,38 +2372,38 @@ front/templates/detail.html
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <div>
-        <img src="{{carinfo.picutre.url}}" alt="">
-    </div>
-    <div>
-        <p>
-            车辆型号:{{carinfo.serbran}}
-        </p>
-        <p>
-            车辆名称:{{carinfo.ctitle}}
-        </p>
-        <p>
-            新车价格:{{carinfo.newprice}}
-        </p>
-        <p>
-            期望售价:{{carinfo.price}}
-        </p>
-        <p>
-            行驶公里数:{{carinfo.mileage}}
-        </p>
-        <p>
-            是否维修:{{carinfo.is_record}}
-        </p>
-        <p>
-            <a href="{% url 'prebuy' %}">我要试驾</a>
-        </p>
-    </div>
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        <div>
+            <img src="{{carinfo.picutre.url}}" alt="">
+        </div>
+        <div>
+            <p>
+                车辆型号:{{carinfo.serbran}}
+            </p>
+            <p>
+                车辆名称:{{carinfo.ctitle}}
+            </p>
+            <p>
+                新车价格:{{carinfo.newprice}}
+            </p>
+            <p>
+                期望售价:{{carinfo.price}}
+            </p>
+            <p>
+                行驶公里数:{{carinfo.mileage}}
+            </p>
+            <p>
+                是否维修:{{carinfo.is_record}}
+            </p>
+            <p>
+                <a href="{% url 'prebuy' %}">我要试驾</a>
+            </p>
+        </div>
+    </body>
 </html>
 ```
 
@@ -2418,28 +2418,28 @@ urlpatterns = [
 ]
 ```
 
-front/templates/pre-buy
+front/templates/pre-buy.html
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <form action="" method="post">
-        <p>
-            真实姓名: <input type="text" name="realname" placeholder="请输入真实姓名">
-        </p>
-        <p>
-            手机号码: <input type="text" name="phone" placeholder="请输入手机号码">
-        </p>
-        <p>
-            试驾地址: <input type="text" name="address" placeholder="请输入试驾地址">
-        </p>
-        <button type="submit">提交</button>
-    </form>
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        <form action="" method="post">
+            <p>
+                真实姓名: <input type="text" name="realname" placeholder="请输入真实姓名">
+            </p>
+            <p>
+                手机号码: <input type="text" name="phone" placeholder="请输入手机号码">
+            </p>
+            <p>
+                试驾地址: <input type="text" name="address" placeholder="请输入试驾地址">
+            </p>
+            <button type="submit">提交</button>
+        </form>
+    </body>
 </html>
 ```
 
