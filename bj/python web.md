@@ -1770,7 +1770,8 @@ INSTALLED_APPS = [
     'userinfo',
     'buy',
     'sale',
-    'front'
+    'front',
+
 ]
 
 MIDDLEWARE = [
@@ -1848,12 +1849,15 @@ USE_L10N = True
 
 USE_TZ = True
 
-AUTH_USER_MODEL = 'userinfo.Userifon'
+AUTH_USER_MODEL = 'userinfo.Userinfo'
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (BASE_DIR, 'static')
+
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media').replace('\\', '/')
 MEDIA_URL = '/media/'
 ```
@@ -1876,10 +1880,7 @@ SEX_CHOICES = (
 )
 
 # Create your models here.
-
-class UserInfo(models.Model):
-    username = models.CharField(max_length=30, null=False, verbose_name='用户名')
-    password = models.CharField(max_length=200, null=False, verbose_name='密码')
+class UserInfo(AbstractUser):
     realname = models.CharField(max_length=30, null=True, verbose_name='姓名')
     cellphone = models.CharField(max_length=11, null=True, verbose_name='手机号')
     uidentity = models.CharField(max_length=18, null=True, verbose_name='身份证号码')
@@ -1902,7 +1903,6 @@ sale/models.py
 ```py
 from django.db import models
 from userinfo.models import UserInfo
-
 IS_RECORD = (
     (0, "否"),
     (1, "是"),
@@ -1914,8 +1914,8 @@ FOR_EXAMINE = (
     (3, '审核不通过'),
 )
 
-# Create your models here.
 
+# Create your models here.
 class Brand(models.Model):
     btitle = models.CharField(max_length=30, null=False, verbose_name='品牌')
     logo_brand = models.ImageField(upload_to='img/logo', default='logo.png', verbose_name='品牌logo')
@@ -1929,7 +1929,7 @@ class Brand(models.Model):
         verbose_name = "车辆品牌表"
         verbose_name_plural = verbose_name
 
-        
+
 class Carinfo(models.Model):
     serbran = models.CharField(max_length=30, null=False, verbose_name="车辆型号")
     ctitle = models.CharField(max_length=50, null=False, verbose_name='车辆名称')
@@ -1948,10 +1948,13 @@ class Carinfo(models.Model):
     isDelte = models.BooleanField(default=False, verbose_name='是否删除')
     brand = models.ForeignKey(Brand, verbose_name='车辆品牌')
     user = models.ForeignKey(UserInfo, verbose_name='用户')
-    
+
     def __str__(self):
         return self.ctitle
-    
+
+    def get_absolute_url(self):
+        return '/sale/detail?carid={}'.format(self.id)
+
     class Meta:
         db_table = 'Carinfo'
         verbose_name = "车辆信息表"
@@ -1967,6 +1970,8 @@ userinfo/admin.py
 ```py
 from django.contrib import admin
 from .models import *
+
+# Register your models here.
 admin.site.register(UserInfo)
 ```
 
@@ -1974,6 +1979,8 @@ sale/admin.py
 ```py
 from django.contrib import admin
 from .models import *
+
+# Register your models here.
 admin.site.register(Brand)
 admin.site.register(Carinfo)
 ```
@@ -1992,47 +1999,47 @@ front/templates/register.html
 ```html
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        {% load static %}
-        <meta charset="UTF-8">
-        <title>Title</title>
-    </head>
-    <body>
-        <form action="{% url 'register_in' %}" method="post">
-            {% csrf_token %}
-            <p>
-                <b>用户注册</b> <b>{{message}}</b>
-            </p>
-            <p>
-                用户名:<input type="text" name="username" placeholder="请输入用户名">
-            </p>
-            <p>
-                密码:<input type="password" name="userpwd" placeholder="请输入密码">
-            </p>
-            <p>
-                确认密码:<input type="password" name="reuserpwd" plaveholder="请输入确认密码">
-            </p>
-            <p>
-                <button name="toregister">
-                    注册
-                </button>
-            </p>
-        </form>
-    </body>
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form action="{% url 'register_in' %}" method="post">
+        {% csrf_token %}
+        <p>
+            <b>用户注册</b>　<b>{{message}}</b>
+        </p>
+        <p>
+            用户名: <input type="text" name="username" placeholder="请输入用户名">
+        </p>
+        <p>
+            密码: <input type="password" name="userpwd" placeholder="请输入密码">
+        </p>
+        <p>
+            确认密码: <input type="password" name="reuserpwd" placeholder="请输入确认密码">
+        </p>
+        <p>
+            <button name="toregister">注册</button>
+        </p>
+    </form>
+</body>
 </html>
 ```
 
 usedcar/urls.py
 ```py
 from django.conf.urls import url, include
-from django.confrib import admin
+from django.contrib import admin
 from sale import views
 from django.conf.urls.static import static
 from django.conf import settings
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    urel(r'^$', views.index, name='index'),
+    url(r'^$', views.index, name='index'),
     url(r'^user/', include('userinfo.urls')),
+    url(r'^sale/', include('sale.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 ```
 
@@ -2040,59 +2047,82 @@ userinfo/urls.py
 ```py
 from django.conf.urls import url
 from userinfo import views
+
 urlpatterns = [
     url(r'register/', views.register, name='register'),
     url(r'registerin/', views.register_, name='register_in'),
     url(r'login/', views.login, name='login'),
     url(r'loginin/', views.login_, name='loginin'),
-    url(r'infomes', view.infomes, name='infomes'),
+    url(r'infomes/$', views.infomes, name='infomes'),
+    url(r'infomesin/', views.infomes_, name="infomes_in"),
     url(r'logout/', views.logout, name='logout'),
 ]
 ```
 
 userinfo/views.py
 ```py
-from django.shortcuts import render, redirectq
+from django.shortcuts import render, redirect
 from .models import *
-from sale.model import *
-from django.contrib.auth.hashers impor make_password
+from sale.models import *
+from django.contrib.auth.hashers import make_password, check_password
 from django.contrib import auth
+
+# Create your views here.
+
+#　显示注册页面
+
+
 def register(request):
     return render(request, 'register.html')
+
+
+#　完成注册的功能
 def register_(request):
     user_name = request.POST.get("username")
     olduser = UserInfo.objects.filter(username=user_name)
     if len(olduser) > 0:
-        return render(request, 'register.html', {'message':'用户名已经存在'})
+        return render(request, 'register.html', {'message': '用户名已经存在'})
     user_pwd = request.POST.get("userpwd")
     re_user_pwd = request.POST.get("reuserpwd")
     if user_pwd != re_user_pwd:
-        return render(request, 'register.html', {'message':'两次输入的密码不一致'})
+        return render(request, 'register.html', {'message': '两次输入的密码不一致'})
+    # 加密
     user_pwd = make_password(user_pwd, 'MarcelArhut', 'pbkdf2_sha1')
     new_user = UserInfo()
     new_user.username = user_name
     new_user.password = user_pwd
     new_user.save()
-    return rnder(request, 'register.html', {'message':'注册成功'})
+    return render(request, 'login.html')
+
+
+# 显示登录界面
 def login(request):
     return render(request, 'login.html')
+
+
+# 登录功能
 def login_(request):
     user_name = request.POST.get("username")
     user_pwd = request.POST.get("userpwd")
     user = auth.authenticate(username=user_name, password=user_pwd)
     if user is not None:
         auth.login(request, user)
-    	return redirect('/')
+        return redirect('/')
     else:
-        return render(request, 'login.html', {'message':"登录失败"})
+        return render(request, 'login.html', {'message': "登录失败"})
+
+
 def infomes(request):
     return render(request, 'info-message.html')
+
+
 def infomes_(request):
     brands = request.POST.getlist("brands")[0]
     model = request.POST.get("model")
     ctitle = request.POST.get("ctitle")
     regist_date = request.POST.get("regist_date")
     engineNo = request.POST.get("engineNo")
+    mileage = request.POST.get("mileage")
     isService = request.POST.getlist("isService")[0]
     if isService:
         isService = 1
@@ -2101,7 +2131,7 @@ def infomes_(request):
     price = request.POST.get("price")
     newprice = request.POST.get("newprice")
     picture = request.FILES.get("picture")
-    formalities = request.POST.getlist("formalities")[o]
+    formalities = request.POST.getlist("formalities")[0]
     if formalities:
         formalities = 1
     else:
@@ -2111,7 +2141,7 @@ def infomes_(request):
         isDebt = 1
     else:
         isDebt = 0
-    promise = request.POST.get("peomise")
+    promise = request.POST.get("promise")
     car = Carinfo()
     car.serbran = model
     car.ctitle = ctitle
@@ -2121,51 +2151,53 @@ def infomes_(request):
     car.is_record = isService
     car.price = price
     car.new_price = newprice
-    car.picture = picture
-    car.formalites = formalites
+    car.picutre = picture
+    car.formalites = formalities
     car.debt = isDebt
     car.promise = promise
-    bradn = Brand.objects.get(btitle=brands)
+    # 查询品牌
+    brand = Brand.objects.get(btitle=brands)
     car.brand = brand
+    # 用户qwer
     user = UserInfo.objects.get(username="qwer")
     car.user = user
-    car.save
-    print(brands,model,ctitle,regist_date,engineNo)
-	print(mileage,isService,price,newprice)
-	print(picture,formalities,isDebt,promise)
-	return render(request, 'info-message.html')
+    car.save()
+    print(brands, model, ctitle, regist_date, engineNo)
+    print(mileage, isService, price, newprice)
+    print(picture, formalities, isDebt, promise)
+    return render(request, 'info-message.html')
+
+
 def logout(request):
     auth.logout(request)
-    return render(request, 'index.html')
+    return redirect("/")
 ```
 
 front/templates/login.html
 ```html
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Title</title>
-    </head>
-    <body>
-        <form action="{% url 'register_in' %}" method="post">
-            {% csrf_token %}
-            <p>
-                <b>用户登录</b> <b>{{message}}</b>
-            </p>
-            <p>
-                用户名:<input type="text" name="username" placeholder="请输入用户名">
-            </p>
-            <p>
-                密码:<input type="password" name="userpwd" placeholder="请输入密码">
-            </p>
-            <p>
-                <button name="login">
-                    登录
-                </button>
-            </p>
-        </form>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form action="{% url 'loginin' %}" method="post">
+        {% csrf_token %}
+        <p>
+            <b>用户登录</b> <b>{{message}}</b>
+        </p>
+        <p>
+            用户名: <input type="text" name="username" placeholder="请输入用户名">
+        </p>
+        <p>
+            密码: <input type="password" name="userpwd" placeholder="请输入密码">
+        </p>
+        <p>
+            <button name="login">登录</button>
+        </p>
+    </form>
+</body>
 </html>
 ```
 
@@ -2186,41 +2218,44 @@ front/templates/index.html
 ```html
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        {% load static %}
-        <meta charset="UTF-8">
-        <title>Title</title>
-    </head>
-    <body>
-        <div>
-            <p>
-                {% if request.user.username %}
-                	欢迎您:{{request.user.username}}
-                	<a href="{% url 'logout' %}">退出</a>
-                {% else %}
-                <a href="{% url 'register' %}">注册</a>
-                <a href="{% url 'login' %}">登录</a>
-                {% en %}
-            </p>
-        </div>
-        {% for car in carlist.carlist %}
-            <P>
-                <img src="{{ car.picture.url }}" alt="">
-            </P>
-            <p>
-                车辆品牌:{{car.brand}}
-            </p>
-            <p>
-                车辆名称:{{car.ctitle}}
-            </p>
-            <p>
-                车辆售价:{{car.price}}
-            </p>
-            <p>
-                行驶公里数:{{car.mileage}}
-            </p>
-        {% endfor %}
-    </body>
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div align="right">
+        <p>
+            {% if request.user.username %}
+            欢迎您:{{request.user.username}}
+            <a href="{% url 'logout' %}">退出</a>
+            {% else %}
+            <a href="{% url 'register' %}">注册</a>|
+            <a href="{% url 'login' %}">登录</a>
+            {% endif %}
+        </p>
+    </div>
+    {% for car in carlist.carlist %}
+    <p>
+        <img src="{{ car.picutre.url }}" alt="">
+    </p>
+    <p>
+        车辆品牌: {{car.brand}}
+    </p>
+    <p>
+        车辆名称: {{car.ctitle}}
+    </p>
+    <p>
+        期望售价: {{car.price}}
+    </p>
+    <p>
+        行驶公里数: {{car.mileage}}
+    </p>
+    <p>
+        <a href="{{car.get_absolute_url}}">查看详情</a>
+    </p>
+    {% endfor %}
+</body>
 </html>
 ```
 
@@ -2229,87 +2264,182 @@ sale/views.py
 from django.shortcuts import render
 from .models import *
 import random
+
+# Create your views here.
+
+
 def index(request):
+    # 同一品牌下的5辆车的基本信息
+    # 在平台展示的车辆是审核通过的、未购买、未删除的车辆
     carlist = Carinfo.objects.filter(examine=2, is_purchase=False, isDelte=False)
     carlist = random.sample(list(carlist), 3)
     return render(request, 'index.html', {'carlist':locals()})
+
+
+def detail(request):
+    car_id = request.GET.get("carid")
+    car = Carinfo.objects.filter(id=car_id)[0]
+    return render(request, 'detail.html', {'carinfo':car})
+
+
+def pre_buy(request):
+    return render(request, 'pre-buy.html')
 ```
 
 front/templates/info-message.html
 ```html
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Title</title>
-    </head>
-    <body>
-        <form action="{% url 'infomes_in' %}" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div>
-                <p>
-                    <b>车辆品牌</b>
-                    <select name="brands" id="brands">
-                        <option value="奔驰">奔驰</option>
-                        <option value="宝马">宝马</option>
-                        <option value="奥迪">奥迪</option>
-                    </select>
-                </p>
-                <p>
-                    <b>车辆名称</b>
-                    <input type="text" name="ctitle">
-                </p>
-                <p>
-                    <b>车辆上牌日期</b>
-                    <input type="text" name="regist_date">
-                </p>
-                <p>
-                    <b>发动机编号</b>
-                    <input type="text" name="engineNo">
-                </p>
-                <p>
-                    <b>形式公里数</b>
-                    <input type="text" name="mileage">
-                </p>
-                <em>
-                    <b>是否有维修记录</b>
-                    <input type="radio" name="isService" value="1">是
-                    <input type="radio" checked name="isService" value="0">否
-                </em>
-                <p>
-                    <b>期望售价</b>
-                    <input type="text" name="price">(万元)
-                </p>
-                <p>
-                    <b>新车价格</b>
-                    <input type="text" name="newprice">(万元)
-                </p>
-                <p>
-                    <b>上传车辆照片</b>
-                    <input type="file" name="pic">
-                </p>
-                <em>
-                    <b>是否手续齐全</b>
-                    <input type="radio" checked name="formalities" value="1">是
-                    <input type="radio" name="formalities" value="0">否
-                </em>
-                <em>
-                    <input type="radio" name="i" value="1">是
-                    <input type="radio" checked name="isService" value="0">否
-                </em>
-                <p>
-                    <b>卖家承诺</b>
-                    <textarea name="promise" id="" cols="30" rows="10"></textarea>
-                </p>
-                <button>
-                    提交
-                </button>
-            </div>
-        </form>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form action="{% url 'infomes_in' %}" method="post" 　class="form" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div>
+            <p>
+                <b>车辆品牌</b>
+                <select name="brands" id="brands">
+                    <option value="奔驰">奔驰</option>
+                    <option value="宝马">宝马</option>
+                    <option value="奥迪">奥迪</option>
+                </select>
+            </p>
+            <p>
+                <b>车辆型号</b>
+                <input type="text" name="model">
+            </p>
+            <p>
+                <b>车辆名称</b>
+                <input type="text" name="ctitle">
+            </p>
+            <p>
+                <b>车辆上牌日期</b>
+                <input type="text" name="regist_date">
+            </p>
+            <p>
+                <b>发动机编号</b>
+                <input type="text" name="engineNo">
+            </p>
+            <p>
+                <b>行驶公里数:</b>
+                <input type="text" name="mileage">
+            </p>
+            <em>
+                <b>是否有维修记录</b>
+                <input type="radio" name="isService" value="1">是
+                <input type="radio" checked name="isService" value="0">否
+            </em>
+            <p>
+                <b>期望售价</b>
+                <input type="text" name="price">(万元)
+            </p>
+            <p>
+                <b>新车价格</b>
+                <input type="text" name="newprice">(万元)
+            </p>
+            <p>
+                <b>上传车辆照片</b>
+                <input type="file" name="picture">
+            </p>
+            <em>
+                <b>是否手续齐全</b>
+                <input type="radio" checked name="formalities" value="1">是
+                <input type="radio" name="formalities" value="0">否
+            </em>
+            <em>
+                <b>是否有债务</b>
+                <input type="radio" name="isDebt" value="1">是
+                <input type="radio" checked name="isDebt" value="0">否
+            </em>
+            <p>
+                <b>卖家承诺:</b>
+                <textarea name="promise" id="" cols="30" rows="10"></textarea>
+            </p>
+            <button type="submit">提交</button>
+        </div>
+    </form>
+</body>
 </html>
 ```
 
 在首页上显示：
 如果用户处于登录状态显示欢迎：xxx(用户名)
 如果用户处于未登录状态显示：注册|登录
+
+front/templates/detail.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div>
+        <img src="{{carinfo.picutre.url}}" alt="">
+    </div>
+    <div>
+        <p>
+            车辆型号:{{carinfo.serbran}}
+        </p>
+        <p>
+            车辆名称:{{carinfo.ctitle}}
+        </p>
+        <p>
+            新车价格:{{carinfo.newprice}}
+        </p>
+        <p>
+            期望售价:{{carinfo.price}}
+        </p>
+        <p>
+            行驶公里数:{{carinfo.mileage}}
+        </p>
+        <p>
+            是否维修:{{carinfo.is_record}}
+        </p>
+        <p>
+            <a href="{% url 'prebuy' %}">我要试驾</a>
+        </p>
+    </div>
+</body>
+</html>
+```
+
+sale/urls.py
+```py
+from django.conf.urls import url
+from sale import views
+
+urlpatterns = [
+    url(r'detail', views.detail, name="detail"),
+    url(r'prebuy', views.pre_buy, name='prebuy'),
+]
+```
+
+front/templates/pre-buy
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form action="" method="post">
+        <p>
+            真实姓名: <input type="text" name="realname" placeholder="请输入真实姓名">
+        </p>
+        <p>
+            手机号码: <input type="text" name="phone" placeholder="请输入手机号码">
+        </p>
+        <p>
+            试驾地址: <input type="text" name="address" placeholder="请输入试驾地址">
+        </p>
+        <button type="submit">提交</button>
+    </form>
+</body>
+</html>
+```
+
