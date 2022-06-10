@@ -2259,3 +2259,47 @@ int listen(int s, int backlog);
 返回值:
   成功  返回0 
   失败  返回-1 
+
+等待并接收连接
+int accept(int s, struct sockaddr *addr, socklen_t *addrlen);
+参数
+s		侦听套接字描述符
+addr	 输出连接请求者的地址信息
+addrlen  输出连接请求者地址信息的字节数
+返回值
+成功 返回连接套接字描述符
+失败 返回-1
+
+接收数据
+ssize_t recv(int sockfd, void *buf, size_t len, int flags);
+参数
+sockfd	套接字描述符
+buf	   接收缓冲区
+len       期望接收的字节数
+flags     接收数据的标志，一般取0(等价于read)
+	MSG_DONTWAIT	以非阻塞方式接收数据
+	MSG_WAITALL	 等待所有数据，不接受到len个字节数据，函数就不返回
+返回值
+成功 返回实际读取的字节数
+失败 返回-1
+
+阻塞和非阻塞的区别
+r = recv(\.\.\., len, \.\.\.);
+					阻塞调用	非阻塞调用
+可接收数据足够	   r == len	r == len
+可接收数据不够	 0 < r < len  0 < r < len
+没有可接收数据        不返回       r == 0 
+TCP连接断开          r == 0      r == -1 
+发生错误            r == -1      r == -1
+
+发送数据
+ssize_t send(int s, const void *msg, size_t len, int flags);
+参数
+s		套接字描述符
+msg  	发送缓冲区
+len  	期望发送的字节数
+flags	发送标志，一般取0(等价于write)
+	MSG_DONTWAIT	以非阻塞方式发送数据
+返回值
+成功 返回实际读取的字节数
+失败 返回-1

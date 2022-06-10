@@ -2124,3 +2124,468 @@ int main(void){
     return 0;
 }
 ```
+
+sweep5.c
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+void plant(char map[][10], int rows){
+    int row = 0, col = 0, cnt = 0;
+    do{
+        row = rand() % rows;
+        col = rand() % 10;
+        if((map[row][col] & 0xf) != 9){
+            map[row][col] &= 0xf0;
+            map[row][col] |= 9;
+            cnt++;
+        }
+    }while(cnt < 10);
+}
+void mark(char map[][10], int rows){
+    int row = 0, col = 0, num = 0;
+    int tmp_r = 0, tmp_c = 0;
+    int del[8][2]= {-1,-1,  -1,0,  -1,1,
+                     0,-1,  /*c*/   0,1,
+                     1,-1,   1,0,   1,1};
+    for(row = 0; row < 10; row++){
+        for(col = 0; col < 10; col++){
+            if((map[row][col]&0xf) == 9)
+                continue;
+            for(num = 0; num < 8; num++){
+                tmp_r = row + del[num][0];
+                tmp_c = col + del[num][1];
+                if(tmp_r<0 || tmp_r>9)
+                    continue;
+                if(tmp_c<0 || tmp_c>9)
+                    continue;
+                if((map[tmp_r][tmp_c] & 0xf) == 9)
+                    map[row][col]++;
+            }
+        }
+    }
+}
+void show(char map[][10], int rows){
+    int row = 0, col = 0, num = 0;
+    printf("  ");
+    for(num = 1;num <= 10;num++){
+        if(num < 10){
+            printf("%d", num);
+        }
+        else{
+            printf("%c", num - 10 + 'a');
+        }
+    }
+    printf("\n");
+    printf(" ");
+    for(num = 1;num <= 12;num++){
+        printf("+");
+    }
+    printf("\n");
+    for(row = 0;row <= 9;row++){
+        if (row < 9){
+            printf("%d", row + 1);
+        }
+        else{
+            printf("%c", row - 9 + 'a');
+        }
+        printf("+");
+        for(col = 0;col <= 9;col++){
+            if(map[row][col] & 0xf0){
+                if((map[row][col] & 0xf) == 9){
+                    printf("X");
+                }
+                else if(!(map[row][col] & 0xf)){
+                    printf(" ");
+                }
+                else{
+                    printf("%u", map[row][col] & 0xf);
+                }
+            }
+            else{
+                printf("*");
+            }
+        }
+        printf("+\n");
+    }
+    printf(" ");
+    for(num = 1;num <= 12;num++){
+        printf("+");
+    }
+    printf("\n");
+}
+void sweep(char map[][10, int rows, int row, int col]){
+    if(row < 0 || row >= rows)
+        return;
+    if(col < 0 || col > 9)
+        return;
+    if(map[row][col] & 0xf0)
+        return;
+    map[row][col] |= 0x10;
+    if(map[row][col] & 0xf)
+        return;
+    for(num = 0; num < 8; num++){
+        tmp_r = row + del[num][0];
+        tmp_c = col + del[num][1];
+        sweep(map, rows, tmp_r, tmp_c);
+    }
+}
+int main(void){
+    char map[10][10] = {0};
+    int row = 0, col = 0;
+    srand(time(0));
+    /*for(row = 0; row < 10; row++){
+        for(col = 0; col < 10; col++)
+            map[row][col] = 0x10;
+    }*/
+    plant(map, 10);
+    mark(map, 10);
+    show(map, 10);
+    printf("请用户输入横坐标和纵坐标:");
+    scanf("%d%d", &row, &col);
+    sweep(map, 10, row-1, col-1);
+    system("clear");
+    show(map, 10);
+    return 0;
+}
+```
+
+sweep6.c
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+void plant(char map[][10], int rows){
+    int row = 0, col = 0, cnt = 0;
+    do{
+        row = rand() % rows;
+        col = rand() % 10;
+        if((map[row][col] & 0xf) != 9){
+            map[row][col] &= 0xf0;
+            map[row][col] |= 9;
+            cnt++;
+        }
+    }while(cnt < 10);
+}
+void mark(char map[][10], int rows){
+    int row = 0, col = 0, num = 0;
+    int tmp_r = 0, tmp_c = 0;
+    int del[8][2]= {-1,-1,  -1,0,  -1,1,
+                     0,-1,  /*c*/   0,1,
+                     1,-1,   1,0,   1,1};
+    for(row = 0; row < 10; row++){
+        for(col = 0; col < 10; col++){
+            if((map[row][col]&0xf) == 9)
+                continue;
+            for(num = 0; num < 8; num++){
+                tmp_r = row + del[num][0];
+                tmp_c = col + del[num][1];
+                if(tmp_r<0 || tmp_r>9)
+                    continue;
+                if(tmp_c<0 || tmp_c>9)
+                    continue;
+                if((map[tmp_r][tmp_c] & 0xf) == 9)
+                    map[row][col]++;
+            }
+        }
+    }
+}
+void show(char map[][10], int rows){
+    int row = 0, col = 0, num = 0;
+    printf("  ");
+    for(num = 1;num <= 10;num++){
+        if(num < 10){
+            printf("%d", num);
+        }
+        else{
+            printf("%c", num - 10 + 'a');
+        }
+    }
+    printf("\n");
+    printf(" ");
+    for(num = 1;num <= 12;num++){
+        printf("+");
+    }
+    printf("\n");
+    for(row = 0;row <= 9;row++){
+        if (row < 9){
+            printf("%d", row + 1);
+        }
+        else{
+            printf("%c", row - 9 + 'a');
+        }
+        printf("+");
+        for(col = 0;col <= 9;col++){
+            if(map[row][col] & 0xf0){
+                if((map[row][col] & 0xf) == 9){
+                    printf("X");
+                }
+                else if(!(map[row][col] & 0xf)){
+                    printf(" ");
+                }
+                else{
+                    printf("%u", map[row][col] & 0xf);
+                }
+            }
+            else{
+                printf("*");
+            }
+        }
+        printf("+\n");
+    }
+    printf(" ");
+    for(num = 1;num <= 12;num++){
+        printf("+");
+    }
+    printf("\n");
+}
+void sweep(char map[][10, int rows, int row, int col]){
+    if(row < 0 || row >= rows)
+        return;
+    if(col < 0 || col > 9)
+        return;
+    if(map[row][col] & 0xf0)
+        return;
+    map[row][col] |= 0x10;
+    if(map[row][col] & 0xf)
+        return;
+    for(num = 0; num < 8; num++){
+        tmp_r = row + del[num][0];
+        tmp_c = col + del[num][1];
+        sweep(map, rows, tmp_r, tmp_c);
+    }
+}
+int finish(char map[][10], int rows){
+    int result = 2;
+    int row = 0, col = 0;
+    for(row = 0; row < rows; row++){
+        for(col = 0; col < 10; col++){
+            if(map[row][col] & 0xf0){
+                if((map[row][col] & 0xf) == 9)
+                    return 0;
+            }else{
+                if((map[row][col] & 0xf) != 9)
+                    return 1;
+            }
+        }
+    }
+}
+int main(void){
+    char map[10][10] = {0};
+    int row = 0, col = 0;
+    int result = 0;
+    srand(time(0));
+    /*for(row = 0; row < 10; row++){
+        for(col = 0; col < 10; col++)
+            map[row][col] = 0x10;
+    }*/
+    plant(map, 10);
+    mark(map, 10);
+    show(map, 10);
+    while(1){
+        printf("请用户输入横坐标和纵坐标:");
+        scanf("%d%d", &row, &col);
+        sweep(map, 10, row-1, col-1);
+        system("clear");
+        show(map, 10);
+        result = finish(map, 10);
+        if(result == 2){
+            printf("恭喜你，游戏胜利\n");
+            break;
+        }else if(!result){
+            printf("游戏结束，再接再厉\n");
+            break;
+        }
+    }
+    return 0;
+}
+```
+
+sweep.c
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#define    ROWS               6
+#define    COLUMNS            6
+#define    MAX_QTY            6
+#define    LOW_MASK           0xf  //低位掩码
+#define    HI_MASK            0xf0 //高位掩码
+#define    EMPTY              0    //空位置
+#define    MINE               9    //地雷
+#define    HIDDEN             0    //隐藏状态
+#define    OPEN               0x10 //非隐藏
+#define    SIGN_HIDDEN        '*'  //隐藏字符
+#define    SIGN_EMPTY         ' '  //空位置
+#define    SIGN_MINE          'X'  //地雷位置
+#define    SIGN_RIM           '+'  //边框字符
+#define    IS_EMPTY(v)        (((v) & LOW_MASK) == EMPTY)   //判断格子内容是否为空
+#define    IS_MINE(v)         (((v) & LOW_MASK) == MINE)    //判断格子内容是否为地雷
+#define    IS_HIDDEN(v)       (((v) & HI_MASK) == HIDDEN)   //判断格子状态是否是隐藏
+#define    IS_OPEN(v)         (((v) & HI_MASK) == OPEN)    //判断格子状态是否是挖开
+#define    CONTENT(v)         ((v) & LOW_MASK)             //获得格子内容
+#define    SET_MINE(v)        ((v) = (v) & ~LOW_MASK | MINE)   //把格子内容设置成地雷
+#define    DIG(v)             ((v) = (v) & ~HI_MASK | OPEN)   //挖开一个格子
+#define    INCREMENT(v)       ((v)++)  //把格子内容加一
+#define    NUM2CHAR(v)        ((v) - 10 + 'a')          //行号，列号转字符
+//放置地雷的函数
+void plant(char map[][COLUMNS], int rows) {
+    int row = 0, col = 0, cnt = 0;
+    do {
+        row = rand() % rows;
+        col = rand() % COLUMNS;
+        if (!IS_MINE(map[row][col])) {
+            SET_MINE(map[row][col]);
+            cnt++;
+        }
+    } while (cnt < MAX_QTY);
+}
+//放置数字的函数
+void mark(char map[][COLUMNS], int rows) {
+    int delta[][2] = {-1, -1, -1, 0,
+                      -1, 1, 0, -1,
+                       0, 1, 1, -1,
+                       1, 0, 1, 1};
+    int row = 0, col = 0, num = 0;
+    int tmp_row = 0, tmp_col = 0;
+    for (row = 0;row <= rows - 1;row++) {
+        for (col = 0;col <= COLUMNS - 1;col++) {
+            if (!IS_MINE(map[row][col])) {
+                continue;
+            }
+            for (num = 0;num <= 7;num++) {
+                tmp_row = row + delta[num][0];
+                tmp_col = col + delta[num][1];
+                if (tmp_row < 0 || tmp_row >= rows) {
+                    continue;
+                }
+                if (tmp_col < 0 || tmp_col >= COLUMNS) {
+                    continue;
+                }
+                if (!IS_MINE(map[tmp_row][tmp_col])) {
+                    INCREMENT(map[tmp_row][tmp_col]);
+                }
+            }
+        }
+    }
+}
+//显示地图内容的函数
+void show(char map[][COLUMNS], int rows) {
+    int num = 0, row = 0, col = 0;
+    printf("  ");
+    for (num = 1;num <= COLUMNS;num++) {
+        if (num < 10) {
+            printf("%d", num);
+        }
+        else {
+            printf("%c", NUM2CHAR(num));
+        }
+    }
+    printf("\n");
+    printf(" ");
+    for (num = 1;num <= COLUMNS + 2;num++) {
+        printf("%c", SIGN_RIM);
+    }
+    printf("\n");
+    for (row = 0;row <= rows - 1;row++) {
+        if (row < 9) {
+            printf("%d", row + 1);
+        }
+        else {
+            printf("%c", NUM2CHAR(row + 1));
+        }
+        printf("%c", SIGN_RIM);
+        for (col = 0;col <= COLUMNS - 1;col++) {
+            if (IS_OPEN(map[row][col])) {
+                if (IS_MINE(map[row][col])) {
+                    printf("%c", SIGN_MINE);
+                }
+                else if (IS_EMPTY(map[row][col])) {
+                    printf("%c", SIGN_EMPTY);
+                }
+                else {
+                    printf("%d", CONTENT(map[row][col]));
+                }
+            }
+            else {
+                printf("%c", SIGN_HIDDEN);
+            }
+        }
+        printf("%c\n", SIGN_RIM);
+    }
+    printf(" ");
+    for (num = 1;num <= COLUMNS + 2;num++) {
+        printf("%c", SIGN_RIM);
+    }
+    printf("\n");
+}
+//挖雷的函数
+void sweep(char map[][COLUMNS], int rows, int row, int col) {
+    static int delta[][2] = {-1, -1, -1, 0,
+                             -1, 1, 0, -1,
+                             0, 1, 1, -1,
+                             1, 0, 1, 1};
+    int num = 0, tmp_row = 0, tmp_col = 0;
+    if (row < 0 || row >= rows ||
+            col < 0 || col >= COLUMNS) {
+        return ;
+    }
+    if (IS_OPEN(map[row][col])) {
+        return ;
+    }
+    DIG(map[row][col]);
+    if (!IS_EMPTY(map[row][col])) {
+        return ;
+    }
+    for (num = 0;num <= 7;num++) {
+        tmp_row = row + delta[num][0];
+        tmp_col = col + delta[num][1];
+        sweep(map, rows, tmp_row, tmp_col);
+    }
+}
+//判断游戏结果的函数
+int finish(char map[][COLUMNS], int rows) {
+    int result = 2, row = 0, col = 0;
+    for (row = 0;row <= rows - 1;row++) {
+        for (col = 0;col <= COLUMNS - 1;col++) {
+            if (IS_OPEN(map[row][col])) {
+                if (IS_MINE(map[row][col])) {
+                    return 0;
+                }
+            }
+            else {
+                if (!IS_MINE(map[row][col])) {
+                    result = 1;
+                }
+            }
+        }
+    }
+    return result;
+}
+int main() {
+    char map[ROWS][COLUMNS] = {0};
+    int row = 0, col = 0, result = 0;
+    srand(time(0));
+    plant(map, ROWS);
+    mark(map, ROWS);
+    show(map, ROWS);
+    while (1) {
+        printf("请用户输入横坐标和纵坐标\n");
+        scanf("%d%d", &row, &col);
+        sweep(map, ROWS, row - 1, col - 1);
+        system("cls");
+        show(map, ROWS);
+        result = finish(map, ROWS);
+        if (result == 2) {
+            printf("你赢了\n");
+            break;
+        }
+        else if (!result) {
+            printf("你输了\n");
+            break;
+        }
+    }
+    return 0;
+}
+```
+
