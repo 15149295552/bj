@@ -1771,7 +1771,6 @@ INSTALLED_APPS = [
     'buy',
     'sale',
     'front',
-
 ]
 
 MIDDLEWARE = [
@@ -1857,7 +1856,6 @@ AUTH_USER_MODEL = 'userinfo.Userinfo'
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (BASE_DIR, 'static')
 
-
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media').replace('\\', '/')
 MEDIA_URL = '/media/'
 ```
@@ -1865,6 +1863,7 @@ MEDIA_URL = '/media/'
 usedcar/\__init__.py
 ```py
 import pymysql
+
 pymysql.install_as_MySQLdb()
 ```
 
@@ -1878,6 +1877,7 @@ SEX_CHOICES = (
     (0, "男"),
     (1, "女"),
 )
+
 
 # Create your models here.
 class UserInfo(AbstractUser):
@@ -1903,6 +1903,7 @@ sale/models.py
 ```py
 from django.db import models
 from userinfo.models import UserInfo
+
 IS_RECORD = (
     (0, "否"),
     (1, "是"),
