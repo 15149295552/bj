@@ -2108,6 +2108,7 @@ def login_(request):
     user = auth.authenticate(username=user_name, password=user_pwd)
     if user is not None:
         auth.login(request, user)
+        request.META['username'] = user_pwd
         return redirect('/')
     else:
         return render(request, 'login.html', {'message': "登录失败"})
@@ -2265,6 +2266,9 @@ sale/views.py
 from django.shortcuts import render
 from .models import *
 import random
+from userinfo.models import *
+from buy.models import PreOrder
+
 
 # Create your views here.
 
@@ -2285,6 +2289,25 @@ def detail(request):
 
 def pre_buy(request):
     return render(request, 'pre-buy.html')
+
+
+def pre_buy_(request):
+    username = request.user
+    cartitle = request.POST.get("cartitle")
+    realname = request.POST.get("realname")
+    phone = request.POST.get("phone")
+    address = request.POST.get("address")
+    user = UserInfo.objects.filter(username = username)[0]
+    car = Carinfo.objects.filter(ctitle=cartitle)[0]
+    user.realname = realname
+    user.cellphone = phone
+    user.save()
+    preorder = PreOrder()
+    preorder.user = user
+    preorder.car = car
+    preorder.address = address
+    preorder.save()
+    return render(request, 'pre-buy.html', {'message':'预约成功'})
 ```
 
 front/templates/info-message.html
@@ -2401,7 +2424,7 @@ front/templates/detail.html
                 是否维修:{{carinfo.is_record}}
             </p>
             <p>
-                <a href="{% url 'prebuy' %}">我要试驾</a>
+                <a href="{% url 'prebuy' %}?carid={{carinfo.id}}">我要试驾</a>
             </p>
         </div>
     </body>
@@ -2415,7 +2438,8 @@ from sale import views
 
 urlpatterns = [
     url(r'detail', views.detail, name="detail"),
-    url(r'prebuy', views.pre_buy, name='prebuy'),
+    url(r'prebuy/$', views.pre_buy, name='prebuy'),
+    url(r'prebuyin', views.pre_buy_, name='prebuyin'),
 ]
 ```
 
@@ -2428,7 +2452,11 @@ front/templates/pre-buy.html
         <title>Title</title>
     </head>
     <body>
-        <form action="" method="post">
+        <form action="{% url 'prebuyin' %}" method="post">
+            {% csrf_token %}
+            <p>
+                <b>试驾预约:</b> <b>{{message}}</b>
+            </p>
             <p>
                 真实姓名: <input type="text" name="realname" placeholder="请输入真实姓名">
             </p>
@@ -2438,9 +2466,33 @@ front/templates/pre-buy.html
             <p>
                 试驾地址: <input type="text" name="address" placeholder="请输入试驾地址">
             </p>
+            <p>
+                预约车辆: <input type="text" name="cartitle" placeholder="请输入预约车辆">
+            </p>
             <button type="submit">提交</button>
         </form>
     </body>
 </html>
+```
+
+buy/models.py
+```py
+from django.db import models
+from userinfo.models import UserInfo
+from sale.models import Carinfo
+
+
+class PerOrder(models.Model):
+    user = models.ForeignKey(UserInfo, verbose_name='用户')
+    car = models.ForeignKey(Carinfo, verbose_name='车辆')
+    address = models.CharField(max_length=50, null=True, verbose_name="试驾地址")
+    
+    def __str__(self):
+        return self.user.username + self.car.ctitle
+    
+    class Meta:
+        db_table = "PreOrder"
+        verbose_name = "预约试驾表"
+        verbose_name_plural = verbose_name
 ```
 
