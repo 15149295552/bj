@@ -2303,3 +2303,122 @@ flags	发送标志，一般取0(等价于write)
 返回值
 成功 返回实际读取的字节数
 失败 返回-1
+
+创建TCP服务器 - 等待客户端来连接
+代码
+tcpser.c
+
+```c
+#include<stdio.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<unistd.h>
+#include<string.h>
+#include<arpa/inet.h>
+int mian(void){
+    printf("服务器 : 创建套接字\n");
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if(-1 == sockfd){
+        perror("sockfd");
+        return -1;
+    }
+    printf("服务器 : 组织地址结构体\n");
+    struct sockaddr_in ser;
+    ser.sin_family = AF_INET;
+    ser.sin_port = htons(5566);
+    ser.sin_addr.s_addr = INADDR_ANY;
+    printf("服务器 : 绑定套接字和地址结构\n");
+    if( bind(sockfd, (struct sockaddr*)&ser, sizeof(ser)) == -1){
+        perror("bind");
+        return -1;
+    }
+    printf("服务器 : 开启侦听\n");
+    if( listen(sockfd, 1024) == -1){
+        perror("listen");
+        return -1;
+    }
+    printf("服务器 : 等待并接收连接\n");
+    struct sockaddr_in cli;
+    socklen_t len = sizeof(cli);
+    int conn = accept(sockfd, (struct sockaddr*)&cli, &len);
+    if(-1 == conn){
+        perror("accept");
+        return -1;
+    }
+    printf("服务器 : 接收到了%s:%hu的客户端的连接", inet_ntoa(cli,sin_addr), ntohs(cli.sin_port));
+    printf("服务器 : 业务处理\n");
+    char buf[128] = {0};
+    ssize_t size = read(conn, buf, sizeof(buf) - sizeof(buf[0]));
+    if(-1 == size){
+        perror("read");
+        return -1;
+    }
+    for(int i = 0; i < size; i++)
+        buf[i] = toupper(buf[i]);
+    if( write(conn, buf, size) == -1){
+        perror("write");
+        return -1;
+    }
+    printf("服务器 : 关闭套接字\n");
+    close(conn);
+    close(sockfd);
+    return 0;
+}
+```
+
+套接字需要和本地的地址/端口号绑定起来 - bind
+当前的主机IP地址/端口号具体是多少 - 定义地址结构 - 描述 - IP地址 - 端口号
+
+socket();	- 套接字
+bind();
+listen();
+accept();	- 连接套接字
+	服务器和客户端建立的连接 - 连接套接字 - 读取数据 - 从连接套接字读取数据即可
+
+tcpcli.c
+```c
+#include<stdio.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<unistd.h>
+#include<string.h>
+#include<arpa/inet.h>
+int main(void){
+    printf("客户端 : 创建套接字\n");
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if(-1 == sockfd){
+        perror("socket");
+        return -1;
+    }
+    printf("客户端 : 组织服务器的地址结构\n");
+    struct sockaddr_in ser;
+    ser.sin_family = AF_INET;
+    ser.sin_port = htons(5566);
+    ser.sin_addr.s_addr = inet_addr("127.0.0.1");
+    printf("客户端 : 发起连接\n");
+    if( connect(sockfd, (struct sockaddr*)&ser, sizeof(ser)) == -1){
+        perror("connect");
+        return -1;
+    }
+    printf("客户端 : 业务处理\n");
+    for(;;){
+        char buf[128] = {0};
+        fgets(buf, sizeof(buf), stdin);
+        if(strcmp(buf, "!\n") == 0)
+            break;
+        if(send(sockfd, buf, strlen(buf), 0) == -1){
+            perror("send");
+            return -1;
+        }
+        ssize_t size = recv(sockfd, buf, sizeof(buf)-sizeof(buf[0]), 0);
+        if(-1 == size){
+            perror("recv");
+            return -1;
+        }
+        printf(">> %s\n",buf);
+    }
+    printf("客户端 : 关闭套接字\n");
+    close(sockfd);
+    return 0;
+}
+```

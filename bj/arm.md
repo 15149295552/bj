@@ -1499,7 +1499,8 @@ cmd.c
 cmd_t cmd_tbl[] = {
     {"led on",led_on},
     {"led off",led_off},
-    {"showid", mma8653_id}
+    {"showid", mma8653_id},
+    {"showacc", mma8653_acc}
 };
 #define ARRAY_SIZE(x)	(sizeof(x) / sizeof(x[0]))
 cmd_t* find_cmd(const char* name){
@@ -1916,6 +1917,7 @@ mma8653.h
 #ifndef _IIC_H
 #define _IIC_H
 extern void mma8653_id(void);
+extern void mma8653_acc(void);
 #endif
 ```
 
@@ -1956,11 +1958,58 @@ void enter_active(void){
     data |= 1;
     mma8653_write(CTRL_REG1, &data, 1);
 }
+void print_acc(char *buf){
+    int x = 0;
+    int y = 0;
+    int z = 0;
+    int flag = 0;
+    char itoa_buf[11] = {0};
+    x = buf[0]<<24|buf[1]<<16;
+    x = x>>22;
+    if(x&(1<<31)){
+        flag = 1;
+        x = 0 -x;
+    }
+    itoa(itoa_buf, x);
+    uart_puts("\nX: ");
+    if(flag){
+        uart_puts("-");
+        flag = 0;
+    }
+    uart_puts(itoa_buf);
+    y = buf[2]<<24|buf[3]<<16;
+    y = y>>22;
+    if(y&(1<<31)){
+        flag = 1;
+        y = 0 -y;
+    }
+    itoa(itoa_buf, y);
+    uart_puts("\nY: ");
+    if(flag){
+        uart_puts("-");
+        flag = 0;
+    }
+    uart_puts(itoa_buf);   
+    z = buf[4]<<24|buf[5]<<16;
+    z = z>>22;
+    if(z&(1<<31)){
+        flag = 1;
+        z = 0 -z;
+    }
+    itoa(itoa_buf, z);
+    uart_puts("\nZ: ");
+    if(flag){
+        uart_puts("-");
+        flag = 0;
+    }
+    uart_puts(itoa_buf);
+}
 #define OUT_X_MSB	(0X01)
 void mma8653_acc(void){
     unsigned char acc[6] = {0};
     enter_active();
-    mma8653_read();
+    mma8653_read(OUT_X_MSB, acc, 6);
+    print_acc(acc);
 }
 ```
 
@@ -2087,52 +2136,65 @@ mma8653 write()
 组合起来
 void print acc(char){}
 
-```c
-void print_acc(char *buf){
-    int x = 0;
-    int y = 0;
-    int z = 0;
-    int flag = 0;
-    char itoa_buf[11] = {0};
-    x = buf[0]<<24|buf[1]<<16;
-    x = x>>22;
-    if(x&(1<<31)){
-        flag = 1;
-        x = 0 -x;
-    }
-    itoa(itoa_buf, x);
-    uart_puts("\nX: ");
-    if(flag){
-        uart_puts("-");
-        flag = 0;
-    }
-    uart_puts(itoa_buf);
-    y = buf[2]<<24|buf[3]<<16;
-    y = y>>22;
-    if(y&(1<<31)){
-        flag = 1;
-        y = 0 -y;
-    }
-    itoa(itoa_buf, y);
-    uart_puts("\nY: ");
-    if(flag){
-        uart_puts("-");
-        flag = 0;
-    }
-    uart_puts(itoa_buf);   
-    z = buf[4]<<24|buf[5]<<16;
-    z = z>>22;
-    if(z&(1<<31)){
-        flag = 1;
-        z = 0 -z;
-    }
-    itoa(itoa_buf, z);
-    uart_puts("\nZ: ");
-    if(flag){
-        uart_puts("-");
-        flag = 0;
-    }
-    uart_puts(itoa_buf);
-}
-```
+shell框架
+输入命令 - led on -> 下位机 - 匹配 - 成功调用 - 失败，告知输入有效的指令
 
+ARM汇编
+对于ARM处理器的认识
+其他的处理器架构
+PowerPC	飞思卡尔
+FPGA:Xilinx
+DSP:TI
+ARM
+	汽车电子：飞思卡尔
+	工控：Ateml
+	网络：博通 马维尔
+	消费类电子：高通 华为 三星 苹果
+mips:北京君正
+单片机：51 MSP430 STM32(arm架构 - 32 - 低端)
+
+ARM的定义
+认为arm是一类处理器
+认为arm是一家公司(软银)
+ARM公司不生产芯片，制作IP授权
+
+ARM核版本划分
+| 大版本 |       小版本        |   具体芯片    |
+| :----: | :-----------------: | :-----------: |
+| ARMV4  |       ARM720T       |    S3C4510    |
+|        |       ARM920T       | S3C2440(三星) |
+| ARMV5  |        ARM10        | S3C6410(三星) |
+| ARMV6  |        ARM11        | S3C6640(三星) |
+| ARMV7  |    ARM cortex-A8    | S5PV210(三星) |
+|        | ARM cortex-M3/M0/M4 |   STM32(ST)   |
+| ARMV8  |   ARM cortex-A53    |    S5P6818    |
+
+A系列 - 高性能
+R系列 - 低延迟
+M系列 - 低功耗，性能较低
+
+三级指令流水线
+就是给CPU核下发的数据运算的命令或者外设访问(读/写)的命令
+指令存在于编译链接生成的二进制可执行文件中
+指令的二进制文件在运行时存在于内存中
+指令在内存中分布
+CPU核 - ARM状态 - ARM指令
+每条指令对应的内存地址简称指令存储地址
+	该地址由链接器来指令
+
+CPU核如果从内存取出要执行的指令
+	以地址的方式访问，获取指令到CPU核
+
+指令流水线的目的
+以流水线的方式从内存获取指
+提高CPU核运行指令的效率和速度
+
+ARMV7版本的三级指令流水线：取指F - 解码D - 执行E
+取指：CPU核内部的取指器从内存中取出指令
+解码：起初取出的指令，CPU核无法识别，需要CPU核内部解码器进行解码
+		对指令进行"翻译"解码
+执行：翻译完成 CPU核最终处理
+
+n.CPU和两种工作状态
+ARM状态 - ARM指令 - 每条指令4字节 - 32位
+THUMB状态 - THUMB指令 - 每条指令2字节 - 16位
