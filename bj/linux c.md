@@ -2315,6 +2315,7 @@ tcpser.c
 #include<unistd.h>
 #include<string.h>
 #include<arpa/inet.h>
+#include <ctype.h>
 int mian(void){
     printf("服务器 : 创建套接字\n");
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -2383,6 +2384,7 @@ tcpcli.c
 #include<unistd.h>
 #include<string.h>
 #include<arpa/inet.h>
+#include <ctype.h>
 int main(void){
     printf("客户端 : 创建套接字\n");
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -2422,3 +2424,257 @@ int main(void){
     return 0;
 }
 ```
+
+并发服务器
+|         服务器         |         客户端          |
+| :--------------------: | :---------------------: |
+|   创建套接字(socket)   |       创建套接字        |
+|   准备地址绑定(bind)   | 准备地址并连接(connect) |
+|    启动侦听(listen)    |                         |
+| 等待并接收连接(accept) |                         |
+|     接收请求(recv)     |        发送请求         |
+|        业务处理        |                         |
+|     发送响应(send)     |        接收响应         |
+|     关闭连接套接字     |       关闭套接字        |
+|     sockfd还没关闭     |         客户端2         |
+
+子进程 - 父进程创建子进程
+
+并发服务器
+
+主进程阻塞在accept函数中
+每当有一个客户端和服务器建立连接，accept函数返回
+	主进程继续等待下一个客户端的连接
+	通过fork函数创健子进程，子进程处理客户端业务
+主进程(侦听套接字sockfd，连接套接字conn)
+	负责继续侦听不需要连接套接字
+子进程(侦听套接字sockfd,连接套接字conn)
+	负责连接，处理客户端任务 - 不需要侦听套接字
+
+```c
+#include <stdio.h>
+#include <sys/types.h>          
+#include <sys/socket.h>
+#include <unistd.h>
+#include <string.h>
+#include <arpa/inet.h>
+#include <ctype.h>
+int main(void){
+    printf("服务器 : 创建套接字.\n");
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if(-1 == sockfd){
+        perror("sockfd");
+        return -1;
+    }
+    printf("服务器 : 组织地址结构.\n");
+    struct sockaddr_in ser;
+    ser.sin_family = AF_INET;
+    ser.sin_port = htons(5566);
+    ser.sin_addr.s_addr = INADDR_ANY;
+    printf("服务器 : 绑定套接字和地址结构.\n");
+    if ( bind(sockfd, (struct sockaddr*)&ser, sizeof(ser)) == -1){
+        perror("bind");
+        return -1;
+    }
+    printf("服务器 :开启侦听．\n");
+    if( listen(sockfd, 1024) == -1){
+        perror("listen");
+        return -1;
+    }
+    for(;;){
+        printf("服务器:等待并接受连接.\n");
+        struct sockaddr_in cli;
+        socklen_t len = sizeof(cli);
+        int conn = accept(sockfd, (struct sockaddr*)&cli, &len);
+        if(-1 == conn){
+            perror("accept");
+            return -1;
+        }
+        printf("服务器:接收到了%s:%hu的客户端的连接", inet_ntoa(cli.sin_addr), ntohs(cli.sin_port));
+        pid_t pid = fork();
+        if(-1 == pid){
+            perror("fork");
+            return -1;
+        }
+        if(0 == pid){
+            close(sockfd);
+            printf("服务器:业务处理.\n");
+            for(;;){
+                char buf[128] = {0};
+                ssize_t size = read(conn, buf, sizeof(buf) - sizeof(buf[0]));
+                if(-1 == size){
+                    perror("read");
+                    return -1;
+                }
+                if(0 == size){
+                    printf("服务器:客户端关闭套接字.\n");
+                    break;
+                }
+                for(int i = 0; i < size; i++)
+                    buf[i] = toupper(buf[i]);
+                if( write(conn, buf, size)  == -1){
+                    perror("write");
+                    return -1;
+                }
+            }
+            printf("服务器:子进程关闭套接字");
+            close(conn);
+            return 0;
+        }
+        printf("服务器:父进程关闭套接字.\n");
+        close(conn);
+    } 
+    close(sockfd);
+    return 0;
+}
+```
+
+for(;;){
+	父进程 - 侦听 - 阻塞 - 有新的客户端到来 - 向下运行 - 阻塞创建子进程
+    子进程任务
+        close sockfd;
+        for{
+            业务处理;
+        }
+        close 连接套接字
+    父进程任务 
+        关闭连接套接字
+}
+
+A.服务器的主进程阻塞于侦听套接字的accept调用, 客户端通过connect函数向服务器发起连接请求
+    服务器主进程 - accept 函数阻塞 
+    客户端 - connect 请求连接 
+B.客户端的连接请求被系统内核接收,服务器的主进程从accept函数中返回, 通过得到用于通信的连接套接字 
+    连接请求 - 内核 
+    服务器主进程 - accept函数 - 返回 
+                \- 侦听套接字 - sockfd 
+                \- 连接套接字 - conn 
+C.服务器主进程调用fork函数创建子进程, 子进程复制父进程的文件描述符表, 因此子进程具有侦听和连接
+ 两个套接字描述符 
+    服务器主进程
+                \- 侦听套接字 - sockfd 
+                \- 连接套接字 - conn
+    服务器子进程
+                \- 侦听套接字 - sockfd 
+                \- 连接套接字 - conn
+D.服务器主进程关闭连接套接字, 服务器子进程关闭侦听套接字
+    服务器主进程
+                \- 侦听套接字 - sockfd
+    服务器子进程
+                \- 连接套接字 - conn
+E.主进程通过循环继续阻塞于针对侦听套接字的accept调用,子进程则通过连接套接字和客户端通信此时
+	如果有新的客户端到来 - 继续重复A-E
+
+资源回收
+子进程结束后 - 如果父进程还没有结束 - 需要父进程来回收子进程的资源
+子进程结束后 - 如果父进程已经结束 - 子进程就会将init1号进程当做父进程 - init进程回收其该进程资源
+
+进程再执行的时候 - 让进程做一些事情 - 给进程发送信号 - 进程接收到信号后 - 处理信号
+默认情况 - 发送信号给进程 - 进程直接终止 
+捕获信号 - 发送某个信号给进程 - 进程捕获该信号 - 做一些事情 - 信号 - 进程间通信方式 
+做的方式 - 对特定的信号进行处理 - SIGCHLD
+
+```c
+#include <stdio.h>
+#include <sys/types.h>          
+#include <sys/socket.h>
+#include <unistd.h>
+#include <string.h>
+#include <arpa/inet.h>
+#include <ctype.h>
+#include <signal.h>
+#include <errno.h>
+#include <sys/wait.h>
+void sigchild(int signum){
+    for(;;){
+        pid_t pid = waitpid(-1, NULL, WNOHANG);
+        if(-1 == pid){
+            if(errno == ECHILD){
+                printf("服务器:没有子进程\n");
+                break;
+            }else{
+                perror("waitpid");
+                exit(-1);
+            }
+        }else if(0 == pid){
+            printf("服务器:所有的子进程都在运行\n");
+            break;
+        }else{
+            printf("服务器:回收了%d进程的僵尸资源\n",pid);
+        }
+    }
+}
+int main(void){
+    if(signal(SIGCHLD, sigchild) == SIG_ERR){
+        perror("signal");
+        return -1;
+    }
+    printf("服务器 : 创建套接字.\n");
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if(-1 == sockfd){
+        perror("sockfd");
+        return -1;
+    }
+    printf("服务器 : 组织地址结构.\n");
+    struct sockaddr_in ser;
+    ser.sin_family = AF_INET;
+    ser.sin_port = htons(5566);
+    ser.sin_addr.s_addr = INADDR_ANY;
+    printf("服务器 : 绑定套接字和地址结构.\n");
+    if ( bind(sockfd, (struct sockaddr*)&ser, sizeof(ser)) == -1){
+        perror("bind");
+        return -1;
+    }
+    printf("服务器 :开启侦听．\n");
+    if( listen(sockfd, 1024) == -1){
+        perror("listen");
+        return -1;
+    }
+    for(;;){
+        printf("服务器:等待并接受连接.\n");
+        struct sockaddr_in cli;
+        socklen_t len = sizeof(cli);
+        int conn = accept(sockfd, (struct sockaddr*)&cli, &len);
+        if(-1 == conn){
+            perror("accept");
+            return -1;
+        }
+        printf("服务器:接收到了%s:%hu的客户端的连接", inet_ntoa(cli.sin_addr), ntohs(cli.sin_port));
+        pid_t pid = fork();
+        if(-1 == pid){
+            perror("fork");
+            return -1;
+        }
+        if(0 == pid){
+            close(sockfd);
+            printf("服务器:业务处理.\n");
+            for(;;){
+                char buf[128] = {0};
+                ssize_t size = read(conn, buf, sizeof(buf) - sizeof(buf[0]));
+                if(-1 == size){
+                    perror("read");
+                    return -1;
+                }
+                if(0 == size){
+                    printf("服务器:客户端关闭套接字.\n");
+                    break;
+                }
+                for(int i = 0; i < size; i++)
+                    buf[i] = toupper(buf[i]);
+                if( write(conn, buf, size)  == -1){
+                    perror("write");
+                    return -1;
+                }
+            }
+            printf("服务器:子进程关闭套接字");
+            close(conn);
+            return 0;
+        }
+        printf("服务器:父进程关闭套接字.\n");
+        close(conn);
+    } 
+    close(sockfd);
+    return 0;
+}
+```
+
