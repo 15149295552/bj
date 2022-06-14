@@ -1,6 +1,7 @@
 # 一 内存布局
 
 代码
+
 ```C
 #include<stdio.h>
 #include<stdlib.h>
@@ -39,8 +40,11 @@ int main(int argc,char *argv[]){
     return 0;
 }
 ```
+
 # 二 虚拟内存
+
 ## 1内存布局
+
     环境变量和命令行参数
     --------------------
     栈区
@@ -67,7 +71,9 @@ int main(int argc,char *argv[]){
     hex:十六进制
     bin:二进制
     oct:八进制
+
 ## 2 内存壁垒
+
     虚拟内存大小为4GB
     将4GB字节大小的内存分为了两个部分：
     0 ~ 3G-1： 用户空间，存放程序员编写的程序中的代码和数据
@@ -82,12 +88,17 @@ int main(int argc,char *argv[]){
     内核空间的内存映射无需随着进程的切换而切换
     用户空间的代码不能直接访问内存空间的代码和数据
     但是可以通过系统调用，间接的和内核互换
+
 ### 2.1段错误
+
     一切对虚拟内存的 越权访问，都会导致 段错误
     试图访问没有映射到物理内存的虚拟内存
     试图以非法方式来访问虚拟内存，如：对只读内存做写操作 等
+
 ## 3虚拟内存的分配和释放
+
 #### 3.1从底层硬件到上层应用，各层的逻辑
+
 ```
 ------------------------------------
 应用程序           业务逻辑
@@ -107,16 +118,20 @@ Linux             mmap/munmap
 从底层硬件到上层应用，各层提供了各自的 内存管理 接口，
     处于不同的开发层次，会使用不同层次的功能函数
 ```
+
 ### 3.2 sbrk函数
+
 ```
 想要在虚拟内存分配一块空间，建立和物理内存之间的映射
     后续直接操作虚拟内存即可
 后续不再想使用的时候，断开虚拟内存和物理内存之间的映射
 ```
+
 ```C
 #include<unistd.h>
 void *sbrk(intptr_t increment);
 ```
+
     功能：以相对的方式 分配 和 释放 虚拟内存
     参数：
     increment 内存的字节增量（单位：字节）
@@ -151,6 +166,7 @@ void *sbrk(intptr_t increment);
     Linux终端：
     man 2 sbrk
     sbrk代码
+
 ```C
 #include<stdio.h>
 #include<string.h>
@@ -173,10 +189,12 @@ int main(void){
     return 0;
 }
 ```
+
 ```C
 #include<unistd.h>//unix standard
 int brk(void *end_data_segment);
 ```
+
 ```
 返回值：
     成功 返回 0
@@ -195,10 +213,13 @@ int brk(void *end_data_segment);
     brk(p);    //释放4字节内存
 在分配和释放内存过程中，p没有发生变化
 ```
+
 ### 3.3 brk函数
+
     brk函数-虚拟内存的分配和释放
     该函数是以 绝对 的方式分配和释放内存
     brk代码
+
 ```C
 #include<stdio.h>
 #include<string.h>
@@ -217,12 +238,14 @@ int main(void){
     return 0;
 }
 ```
+
 ```C
 #include <sys/mman.h>
 //分配内存，并建立虚拟内存和物理内存映射关系
 void *mmap(void *addr,size t length,int prot,int flags,
         int fd,off t offset);
 ```
+
     参数：
     addr：要建立映射关系的虚拟内存起始地址
     一般给NULL，操作系统在当前进程的3GB虚拟内存中的预留空间
@@ -248,9 +271,11 @@ void *mmap(void *addr,size t length,int prot,int flags,
     结果：
     一旦该函数调用成功，将来访问的虚拟地址就是对应的物理地址
     //释放内存，解除映射关系
+
 ```c
 int munmap (void *addr,size t length);
 ```
+
 参数：
 addr：指定映射区的起始地址
 length：指定映射区的长度
@@ -263,20 +288,27 @@ int * p;p+1;  //0x104
 char * p;p+1;  //0x101
 double * p;p+1;  //0x108
 short * p;p+1;  //0x102
+
 ### 3.4总结
+
     sbrk和brk函数都是在堆尾指针(malloc / free 也是在操作堆尾指针)
     使用sbrk 函数分配内存比较方便
     使用brk函数释放内存比较方便
     如果后续使用这两个函数从堆区分配内存，建议
     用sbrk 分配内存
     用brk释放内存
+
 ## 4分配内存
+
     1. 将一段 虚拟地址范围 标记为"占用"状态
     2. 将这段 虚拟内存和物理内存做映射，一次映射的最小单位是4KB
     每次映射至少4KB，如果用完了，继续4KB映射
     操作系统的功能：屏蔽硬件操作细节，让应用无需关注底层的硬件操作
+
 ## 5系统调用函数 mmap
+
 mmap代码
+
 ```C
 #include<stdio.h>
 #include<sys/mman.h>
@@ -311,6 +343,7 @@ int main(void){
         return 0;
 }
 ```
+
     内存壁垒：
     0 ~ 3G-1  ： 用户空间
     3G ~ 4G-1：内核空间
@@ -344,18 +377,24 @@ int main(void){
     real：总的执行时间
     user：用户时间
     sys  ：系统时间
+
 # 三 文件系统
+
 ## 1 概念
+
     Linux理念：一切皆文件
     文件系统的分类：NTFS，FAT32，EXT2，EXT4，UTS，CRAMFDS，...
     不同的文件系统管理的方式不一样
     使用管理系统来管理文件，组织文件的流程
     硬盘：分区(windows)|分区|分区
     c盘        D盘 E盘
+
 ## 2文件系统的逻辑结构
+
     一个磁盘驱动器被分为多个分区
     拿出一个分区，解剖：
     分区：引导块|超级块|柱面组1|柱面组2|...|
+
 ### 概念
 
 ```
@@ -390,6 +429,7 @@ int main(void){
 ```
 
 ### 文件访问流程:
+
 文件名 - 目录 - i节点号 - i节点映射表 - i节点位置(下标) - i节点 - 数据块索引 - 数据块+数据块(文件内容)
 
 ### 文件类型：
@@ -431,7 +471,9 @@ int main(void){
 ```
 
 ## 3文件的打开和关闭
+
 open    -  打开文件
+
 ```C
 #include <fcntl.h>
 int open (const char *pathname,int flags,mode t mode);
@@ -458,14 +500,18 @@ int open (const char *pathname,int flags,mode t mode);
         成功    返回未使用的，最小的文件描述符 - 使用文件描述符来表示该文件[0，∞(整数)]
         失败    返回-1
 ```
+
 close    -  关闭文件
+
 ```C
 #include <unistd.h>
 int close(int fd);
 参数：
     fd：open的返回值，关闭某个文件
 ```
+
 代码:
+
 ```C
 #include<stdio.h>
 #include<fcntl.h>
@@ -488,6 +534,7 @@ int main(void){
     return 0;
 }
 ```
+
 ```
 使用open函数打开某个文件的时候，会使用文件描述符来表示某个文件
 fd  --文件
@@ -548,6 +595,7 @@ STDERR_FILENO - 2 - 件表项指针 - 文件表项 - v节点 - i节点 - 标准�
     1.关闭文件描述符0-文件描述符0处于空闲/未使用状态
     2.打开1.txt,分配最小的未使用的文件描述符-
 ```
+
 ```c
 #include<stdio.h>
 #include<stdlib.h>
@@ -577,12 +625,15 @@ int main(void){
     return 0;
 }
 ```
+
     分析
     int creat (const char *pathname,mode t mode);
     open(pathname,O_WRONLY | O_CREAT | O_TRUNC,mode);
     creat("o.txt",0644)
     open("o.txt",O_WRONLY | O_CREAT | O_TRUNC,0644);
+
 ## 文件的读写
+
 ```c
 #include<unistd.h>
 ssize_t write(int fd,const void *buf,size_t count);
@@ -598,7 +649,9 @@ int fd=open("a.txt");
 const char* text = "hello,world";
 write(fd,text,100);
 ```
+
 代码:
+
 ```c
 //write.c
 #include<stdio.h>
@@ -626,6 +679,7 @@ int main(void){
     return 0;
 }
 ```
+
     向xx.txt文件写入非字符串类型内容
     char name[128]="James";
     unsigned int age=35;
@@ -638,7 +692,9 @@ int main(void){
     char buf[1024];
     sprintf(buf , "%s %u %.2lf\n",name,age,salary);
         s=string
+
 代码:
+
 ```c
 #include<stdio.h>
 #include<string.h>
@@ -673,6 +729,7 @@ int main(void){
     return 0;
 }
 ```
+
 ```
 读取-read
 #include <unistd.h>
@@ -716,10 +773,13 @@ int main(void){
     return 0;
 }
 ```
+
     writei和read都是基于系统调用的文件读写，是面向于二进制字节流的
     对二进制文件读写,无需做额外的工作
     对文本文件读写，需要按照特定的格式，将二进制形式的数据转换为文本字符串
+
 代码:
+
 ```c
 //binary.c
 #include <stdio.h>
@@ -2295,10 +2355,10 @@ TCP连接断开          r == 0      r == -1
 发送数据
 ssize_t send(int s, const void *msg, size_t len, int flags);
 参数
-s		套接字描述符
-msg  	发送缓冲区
-len  	期望发送的字节数
-flags	发送标志，一般取0(等价于write)
+s	 	套接字描述符
+msg   	发送缓冲区
+len   	期望发送的字节数
+flags	 发送标志，一般取0(等价于write)
 	MSG_DONTWAIT	以非阻塞方式发送数据
 返回值
 成功 返回实际读取的字节数
@@ -2377,6 +2437,7 @@ accept();	- 连接套接字
 	服务器和客户端建立的连接 - 连接套接字 - 读取数据 - 从连接套接字读取数据即可
 
 tcpcli.c
+
 ```c
 #include<stdio.h>
 #include<sys/types.h>
@@ -2426,6 +2487,7 @@ int main(void){
 ```
 
 并发服务器
+
 |         服务器         |         客户端          |
 | :--------------------: | :---------------------: |
 |   创建套接字(socket)   |       创建套接字        |
@@ -2677,4 +2739,184 @@ int main(void){
     return 0;
 }
 ```
+
+TCP客户端和服务器 - 通信
+	可是连接
+	业务处理
+	通信终止
+
+1. 客户端主动终止通信过程
+   在某个特定的时刻，客户端认为此时不再需要服务器继续为其提供服务了
+   于是客户端在接收完最后一个响应包后，通过c1ose函数关闭和服务器通信的套接字
+   客户端的TCP协议栈向服务器发送FIN分节并且得到对方的ACK应答
+   服务器中负责和客户端通信的子进程，此时正在试图通过xecv函数/xead函数接收下一个请求包，但是收到了来自于客户端的FIN分节，返回0
+   于是该子进程退出收发循环，同时通过close函数关闭连接套接字
+   导致服务器的TCP协议栈向客户端发送FIN分节，客户端接收到进入到TIME WAIT状态，并在收到对方的ack应答后，自己进入到c1osed状态
+   随着收发循环的退出，服务器子进程终止，然后再服务器主进程的SIGCHLD(17)信号处理函数回收
+   通信过程宣告结束
+
+   断开连接的过程 - 四次分手
+   客户端 - FIN[N] -> 服务器
+   客户端 <- ACK[N+1] - 服务器
+   客户端 <- FIN[M] - 服务器
+   客户端 - ANK[M+1] -> 服务器
+
+2. 服务器主动终止通信过程
+   服务器中专门辅助和某个特定的客户端通信的子进程，在运行过程中如果出现了问题，无法和客户端通信，不得不调用close函数关闭连接套接字/或者直接退出/或者被信号杀死
+   服务器的TCP协议栈就会向客户端发送FIN分节并得到对方的ACK应答
+
+   1. 如果客户端试图通过recv函数接收响应包
+      此时该函数会返回0
+      客户端就会根据返回值判断 - 当前服务器宕机 - 客户端直接通过c1ose函数关闭和服务器的连接套接字 - 终止通信
+   2. 如果客户端试图通过send函数发送请求包
+      此时该函数并不会失败，但是会导致对方以RST分节做出响应 - 该响应分节会先于FIN分节被紧随其后的rece函数收到并返回-1
+      同时设置errno为ECONNRESET
+      终止通信的条件
+
+3. 服务器主机不可达 - 主机崩溃/网络中断/路由失效
+   在服务器主机不可达的前提下 - 无论是客户端还是服务器 - 它们的协议栈都不会再有任何数据分节的交换
+   客户端通过send函数发送完了请求包 - 会阻塞在recv函数上等待来自服务器的响应包
+   此时客户端的TCP协议栈会持续的重传数据分节 - 试图得到对方的acd应答
+   最终重传12次 - 最长等待9分钟
+   当TCP最终决定放弃的时候，会通过recv函数向用户进程返回失败
+   设置errno ETIMEOUT/EHOSTUNREACH/ENETUNREACH
+   假设此时 网络ok了 - 因为失去了之前的连接 - 通信无法继续
+   TCP - 面向于连接
+       \- 流格式的连接
+   UCP - 面向于无连接
+       \- 数据包套接字
+
+   通信：
+   C1 - 1 - 4 - C2
+   C1 - 1 - 3 - 5 - 4 - C2
+   C1 - 1 - 3 - 4 - C2
+   C1 - 1 - 2 - 4 - C2
+
+   在进行通信的时候，数据包可以选择多条线路
+
+   面向路连接，假设有五个数据包
+   第1个数据包 - 路径1
+   第2个数据包 - 路径2
+   第3个数据包 - 路径4
+   第4个数据包 - 路径2
+   第5个数据包 - 路经1
+
+   每一个数据包之间都是独立的，谁也不影响谁
+   就会有很大不确定性 - 不确定数据是否可以真的传输到到目的主机
+   C1发送消息给C2 - C1就先发送出去 - 到不到 - 不知道
+   C2接收C1的消息 - 没有选择的权利 - 被动接收
+
+   TCP - 面向连接 - 通信之前 - 先建立连接关系 - 通信
+   通信线路-路由器维护
+   如果断开连接 - 路由器将之前存储的路径信息 - 删除
+   该条线路 - 虚电路
+
+1. UDP协议的基本特性
+
+   1. UDP不提供客户端和服务器之间的连接
+   2. UDP不保证数据传输的可靠性和有序性
+      不提供 确认 超时重传 RTT估算 序列号
+   3. UDP不提供流量控制
+   4. UCP是全双工
+      应用程序在任何时候都可以发送也可以接收数据
+
+2. 常用函数
+   size_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *src_addr, socklen_t *addrlen);
+   参数
+   sockfd	套接字描述符
+   buf	   接收缓冲区
+   len       期望接收的字节数
+   flags     接收数据的标志，一般取0(等价于read)
+   	MSG_DONTWAIT	以非阻塞方式接收数据
+   	MSG_WAITALL	 等待所有数据，不接受到len个字节数据，函数就不返回
+   src_addr  输出源主机的地址信息
+   addrlen   输入输出源主机的地址信息字节数
+
+   返回值
+   成功 返回实际读取的字节数
+   失败 返回-1
+
+   ssize_t sendto(int sockfd, const *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
+   参数
+   s		 套接字描述符
+   msg  	 发送缓冲区
+   len  	 期望发送的字节数
+   flags	 发送标志，一般取0(等价于write)
+   	MSG_DONTWAIT	以非阻塞方式发送数据
+   dest_addr 目的主机的地址信息
+
+   返回值
+   成功 返回实际读取的字节数
+   失败 返回-1
+
+服务器
+udpser.c
+
+```c
+#include <stdio.h>
+#include <sys/types.h>          
+#include <sys/socket.h>
+#include <unistd.h>
+#include <string.h>
+#include <arpa/inet.h>
+#include <ctype.h>
+#include <signal.h>
+#include <errno.h>
+#include <sys/wait.h>
+    printf("服务器 : 创建套接字.\n");
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if(-1 == sockfd){
+        perror("sockfd");
+        return -1;
+    }
+    printf("服务器 : 组织地址结构.\n");
+    struct sockaddr_in ser;
+    ser.sin_family = AF_INET;
+    ser.sin_port = htons(5566);
+    ser.sin_addr.s_addr = INADDR_ANY;
+    printf("服务器 : 绑定套接字和地址结构.\n");
+    if ( bind(sockfd, (struct sockaddr*)&ser, sizeof(ser)) == -1){
+        perror("bind");
+        return -1;
+    }
+    for(;;){
+        char buf[128] = {0};
+        struct sockaddr_in cli;
+        socklen_t len = sizeof(cli);
+        ssize_t size = recvfrom(sockfd, buf, sizeof(128)-1, 0, (struct sockaddr*)&cli, len);
+        if(-1 == size){
+            perror("recvfrom");
+            return -1;
+        }
+        for(int i = 0; i < size; i++)
+            buf[i] = touppr(buf[i]);
+        if(sento(sockfd, buf, size, 0, (struct sockaddr*)&cli, len) == -1){
+            perror("sento");
+            return -1;
+        }
+    }
+	pritnf()
+    close(sockfd);
+    return 0;
+}
+```
+
+客户端
+udpcli.c
+
+```c
+
+```
+
+|         服务器          |      客户端      |
+| :---------------------: | :--------------: |
+|    创建套接字socket     |    创建套接字    |
+| 准备地址结构sockaddr_in |   准备地址结构   |
+|      绑定地址bind       |        \-        |
+|    接收请求recvfrom     |  发送请求sendto  |
+|        业务处理         |      \.\.\.      |
+|     发送响应sendto      | 接收响应recvfrom |
+|     关闭套接字close     |    关闭套接字    |
+
+
 

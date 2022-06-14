@@ -2037,11 +2037,12 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 urlpatterns = [
-                  url(r'^admin/', admin.site.urls),
-                  url(r'^$', views.index, name='index'),
-                  url(r'^user/', include('userinfo.urls')),
-                  url(r'^sale/', include('sale.urls')),
-              ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    url(r'^admin/', admin.site.urls),
+    url(r'^$', views.index, name='index'),
+    url(r'^user/', include('userinfo.urls')),
+    url(r'^sale/', include('sale.urls')),
+	url(r'^buy/', include('buy.urls')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 ```
 
 userinfo/urls.py
@@ -2486,6 +2487,8 @@ class PerOrder(models.Model):
     user = models.ForeignKey(UserInfo, verbose_name='用户')
     car = models.ForeignKey(Carinfo, verbose_name='车辆')
     address = models.CharField(max_length=50, null=True, verbose_name="试驾地址")
+    is_satis = models.BooleanField(default=True, verbose_name='是否满意')
+    evaluate = models.CharField(max_length=150, null=True, verbose_name='评价')
     
     def __str__(self):
         return self.user.username + self.car.ctitle
@@ -2494,5 +2497,48 @@ class PerOrder(models.Model):
         db_table = "PreOrder"
         verbose_name = "预约试驾表"
         verbose_name_plural = verbose_name
+```
+
+front/templates/prefeedback.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        <p>
+            <b>是否满意:</b>
+            <input type="radio" name="istais" value="1" checked>是
+            <input type="radio" name="istais" value="0">否
+		</p>
+        <p>
+            <b>评价:</b>
+            <textarea name="evaluate" id="" cols="30" rows="10"></textarea>
+        </p>
+        <p>
+            <button type="submit">
+                提交
+            </button>
+        </p>
+    </body>
+</html>
+```
+
+buy/views
+```py
+from django.shortcuts import render
+def pre_feedback(request):
+    return render(request, 'prefeedback.html')
+```
+
+buy/urls.py
+```py
+from django.conf.urls import url
+from buy import views
+def pre_urlpatterns = [
+    url(r'prefeedback', views.pre_feedback, name='prefeedback'),
+]
 ```
 
