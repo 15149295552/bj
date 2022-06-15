@@ -2905,7 +2905,45 @@ udpser.c
 udpcli.c
 
 ```c
-
+#include <stdio.h>
+#include <sys/types.h>          
+#include <sys/socket.h>
+#include <unistd.h>
+#include <string.h>
+#include <arpa/inet.h>
+int main(void){
+    printf("客户端:创建套接字.\n");
+    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if(-1 == sockfd){
+        perror("socket");
+        return -1;
+    }
+    printf("客户端:组织服务器的地址结构.\n");
+    struct sockaddr_in ser;
+    ser.sin_family = AF_INET;
+    ser.sin_port = htons(5566);
+    ser.sin_addr.s_addr = inet_addr("127.0.0.1");
+    printf("客户端:业务处理.\n");
+    for(;;){
+        char buf[128] = {0};
+        fgets(buf, sizeof(buf), stdin);
+        if(strcmp(buf, "!\n") == 0)
+            break;
+        if(sendto(sockfd, buf, strlen(buf), 0, (struct sockaddr*)&ser, sizeof(ser)) == -1){
+            perror("send");
+            return -1;
+        }
+        ssize_t size = recv(sockfd, buf, sizeof(buf)-sizeof(buf[0]), 0);
+        if(-1 == size){
+            perror("recv");
+            return -1;
+        }
+        printf(">> %s", buf);
+    }
+    printf("客户端:关闭套接字.\n");
+    close(sockfd);
+    return 0;
+}
 ```
 
 |         服务器          |      客户端      |
@@ -2918,5 +2956,126 @@ udpcli.c
 |     发送响应sendto      | 接收响应recvfrom |
 |     关闭套接字close     |    关闭套接字    |
 
+发送附近给服务器
+sendto函数
+因为服务器和客户端二者之间并没有建立连接关系 - 主动说明服务器的IP地址/端口
 
+dns服务器
+域名系统 - 完成域名好IP地址的互相映射
+域名 - www.baidu.com
+ip地址 - 192.168.1.8
+域名系统：域名 - IP地址
+上网 - 域名 - 助记符 - IP地址 - 登录网站
+
+get host by name - 通过域名获取IP地址
+
+struct hostent *gethostbyname(const char *name);
+参数
+name	字符串，主机名 - 域名
+		 传递 - 域名作为参数，就回返回域名对应的IP地址
+返回值
+返回IP地址以及附属信息
+
+```c
+struct hostent{
+    char *h_name;			//官方域名
+    char **h_aliases;		//别名 可以通过多个域名访问同一主页
+    int h_addrtype;			//地址类型	IPV4/IPV6
+    int h_length;			//ipv4:4	ipv6:16
+    char **h_addr_list;		//ip地址表
+}
+```
+
+对于一些访问量比较大额服务器，分配多个ip地址给同一域名，利用多个服务器负载均衡
+
+\#define h_addr h_addr_list[0] /\* for backward compatibility \*/
+指针数组数组中每个元素都是一个二级指针 - 指向了一个字符串 - main函数中的argv
+char* h_aliases[] = {"xxx", "yyy", \.\.\.,NULl};
+
+代码
+dns.c - 获取域名对应的相关信息
+
+```c
+#include<stdio.h>
+#include<unistd.h>
+#include<arpa/inet.h>
+#include<netdb.h>
+int main(void){
+    if(argc < 2){
+        fprintf(stderr,"usage : %s <域名>\n", argv[0]);
+    }
+    struct hostent* host = gethostbyname(argv[1]);
+    if(NULL == hostent){
+        perror("gethostbyname");
+        return -1;
+    }
+    printf("官方主机名\n");
+    printf("%s\n", host->h_name);
+    printf("主机别名表\n");
+    for(char** pp = host->h_aliases; *pp; PP++)
+        printf("%s\n", *pp);
+    printf("IP地址表\n");
+    for(struct in_addr** pp = (struct in_addr**)host->h_addr_list; *pp; pp++)
+        printf("%s\n", inet_ntoa(**pp));
+    return 0;
+}
+```
+
+HTTP协议 - Hyper Text Transfer Protocol 超文本传输协议
+HTTP 1.0
+HTTP 1.1
+详细规定了浏览器和万维网服务器之间通信的一个规则，通过网络传输网络数据的数据传输协议
+
+用于客户端和服务器之间的通信
+
+http.c
+```c
+#include <stdio.h>
+#include <sys/types.h>          
+#include <sys/socket.h>
+#include <unistd.h>
+#include <string.h>
+#include <arpa/inet.h>
+int main(void){
+    if(argc < 4){
+        fprintf(stderr, "usage:%s <IP地址> <域名> [<路径>]", argv[0]);
+        return -1;
+    }
+    char* ip = argv[1];
+    char* name = argv[2];
+    char* path = argc<4 ? "" : argv[3];
+    printf("客户端:创建套接字.\n");
+    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if(-1 == sockfd){
+        perror("socket");
+        return -1;
+    }
+    printf("客户端:组织服务器的地址结构.\n");
+    struct sockaddr_in ser;
+    ser.sin_family = AF_INET;
+    ser.sin_port = htons(5566);
+    ser.sin_addr.s_addr = inet_addr("127.0.0.1");
+    printf("客户端:业务处理.\n");
+    for(;;){
+        char buf[128] = {0};
+        fgets(buf, sizeof(buf), stdin);
+        if(strcmp(buf, "!\n") == 0)
+            break;
+        if(sendto(sockfd, buf, strlen(buf), 0, (struct sockaddr*)&ser, sizeof(ser)) == -1){
+            perror("send");
+            return -1;
+        }
+        ssize_t size = recv(sockfd, buf, sizeof(buf)-sizeof(buf[0]), 0);
+        if(-1 == size){
+            perror("recv");
+            return -1;
+        }
+        printf(">> %s", buf);
+    }
+    
+    printf("客户端:关闭套接字.\n");
+    close(sockfd);
+    return 0;
+}
+```
 
