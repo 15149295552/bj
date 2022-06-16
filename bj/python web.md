@@ -2036,6 +2036,7 @@ from sale import views
 from django.conf.urls.static import static
 from django.conf import settings
 
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.index, name='index'),
@@ -2049,6 +2050,7 @@ userinfo/urls.py
 ```py
 from django.conf.urls import url
 from userinfo import views
+
 
 urlpatterns = [
     url(r'register/', views.register, name='register'),
@@ -2237,6 +2239,14 @@ front/templates/index.html
                 <a href="{% url 'login' %}">登录</a>
                 {% endif %}
             </p>
+        </div>
+        <div>
+            <span>0W-10W</span>
+            <span>10W-20W</span>
+            <span>20W-40W</span>
+            <span>40W-80W</span>
+            <span>80W-130W</span>
+            <span>130W+</span>
         </div>
         {% for car in carlist.carlist %}
         <p>
@@ -2437,6 +2447,7 @@ sale/urls.py
 from django.conf.urls import url
 from sale import views
 
+
 urlpatterns = [
     url(r'detail', views.detail, name="detail"),
     url(r'prebuy/$', views.pre_buy, name='prebuy'),
@@ -2508,37 +2519,76 @@ front/templates/prefeedback.html
         <title>Title</title>
     </head>
     <body>
-        <p>
-            <b>是否满意:</b>
-            <input type="radio" name="istais" value="1" checked>是
-            <input type="radio" name="istais" value="0">否
-		</p>
-        <p>
-            <b>评价:</b>
-            <textarea name="evaluate" id="" cols="30" rows="10"></textarea>
-        </p>
-        <p>
-            <button type="submit">
-                提交
-            </button>
-        </p>
+        <div>
+            <form action="{% url 'precarin' %}" method="post">
+                {% csrf_token %}
+                <p>
+                    <b>预约试驾车辆</b>
+                    <input type="text" name="precar" placeholder="请输入预约试驾车辆">
+                </p>
+                <p>
+                    <b>是否满意:</b>
+                    <input type="radio" name="istais" value="1" checked>是
+                    <input type="radio" name="istais" value="0">否
+                </p>
+                <p>
+                    <b>评价:</b>
+                    <textarea name="evaluate" id="" cols="30" rows="10"></textarea>
+                </p>
+                <p>
+                    <button type="submit">
+                        提交
+                    </button>
+                </p>
+            </form>
+    	</div>
     </body>
 </html>
 ```
 
 buy/views
 ```py
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from userinfo.models import UserInfo
+from sale.models import Carinfo
+from .models import PreOrder
+
+
 def pre_feedback(request):
     return render(request, 'prefeedback.html')
+
+
+def pre_feedback_(request):
+    user = request.user
+    precar = requset.POST.get("precar")
+    istais = request.POST.getlist("istais")[0]
+    evaluate = request.POST.get("evaluate")
+    user = UserInfo.objects.get(username=user)
+    car = Carinfo.objects.get(ctitle=precar)
+    preorder = PreOrder.objects.filter(user=user, car=car)[0]
+    preorder.is_satis = istais
+    preorder.evaluate = evaluate
+    preorder.save()
+    return redirect("/")
 ```
 
 buy/urls.py
 ```py
 from django.conf.urls import url
 from buy import views
+
+
 def pre_urlpatterns = [
     url(r'prefeedback', views.pre_feedback, name='prefeedback'),
+    url(r'precar', views.pre_feedback_, name='precarin'),
 ]
 ```
 
+buy/admin.py
+```py
+from django.contrib import admin
+from .models import *
+
+
+admin.site.register(PreOrder)
+```

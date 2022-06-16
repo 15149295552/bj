@@ -2262,7 +2262,7 @@ ARM核相关特性
         r12：暂存寄存器ip
       6个状态寄存器
       一个cpsr：保存当前程序运行的状态信息
-      五个cpsr：用来备份cpsr，当有模式切换使用到cpsr
+      五个spsr：用来备份cpsr，当有模式切换使用到cpsr
    3. 详解cpsr寄存器
       [4:0] mode 记录当前程序运行的时候，CPU核的工作模式
       [5] 状态位
@@ -2295,3 +2295,136 @@ ARM核相关特性
              eq z = 1，条件满足 - 执行该语句
              ne z = 0，条件满足 - 执行该语句
 
+ARM寄存器
+1个cpsr
+5个spsr	备份状态信息
+
+spsr使用场景
+usr模式：运行程序 - helloworld - FIQ中断到来
+fiq模式：运行中断函数 - 结束 - 返回被打断位置
+
+ARM核的七种异常
+异常：随机触发的事件
+
+|         异常          | CPU核入口地址 |          触发场景           |
+| :-------------------: | :-----------: | :-------------------------: |
+|     复位异常(SVC)     |     0X00      |          系统复位           |
+| 未定义指令异常(UNDEF) |     0X04      | CPU核执行了一个不认识的指令 |
+|    软中断异常(SCV)    |     0X08      |      CPU核执行swi指令       |
+|    取指异常(ABORT)    |     0X0C      |          取指F失败          |
+|  数据处理异常(ABORT)  |     0X10      |          访存M失败          |
+|   IRQ中断异常(IRQ)    |     0X18      |       触发IRQ中断信号       |
+|   FIQ中断异常(FIQ)    |     0X1C      |       触发FIQ中断信号       |
+
+异常处理过程(8步骤)
+场景：usr -> 进程 -> 中断到来FIQ -> FIQ -> 恢复 -> usr:进程
+硬件四步骤
+
+1. 备份当前进程的cpsr到spsr
+   [cpsr] = usr -> [spsr] = usr
+2. 设置cpsr的对应bit
+   [4:0] = 0b10001 FIQ模式
+   [5] = 0 ARM状态
+   [7:6] = 11 禁止CPU核响应FIQ好IRQ中断电信号，此时cpsr记录当前FIQ模式下的状态信息
+3. 保存返回地址到lr寄存器，lr = pc - 4
+   中断执行完毕，想要返回被打断任务继续执行，从lr寄存器中取出来保存的地址即可
+4. 最终给pc赋值，也就是设置pc等于某个异常的入口地址
+   结果：CPU核会直接跑到异常入口地址上去运行(F - D - E - (M) - W)
+   开启软件进行异步处理异常的进程
+   注意：只要给pc赋值，就是让CPU核跑到该地址上去运行
+
+软件四步骤第一步 :
+1.问:pc = 0x00/04/08/0c/10/18/1c, CPU核跑到这些入口地址去做什么呢?
+答:是要执行程序, 七个地址对应着七个程序 
+问:要运行的程序如何和这七个地址关联起来 
+答:通过链接器进行关联 
+  举例 :vim start.s //汇编文件 
+    b  reset_func 
+    b  undef_func 
+    b  swi_func 
+    b  fetch_abort_func 
+    b  data_abort_func 
+    b  . @类似于while(1), 死循环
+    b  irq_func 
+    b  fiq_func 
+
+​    reset_func :
+​      add ..
+​      sub ..
+​      orr ..
+​      b . 
+
+​    undef_func :
+​      add ..
+​      sub ..
+​      orr ..
+​      b . 
+​    ...
+​    保存退出 
+​    arm...as -nostdlib -c start.s -o start.o 
+​    arm...as:汇编器 .s->.o 
+​    arm...ld -nostdlib -nostartfiles -Ttext=0x00 -o start.elf start.o 
+​      -Ttext=0x00 汇编代码的起始地址从0x00开始
+​    arm...objcopy -O binary start.elf start.bin 
+​    结论 :
+​    指令            指令地址
+​    b  reset_func       0x00
+​    b  undef_func       0x04
+​    b  swi_func        0x08
+​    b  fetch_abort_func    0x0c
+​    b  data_abort_func     0x10
+​    b  . @类似于while(1)    0x14
+​    b  irq_func        0x18
+​    b  fiq_func        0x1c
+
+b就是bl的简化版本,不带返回的跳转 
+b  reset_func 跳转到reset_func去运行,也是一条指令占据4字节
+
+​    将来某个异常触发, CPU核跑到对应的异常入口地址上运行 
+​    就会自己编写的指令代码(b fiq_func)
+​    将以上8行2列的表格 - 异常向量表 
+​    且在软件处理异常之前, 需要在内存中提前建立异常向量表 
+​    建立过程:tftp 0x00 start.bin 
+
+开发板 : 0x40000000 - 0x7fffffff 
+  地址可以偏移 
+
+2.保护现场 
+  问:何为保护现场?
+  答:将由异常大端的任务使用的arm寄存器备份到栈中,压栈 
+  问:为何要压栈?
+  答:
+  举例 ;
+  usr模式 : 运行程序 - helloworld - FIQ中断到来
+    mov r0, #1 
+    mov r1, #1 
+    cmp r0, r1 @alu_out = r0 - r1, 影响cpsr Z=1  -> 中断到来 
+    addeq r2, r0, r1  @该指令执行
+  fiq模式 : 运行中断函数 - 结束 - 返回被打断位置 
+    mov r0, #100
+    mov r1, #567 
+    ...
+  usr模式 : 运行程序 - helloworld
+    继续执行下一条语句 :
+
+​    addeq r2, r0, r1  @会执行 r2 = r0 + r1 = 100 + 567 = 667
+  处理方式 :
+​    CPU核在执行fiq_func里面的代码之前将之前进程使用的arm寄存器保存到栈中即可 
+​    将来中断执行结束, 再从栈中奖之前保存的数据恢复到ARM寄存器中 
+
+  举例 :
+    r0=1,r1=1  => 存储到栈中 
+    中断执行 
+    r0=1,r1=1  <= 从栈中恢复 
+3.根据用户需求调用异常处理函数(一般使用C语言实现)
+  举例 :
+    bl uart_puts @汇编调用C语言实现对应的功能 
+4.恢复现场, 状态恢复和跳转返回 
+  何为恢复现场 - 将之前在栈中保存的数据恢复到arm寄存器中, 给被打断的进程使用 
+  状态恢复 : cpsr = spsr 
+    spsr - usr -> cpsr 
+  跳转返回 : pc = lr 
+  至此 :
+    CPU又返回到原先被打断的位置继续运行 
+  至此 :
+    异常处理完毕
