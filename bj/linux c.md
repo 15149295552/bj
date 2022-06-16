@@ -3028,17 +3028,68 @@ HTTP 1.1
 
 用于客户端和服务器之间的通信
 
+通过http协议将网页下载下来
+我们再通过浏览器获取网络资源的过程中，一直在蹲守HTTP协议
+
+客户端终端和服务器终端请求和应答的标准
+客户端发起了一个HTTP请求到服务器指定端口，默认80，应答服务器存储这一系资源
+浏览器中输入URL，按下回车经历的流程
+
+1. 浏览器向DNS的服务器请求解析该URL中域名所对应的IP地址
+2. 根据解析后的IP地址好默认端口80好服务器建立TCP连接
+3. 浏览器发出HTTP请求
+4. 服务器对浏览器的请求作出响应
+
+HTTP的请求和响应
+请求行：
+请求方法字段 URL字段 HTTP协议版本 使用空格将它们隔开
+HTTP 1.0：三种请求方法 - GET POST HEAD
+HTTP 1.1：新增五种方法 - OPTIONS PUT DELET TRACE CONNECT
+其中GET是最常见的请求方法 - 用于回去服务器的数据
+
+请求头部
+由关键字/值对构成每行一队，关键字和值使用英文冒号":"分隔
+请求头部告知服务器有观客户端请求的信息，典型的请求头有
+Accept	  告诉服务器自己可以接收什么类型的介质，\*/\*表示任何类型，type/\*表示该类型下的所有子类型
+Host	    客户端指定自己想要访问的web服务器的域名
+User_Agent  浏览器表明自已的身份，是哪种浏览器
+Referer	 浏览器web服务器表明自己是从哪个ur1获的点击当前请求中的网页
+Connection  表示是否需要持久连接
+
+HTTP响应
+状态行 响应头[空行]响应正文
+
+状态行
+当浏览者访问一个网页的时候，浏览器会向网页所在的服务器发出请求
+当浏览器接收并显示网页前，该网页所在的服务器返回一个包含HTTP状态码的信息头，
+用以响应浏览器的请求
+常见状态码：
+200 OK				  客户端请求成功
+400 Bad Request		 客户端请求的语法错误，不能被服务器理解
+403 Forbidden		   服务器接收到请求，但是拒绝提供服务
+404 Not Found		   请求资源不存在
+503 Server Unavailable  服务器当前无法处理客户端请求，多一段时间可能会恢复正常
+
+消息报头
+Date			响应时间
+Content_Type	响应类型
+Content_Length  响应数据大小
+Connection	  连接状态
+
+代码
 http.c
-```c
+
+~~~c
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>          
 #include <sys/socket.h>
 #include <unistd.h>
 #include <string.h>
 #include <arpa/inet.h>
-int main(void){
-    if(argc < 4){
-        fprintf(stderr, "usage:%s <IP地址> <域名> [<路径>]", argv[0]);
+int main(int argc, char* argv[]){
+    if(argc < 3){
+        fprintf(stderr, "usage : %s <IP地址> <域名> [<路径>]\n", argv[0]);
         return -1;
     }
     char* ip = argv[1];
@@ -3053,29 +3104,41 @@ int main(void){
     printf("客户端:组织服务器的地址结构.\n");
     struct sockaddr_in ser;
     ser.sin_family = AF_INET;
-    ser.sin_port = htons(5566);
-    ser.sin_addr.s_addr = inet_addr("127.0.0.1");
-    printf("客户端:业务处理.\n");
+    ser.sin_port = htons(80);
+    ser.sin_addr.s_addr = inet_addr("ip");
+    printf("客户端:发起连接.\n");
+    if( connect(sockfd, (struct sockaddr*)&ser, sizeof(ser))  == -1){
+        perror("connect");
+        return -1;
+    }
+    char request[1024] = {0};
+    sprintf(
+    		"GET /%S HTTP/1.0\r\n"
+        	"Host: %s\r\n"
+        	"Accept: */*\r\n"
+        	"User_Agent: Mozilla/5.0\r\n"
+        	"Referer: %s\r\n"
+        	"Connecttion: Close\r\n\r\n"
+    		,path, name, name);
+    if( send(sockfd, request, strlen(request), 0) == -1){
+        perror("send");
+        return -1;
+    }
     for(;;){
-        char buf[128] = {0};
-        fgets(buf, sizeof(buf), stdin);
-        if(strcmp(buf, "!\n") == 0)
-            break;
-        if(sendto(sockfd, buf, strlen(buf), 0, (struct sockaddr*)&ser, sizeof(ser)) == -1){
-            perror("send");
-            return -1;
-        }
-        ssize_t size = recv(sockfd, buf, sizeof(buf)-sizeof(buf[0]), 0);
+        char respond[1024] = {};
+        ssize_t size = recv(sockfd, respond, sizeof(respond)-1, 0);
         if(-1 == size){
             perror("recv");
             return -1;
         }
-        printf(">> %s", buf);
+        if(0 == size)
+            break;
+        printf("%s", respond);
     }
-    
+    printf("\n");
     printf("客户端:关闭套接字.\n");
     close(sockfd);
     return 0;
 }
-```
+~~~
 

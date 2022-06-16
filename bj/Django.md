@@ -84,3 +84,20 @@ def xxx_view(request[,其他参数.\.\.]):
 {% for 变量 in 可迭代对象%}
 {% empty %}
 {% endfor %}
+
+#URL
+
+url出现位置
+模板(html中)
+
+~~~html
+<a href='url'>超链接</a>
+点击后页面跳转至url
+<form action='url' method='post'>
+    
+</form>
+form表单中的数据 action提交至哪个路由 用post方法提交至url
+~~~
+
+视图函数HttpResponseRedirect('url')
+将用户地址栏中的地址跳转到url
