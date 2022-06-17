@@ -2241,8 +2241,8 @@ front/templates/index.html
             </p>
         </div>
         <div>
-            <span>0W-10W</span>
-            <span>10W-20W</span>
+            <a href="{% url 'search' %}?low_price=0&high_price=10"><span name="price">0W-10W</span></a>
+            <a href="{% url 'search' %}?low_price=10&high_price=20"><span>10W-20W</span></a>
             <span>20W-40W</span>
             <span>40W-80W</span>
             <span>80W-130W</span>
@@ -2319,6 +2319,12 @@ def pre_buy_(request):
     preorder.address = address
     preorder.save()
     return render(request, 'pre-buy.html', {'message':'预约成功'})
+
+
+def search_price(request):
+    low_price = int(request.GET.get("low_price"))
+    high_price = int(request.GET.get("high_price"))
+    Carinfo.objects.filter(price__gte=low_prive, price__lte=high_price)
 ```
 
 front/templates/info-message.html
@@ -2452,6 +2458,7 @@ urlpatterns = [
     url(r'detail', views.detail, name="detail"),
     url(r'prebuy/$', views.pre_buy, name='prebuy'),
     url(r'prebuyin', views.pre_buy_, name='prebuyin'),
+    url(r'search', views.search_price, name='search')
 ]
 ```
 

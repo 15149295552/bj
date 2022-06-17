@@ -2461,3 +2461,87 @@ data: @此时的标签就是 - 变量
 
 main: @变量 
     .int 100 
+
+sub.s
+```assembly
+.text
+.code 32
+.global _start
+_start:
+	mov r0, #2		 @r0 = 2
+	mov r1, #9		 @r1 = 9
+	subs r0, r0, r1  @r0 = r0 - r1 = -7 N = 1(CPSR[31] = 1)
+	b	.
+.end
+@判断cpsr的N位是否为1，判断数据计算机是否正确
+```
+
+arm-cortex_a9-linux-gnueabi-as -g -o sub.o sub.s
+arm\.\.\.as  汇编器
+-g		如果使用gdb调试，添加调试信息
+sub.o	 二进制代码，调试信息
+arm-cortex_a9-linux-gnueabi-ld -o sub sub.o
+
+qemu：仿真器，仿真运行程序
+sudo apt-get install qemu
+
+使用gdb调试器对程序进行调试
+在当前终端下
+qemu-arm -g 1234 sub 启动模拟器qemu运行sub可执行程序
+						-g 1234	指定端口号 1234
+
+ctrl + shift + T 打开另一个终端，在用一个目录
+arm-cortex_a9-linux-gnueabi-gdb sub
+出现gdb命令行终端(gdb)执行以下调试命令
+(gdb)target remote localhost:1234
+(gdb)l		 //list 列出代码信息
+(gdb)b 5  	 //设置断点 break point
+(gdb)s		 //step 下一步，让CPU去执行下一条语句
+(gdb)info reg  //information register 查看到寄存器的信息, 三列内容
+
+| 寄存器的名 | 寄存器的值(HEX) | 寄存器的值(DEC)    |
+| ---------- | --------------- | ------------------ |
+| r0         | 0xfffffff9      | -7                 |
+| r1         | 0x9             | 9                  |
+| r2-r9      | 0x0             | 0                  |
+| r10        | 0x8064          | 32868              |
+| r11-r12    | 0x0             | 0                  |
+| sp         | 0xf6fff060      | 0xf6fff060         |
+| lr         | 0x0             | 0                  |
+| pc         | 0x8060          | 0x8060 <_start+12> |
+| cpsr       | 0x80000010      | -2147483632        |
+
+(gdb)quit 	 //退出gdb调试命令, qemu模拟器也会跟着退出
+
+target	 目标
+remote	 远程
+localhost  本地地址 127.0.0.1
+1234	   端口号，让其大于1234即可
+
+案例：编写汇编实现1+2+\.\.\.+10
+sum.s
+
+~~~assembly
+.text 
+.code 32
+.global _start 
+_start :
+    mov r0, #0      @将求和的结果放到r0寄存器中
+    mov r1, #10     @定义循环变量, 意味着需要循环10次
+
+_sum :
+    add r0, r0, r1  @依次的将r1中的数据放到r0寄存器中 
+    sub r1, r1, #1  @r1=r1-1 
+    cmp r1, #0  @比较r1的值和0的值的大小, 当r1==0, 结束循环; 反观之, 继续循环
+                @alu_out = r1 - 0 
+    bne _sum    @r1 != 0, alu_out!=0, Z=0, ne条件成立, 执行b _sum 
+                @r1 == 0, alu_out ==0,Z=1, ne条件不成立, 不执行b _sum, 循环到此结束
+                @将加和的结果放到了r0中 
+    b   .
+.end 
+~~~
+
+arm...as -g -o sum.o sum.s 
+arm...ld -o sum sum.o 
+从1加到10的值, 存储到了r0寄存器中, qemu+gdb调试, 查看r0的值
+想要让循环变量r1从10减到0, 然后将其减的过程中的数字,加到r0寄存器中
