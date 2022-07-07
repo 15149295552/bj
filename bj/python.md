@@ -1,6 +1,6 @@
 # print()输出函数
 
-```py
+```python
 #输出数字
 print(520)
 print(98.5)
@@ -16,9 +16,10 @@ fp.close()
 #不进行换行输出(输出内容在一行中)
 print('hello','world','Python')
 ```
+
 # 转义字符
 
-```py
+```python
 print('hello\nworld') #\n表示换行
 print('hello\tworld') #\t制表符
 print('helloooo\tworld')
@@ -31,33 +32,43 @@ print(r'hello\nworld')
 #注意事项：最后一个字符不能是反斜线
 print(r'hello\nworld\')
 ```
+
 # 字符编码
+
 ```py
 print(chr(0b100111001011000))
 print(ord('乘'))
 ```
+
 # 标识符和保留字
+
 ```py
 import keyword
 print(keyword.kwlist)
 ```
+
 # 变量
-```py
+
+```python
 name='玛丽亚'
 print(name)
 print('标识',id(name))
 print('类型',type(name))
 print('值',name)
 ```
-```py
+
+```python
 name='玛丽亚'
 print(name)
 name='楚溜冰'
 print(name)
 ```
+
 # 数据类型
+
 ## int：整数类型，表示正数，负数，0
-```py
+
+```python
 n1=90
 n2=-2
 n3=0
@@ -69,8 +80,10 @@ print('二进制',0b01110110)
 print('八进制',0o166)
 print('十六进制',0x76)
 ```
+
 ## float：浮点类型
-```py
+
+```python
 a=3.13159
 print(a,type(a))
 n1=1.1
@@ -81,9 +94,10 @@ print(n1+n3)
 from decimal import Decimal
 print(Decimal('1.1')+Decimal('2.2))
 ```
+
 ## bool布尔类型
 
-```py
+```python
 f1=Ture
 f2=False
 print(f1,type(f1))
@@ -95,7 +109,7 @@ print(f2+1)#1	0+1的结果为2  False表示0
 
 ## 字符串类型
 
-```py
+```python
 str1='我用python'
 str2="我用python"
 str3="""我用
@@ -110,7 +124,7 @@ print(str4,type(str4))
 
 # 数据类型转换
 
-```py
+```python
 name='张三'
 age=20
 print(type(name),type(age))
@@ -152,7 +166,7 @@ print(float(i),type(float(i)))
 
 ## input()函数
 
-```py
+```python
 present=input('想要什么礼物呢')
 print(present,type(present))
 a=int(input('请输入一个加数'))
@@ -167,7 +181,7 @@ print(a+b)
 
 ### 算数运算符
 
-```py
+```python
 print(1+1)#加法运算
 print(1-1)#减法运算
 print(2*3)#乘法运算
@@ -185,7 +199,7 @@ print(-9%4)# =3	-9-(4)*(-3) 商为10行，11行的//
 
 ### 赋值运算符
 
-```py
+```python
 #顺序从右到左
 i=3+4
 print(i)
@@ -220,7 +234,7 @@ print('交换之后：',a,b)
 
 ### 比较运算符
 
-```py
+```python
 a,b=10,20
 print('a>b?',a>b)#False
 print('a<b?',a<b)#True
@@ -242,7 +256,7 @@ print(lst1 is not lst2)#True
 
 ### 布尔运算符
 
-```py
+```python
 a,b=1,2
 #and 并且
 print(a==1 and b==2)#True
@@ -269,7 +283,7 @@ print('k' not in s)
 
 ### 位运算符
 
-```py
+```python
 print(4&8)#按位&，同为1时，结果为1
 print(4|8)#按位或，同为0时，结果为0
 print(4<<1)#向左移动1位(移动一个位置)
@@ -282,9 +296,9 @@ print(4>>2)#向右移动2位
 
 先算术运算，然后位运算，最后比较运算
 
-# 对象的布尔值
+# 对象的布尔值d
 
-```py
+```python
 print(bool(False))#False
 print(bool(0))#False
 print(bool(0.0))#False
@@ -308,7 +322,7 @@ print(bool('helleworld'))
 
 ## 单分支结构
 
-```py
+```python
 money=1000
 s=int(input('请输入取款金额'))
 #判断余额是否充足
@@ -319,7 +333,7 @@ if money >= s:
 
 ## 双分支结构
 
-```py
+```python
 num=int(input('请输入一个整数'))
 if num % 2 == 0:
     print(num,'是偶数')
@@ -329,7 +343,7 @@ else:
 
 ## 多分支结构
 
-```py
+```python
 score=input('请输入一个成绩：')
 if score >= 90 and score <= 100:
     print('A')
@@ -347,7 +361,7 @@ else:
 
 ## 嵌套if
 
-```py
+```python
 answer=input('你是会员吗?y/n')
 money=float(input('请输入购物金额'))
 if answer=='y':
@@ -366,7 +380,7 @@ else:
 
 ## 条件表达式
 
-```py
+```python
 num_a=int(input('请输入第一个整数'))
 num_b=int(input('请输入第二个整数'))
 if num_a>num_b:
@@ -378,7 +392,7 @@ print(str(num_a+'大于等于'+num_b) if num_a>=num_b else str(num_a+'小于'+nu
 
 ## pass语句
 
-```py
+```python
 answer=input('你是会员吗？y/n')
 if answer=='y':
     pass
@@ -386,7 +400,7 @@ else:
     pass
 ```
 
-```py
+```python
 age=int(input('请输入年龄：'))
 if age:
     print(age)
@@ -397,7 +411,8 @@ else:
 ## 内置函数
 
 range()
-```py
+
+```python
 r=range(10)#从0开始，一直到10(不包括10)，步长默认1
 print(r)
 print(list(r))
@@ -413,7 +428,7 @@ print(range(1,20,1))
 
 ## 循环结构
 
-```py
+```python
 sum=0
 a=0
 while a<5:
@@ -422,7 +437,7 @@ while a<5:
 print(sum)
 ```
 
-```py
+```python
 sum=0
 a=1
 while a<=100:
@@ -432,7 +447,7 @@ while a<=100:
 print(sum)
 ```
 
-```py
+```python
 for item in 'python':
     print(item)
 for i in range(10):
@@ -445,7 +460,7 @@ for item in range(1,10):
 print(sum)
 ```
 
-```py
+```python
 for item in range(100,1000):
     fe=item%10
     shi=item
@@ -457,7 +472,7 @@ for item in range(100,1000):
 
 ## 流程控制语句
 
-```py
+```python
 for item in range(3):
     pwd=input('请输入密码')
     if pwd == '8888':
@@ -467,7 +482,7 @@ for item in range(3):
         print('密码不正确')
 ```
 
-```py
+```python
 a=0
 while a<3:
      pwd=input('请输入密码')
@@ -478,7 +493,7 @@ while a<3:
         print('密码不正确')
 ```
 
-```py
+```python
 for item in range(1,51):
     if item%5 == 0:
         print(item)
@@ -488,7 +503,7 @@ for item in range(1,51):
     print(item)
 ```
 
-```py
+```python
 for item in range(3):
     pwd=input('请输入密码')
     if pwd=='8888':
@@ -500,7 +515,7 @@ else:
     print('三次密码均错误')
 ```
 
-```py
+```python
 a=0
 while a<3:
     pwd=input('请输入密码')
@@ -514,21 +529,21 @@ else:
     print('三次密码均错误')
 ```
 
-```py
+```python
 for i in range(1,4):
     for j in range(1,5):
         print('*',end='\t')
     print()
 ```
 
-```py
+```python
 for i in range(1,10):
     for j in range(1,i+1):
         print(i,'*',j,'=',i*j,end='\t')
 	print()
 ```
 
-```py
+```python
 for i in range(5):
     for j in range(1,11):
         if j%2 == 0:
@@ -539,7 +554,7 @@ for i in range(5):
 
 # 列表
 
-```py
+```python
 a=10
 lst=['hello','world',98]
 print(id(lst))
@@ -549,7 +564,7 @@ print(lst)
 
 ## 列表创建
 
-```py
+```python
 lst=['hello','world',98]
 lst2=list(['hello','world',98])
 ```
@@ -557,7 +572,8 @@ lst2=list(['hello','world',98])
 # 类与对象
 
 ## 定义类
-```py
+
+```python
 class Student:#Student - 类名：由一个或多个单词组成，每个单词第一个字母大写
     pass
 #一切皆对象
@@ -565,7 +581,8 @@ print (id(Student))#2926222013040
 print(type(Student))#<class type'>
 print (Student)#<class'_main_.Student'>
 ```
-```py
+
+```python
 class Student:
     native_pace='abc'#直接写在类里的变量，称为类属性
     def __init__(self,name,age):#初始化方法
@@ -583,8 +600,10 @@ class Student:
 def dreak:#函数
     print('水')
 ```
+
 ## 对象的创建
-```py
+
+```python
 class Student:
     native_pace='abc'#直接写在类里的变量，称为类属性
     def __init__(self,name,age):
@@ -599,8 +618,10 @@ print(stu1.age)
 Student.eat(stu1)#类名.方法名(类的对象) -> 实际就是方法定义处的self
 #Student.eat(stu1)与stu1.eat()代码功能相同，都是调用Student中的eat方法
 ```
+
 ## 类属性
-```py
+
+```python
 class Student:
     native_pace='abc'#直接写在类里的变量，称为类属性
     def __init__(self,name,age):
@@ -614,7 +635,9 @@ stu2=Student('lisi',30)
 print(stu1.native_pace)
 print(stu2.native_pace)
 ```
+
 ## 类方法
+
 ```py
 Student.cm()
 ```
@@ -630,7 +653,8 @@ Student.method
 
 
 ## 动态绑定属性和方法
-```py
+
+```python
 class Student:
     def __init__(self,name,age):
         self.name=name
@@ -653,9 +677,12 @@ def show():
 stu1.show=show
 stu1.show()
 ```
+
 # 面向对象
+
 ## 封装
-```py
+
+```python
 class Car:
     def __init__(self,brand):
         self.brand=brand
@@ -665,7 +692,8 @@ car=Car('x5')
 car.start()
 print(car.brand)
 ```
-```py
+
+```python
 class Student:
     def __init__(self,name,age):
         self.name=name
@@ -680,8 +708,10 @@ print(stu.__age)#error
 print(dir(stu))
 print(stu._Student__age)#在类之外通过 _Student__age 进行访问
 ```
+
 ## 继承
-```py
+
+```python
 class Person(object):#Person继承object类
     def __init__(self,name,age):
         self.name=name
@@ -701,7 +731,8 @@ teacher=Teacher('lisi',34,10)
 stu.info()
 teacher.info()
 ```
-```py
+
+```python
 class A(object):
     pass
 class B(object):
@@ -709,8 +740,10 @@ class B(object):
 class C(A,B):
     pass
 ```
+
 ### 方法重写
-```py
+
+```python
 class Person(object):#Person继承object类
     def __init__(self,name,age):
         self.name=name
@@ -736,7 +769,8 @@ teacher=Teacher('lisi',34,10)
 stu.info()
 teacher.info()
 ```
-```py
+
+```python
 class Student:
     def __init__(self,name,age):
         self.name=name
@@ -747,8 +781,10 @@ stu=Student('zhangsan',20)
 print(dif(stu))
 print(stu)
 ```
+
 ## 多态
-```py
+
+```python
 class Animal(object):
     def eat(self):
         print('dwhc')
@@ -770,7 +806,8 @@ fun(Dog())
 fun(Animal())
 fun(Person())
 ```
-```py
+
+```python
 class A:
     pass
 class C:
@@ -790,7 +827,8 @@ print(C.__base__)#类的基类：谁在前输出谁
 print(C.__mro__)#类的层次结构
 print(A.__subclasses__())#子类列表
 ```
-```py
+
+```python
 a=20
 b=100
 c=a+b#两个整数类型的对象的相加操作
@@ -815,7 +853,8 @@ print(len(lst))#len是内容函数
 print(lst.__len__())
 print(len(stu1))
 ```
-```py
+
+```python
 class Person(object):
     def __init__(self,name,age):
         self.name=name
@@ -834,7 +873,8 @@ print('Person这个对象的id为：{0}'.format(id(Person)))
 p1=Person('zhangsan',20)
 print('p1这个Person类的实例对象的id：{0}'.format(id(p1)))
 ```
-```py
+
+```python
 class CPU:
     pass
 class Disk:
@@ -860,9 +900,10 @@ computer3=copy.deepcopy(computer)
 print(computer,computer.cpu,computer.disk)
 print(computer3.computer3.cpu,computer3.disk)
 ```
+
 ## 模块
 
-```py
+```python
 def fun():
     pass
 def fun2():
@@ -888,7 +929,8 @@ print(dir(math))
 from math import  pi
 print(pi)
 ```
-```py
+
+```python
 #新建模块：可以是创建一个.py的文件
 #新建模块：calc.py
 def add(a,b):
@@ -899,9 +941,10 @@ def div(a,b):
 from calc import add
 print(add(10,20))
 ```
+
 ## 以主程序运行
 
-```py
+```python
 #新建模块：calc2.py
 def add(a,b):
     return a+b
@@ -911,8 +954,10 @@ if __name__=='__main__':#只有点击运行calc2时，才会运行
 import calc2
 print(calc2.add(100,200))
 ```
+
 ## 包
-```py
+
+```python
 #包包含模块
 #directory：目录
 #创建包 - package：包
@@ -927,8 +972,10 @@ import pageage.module_A as ma#ma是pageage.module_A的别名
 print(ma.a)
 #使用import方式导入时，只能跟包名或模块名,使用from...import导入包，模块，函数，变量
 ```
+
 ## 常用模块
-```py
+
+```python
 import sys
 import time
 import urllib.request
@@ -939,4 +986,185 @@ print(time.time())
 print(time.localtime(time.time()))
 print(urllib.request.urlopen('http://www.baidu.com').read)
 ```
+
+# 1 变量
+
+变量就是一个存储数据的时候当前数据所在的内存地址的名字
+
+## 1.1 标识符
+
++ 由数字、字母、下划线组成
++ 不能数字开头
++ 不能使用内置关键字
++ 严格区分大小写
+
+## 1.2 命名习惯
+
+- 大驼峰：每个单词首字母都大写，例如：MyName
+- 小驼峰：第二个(含)以后的单词首字母大写，例如：myName
+- 下划线：例如：my_name
+
+## 1.3 使用变量
+
+语法：变量名 = 值
+
+代码
+
+~~~python
+#定义变量：存储数据TOM
+my_name = 'TOM'
+print(my_name)
+#定义变量：存储数据 程序员
+schoolName = '程序员'
+print(schoolName)
+~~~
+
+## 1.4 认识bug
+
+所谓bug，就是程序中的错误
+
+代码
+
+~~~python
+#定义变量：存储数据TOM
+my_name = 'TOM'
+print(my_name)
+#定义变量：存储数据 程序员
+schoolName = '程序员'
+print(schoolName)
+#bug
+schoolName = '程序员'
+print(schoolname)#NameError:名字错误
+schoolName = '程序员'
+ print(schoolName)#IndentationError:缩进错误
+print(schoolName)
+schoolName = '程序员'#NameError
+~~~
+
+## 1.5 Debug工具
+
+使用步骤
+
+1. 打断点
+2. Debug调试
+
+# 2 数据类型
+
+* int	整型
+* float  浮点型
+* str	字符串
+* bool   布尔型
+* list   列表
+* set    集合
+* dict   字典
+
+# 3 格式化输出
+
+## 3.1 格式符号
+
+| 格式符号 |               转换                |
+| :------: | :-------------------------------: |
+|    %s    |              字符串               |
+|    %d    |         有符号十进制整数          |
+|   %02d   | 显示位数，不足以0补全超出原样输出 |
+|    %f    |              浮点数               |
+|   %.2f   |           小数点后两位            |
+|    %c    |               字符                |
+|    %u    |         无符号十进制整数          |
+|    %o    |            八进制整数             |
+|    %x    |       十六进制整数(小写ox)        |
+|    %X    |       十六进制整数(大写OX)        |
+|    %e    |        科学计数法(小写'e')        |
+|    %E    |        科学计数法(大写'E')        |
+|    %g    |           %f和%e的简写            |
+|    %G    |           %f和%E的简写            |
+
+~~~py
+age = 18
+name = 'TOM'
+weight = 75.5
+stu_id = 1
+#1.今年我的年龄是xxx岁
+print('今年我的年龄是%d岁' % age)
+#2.我的名字是xxx
+print('我的名字是%s' % name)
+#3.我的体重是xxx公斤
+print('我的体重是%.2f公斤' % weight)
+#4.我的学号是
+print('我的学号是%d' % stu_id)
+#5.我的名字是xxx，今年xxx岁了
+print('我的名字是%s，今年%d岁了' % (name, age))
+#5.1我的名字是xxx，明年xxx岁了
+print('我的名字是%s，明年%d岁了' % (name, age + 1))
+#6.我的名字是xxx，今年xxx岁了，体重xxx公斤，学号是xxx
+print('我的名字是%s，今年%d岁了，体重%.02f公斤，学号是%06d' % (name, age, weight, stu_id))
+print('我的名字是%s，今年%s岁了，体重%s公斤' % (name, age, weight))
+~~~
+
+语法：f'{表达式}'
+
+~~~python
+print(f'我的名字是{name}')
+~~~
+
+## 3.2 转义字符
+
+\n:换行
+\t:制表符
+
+## 3.3 结束符
+
+print('输出的内容'， end="\n")
+默认自带end="\n"
+
+~~~python
+print('hello', end="\n")
+print('world', end="\t")
+print('python', end="...")
+~~~
+
+# 4 输入
+
+程序接收用户输入的数据的功能
+
+语法：input("提示信息")
+
+~~~python
+password = input("输入密码：")
+print(f'密码:{password}')
+~~~
+
+# 5 转换数据类型
+
+|     函数      |                         说明                         |
+| :-----------: | :--------------------------------------------------: |
+| int(x[,base]) |                  将x转换为一个整数                   |
+|   float(x)    |                 将x转换为一个浮点数                  |
+|    str(x)     |                 将对象x转换为字符串                  |
+|   eval(str)   | 用来计算在字符串中的有效Python表达式，并返回一个对象 |
+|   tuple(s)    |                将序列s转换为一个元组                 |
+|    list(s)    |                将序列s转换为一个列表                 |
+
+~~~python
+num = input("请输入一个数")
+print(num)#str
+print(int(num))#int
+~~~
+
+# 6 运算符
+
+- 算数运算符
+- 赋值运算符
+- 复合赋值运算符
+- 比较运算符
+- 逻辑运算符
+
+# 7 条件语句
+
+## 7.1 if语句
+
+语法
+if 条件:
+	条件成立执行代码1
+	条件成立执行代码2
 
