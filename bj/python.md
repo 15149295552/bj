@@ -1168,3 +1168,128 @@ if 条件:
 	条件成立执行代码1
 	条件成立执行代码2
 
+代码
+~~~python
+age = 20
+if age >= 18:
+    print('已经成年，可以上网')    
+~~~
+
+~~~python
+age = int(input('请输入您的年龄：'))
+if age >= 18:
+    print(f'您输入的年龄是{age}, 已经成年, 可以上网')
+~~~
+
+## 7.2 if…else…语句
+
+~~~python
+age = int(input('请输入您的年龄：'))
+if age >= 18:
+    print(f'您输入的年龄是{age}, 已经成年, 可以上网')
+else:
+    print(f'您输入的年龄是{age}, 小朋友, 回家写作业去')
+~~~
+
+## 7.3 多重判断
+
+语法
+if 条件1:
+	条件1成立执行的代码1
+	条件1成立执行的代码2
+elif 条件2:
+	条件2成立执行的代码1
+	条件2成立执行的代码2
+else:
+	以上条件都不成立执行的代码
+
+~~~python
+age = int(input('请输入您的年龄：'))
+if age < 18:
+    print(f'您输入的年龄是{age}, 童工')
+elif (age >= 18) and (age <= 60):
+    print(f'您输入的年龄是{age}, 合法')
+elif age > 60:
+    print(f'您输入的年龄是{age}, 退休年龄')
+~~~
+
+## 7.4 if嵌套
+
+语法
+if 条件1:
+	条件1成立执行的代码1
+	条件1成立执行的代码2
+	if 条件2:
+		条件2成立执行的代码1
+		条件2成立执行的代码2
+
+~~~python
+money = 1
+seat = 1
+if money == 1:
+    print('土豪，请上车')
+    if seat == 1:
+        print('有空座，坐下了')
+    else:
+        print('没有座位，站着等')
+else:
+    print('朋友，没带钱，跟着跑，跑快点')
+~~~
+
+### 7.4.1 猜拳游戏
+
+~~~python
+import random
+player = int(input('请出拳:0--石头:1--剪刀:2--布:'))
+computer = random.randint(0, 2)
+if ((player == 0) and (computer == 1)) or ((player == 1) and (computer == 2)) or ((player == 2) and (computer == 0)):
+    print('玩家获胜，哈哈哈哈')
+elif player == computer:
+    print('平局，别走，再来一局')
+else:
+    print('电脑获胜')
+~~~
+
+### 7.4.2 随机数
+
+~~~python
+import random
+num = random.randint(0, 2)
+print(num)
+~~~
+
+## 7.5 三目运算符
+
+条件成立执行的表达式 if 条件 else 条件不成立执行的表达式
+
+~~~python
+a = 1
+b = 2
+c = a if a > b else b
+print(c)
+aa = 10
+bb = 6
+cc = aa - bb if aa > bb else bb - aa
+print(cc)
+~~~
+
+# 8 循环
+
+1. 作用：让代码更高效的重复执行
+2. 分类：while和for
+
+## 8.1 while循环
+
+语法
+while条件:
+	条件成立重复执行的代码1
+	条件成立重复执行的代码2
+	.\.\.\.\.\.
+
+~~~python
+i = 0
+while i < 5:
+    print('1')
+    i += 1
+~~~
+
