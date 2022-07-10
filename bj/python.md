@@ -1291,5 +1291,502 @@ i = 0
 while i < 5:
     print('1')
     i += 1
+print('2')
+~~~
+
+#### 8.1.0.1 while循环应用
+
+ ~~~python
+ i = 1
+ result = 0
+ while i <= 100:
+     result = result + i
+     i += 1
+ print(result)
+ ~~~
+
+```python
+i = 1
+result = 0
+while i <= 100:
+    if i % 2 == 0:
+        result += i
+	i += 1
+print(result)
+```
+
+~~~python
+i = 2
+result = 0
+while i <= 100:
+    result += i
+    i += 2
+print(result)
+~~~
+
+### 8.1.1 break和continue终止while循环
+
+break和continue是循环中满足一定条件退出循环的两种不同方式
+
+break：终止此循环
+continue：退出当前一次循环继而执行下一次循环代码
+
+~~~python
+i = 1
+while i <= 5:
+    if i == 4:
+        print('吃饱了，不吃了')
+        break
+    print(f'吃了第{i}个苹果')
+    i += 1
+~~~
+
+```python
+i = 1
+while i <= 5:
+    if i == 3:
+        print('吃出一个大虫子，这个苹果不吃了')
+        i += 1
+        continue
+    print(f'吃了第{i}个苹果')
+    i += 1
+```
+
+### 8.1.2 while循环嵌套
+
+语法
+while 条件1:
+	条件1成立执行的代码
+	while 条件2:
+		条件2成立执行的代码
+
+~~~python
+j = 0
+while j < 3:
+    i = 0
+    while i < 3:
+        print('1')
+        i += 1
+    print('2')
+    print('3')
+    j += 1
+~~~
+
+#### 8.1.2.1 while嵌套应用
+
+~~~python
+j = 0
+while j < 5:
+    i = 0
+    while i <= j:
+        print('*', end='')
+        i += 1
+    print()
+    j += 1
+~~~
+
+~~~python
+j = 1
+while j <= 9:
+    i = 1
+    while i <= j:
+    	print(f'{i} * {j} = {i*j}', end='\t')
+    	i += 1
+    print()
+    j += 1
+~~~
+
+## 8.2 for循环
+
+语法
+for 临时变量 in 序列:
+	重复执行的代码1
+	重复执行的代码2
+
+~~~python
+str1 = 'abcdef'
+for a in str1:
+    print(a)
+~~~
+
+### 8.2.1 break和continue终止for循环
+
+~~~python
+str1 = 'abcdef'
+for a in str1:
+    if a == 'd':
+        print('遇到d不打印')
+        break
+    print(a)
+~~~
+
+~~~python
+str1 = 'abcdef'
+for a in str1:
+    if a == 'd':
+        print('遇到d不打印')
+        continue
+	print(a)
+~~~
+
+## 8.3 else
+
+循环可以和else配合使用，else下方缩进的代码指的是当循环正常结束之后要执行的代码
+
+语法
+while 条件:
+	条件成立重复执行的代码
+else:
+	循环正常结束之后要执行的代码
+
+~~~python
+i = 1
+while i <= 5:
+    print('1')
+    i += 1
+else:
+    print('2')
+~~~
+
+### 8.3.1 while…else
+
+#### 8.3.1.1 退出while循环
+
+~~~python
+i = 1
+while i <= 5:
+    if i == 3:
+        break
+    print('1')
+    i += 1
+else:
+    print('2')
+~~~
+
+~~~python
+i = 1
+while i <= 5:
+    if i == 3:
+        continue
+    print('1')
+    i += 1
+else:
+    print('2')
+~~~
+
+break  不执行 else
+continue 执行 else
+
+### 8.3.2 for…else
+
+语法
+for 临时变量 in 序列:
+	重复执行的代码
+else:
+	循环正常结束之后要执行的代码
+
+~~~python
+str1 = 'abcdef'
+for a in str1:
+    print(a)
+else:
+    print('循环正常结束之后执行的代码')
+~~~
+
+#### 8.3.2.1 退出for循环
+
+~~~python
+str1 = 'abcdef'
+for a in str1:
+    if a == 'd':
+        break
+	print(a)
+else:
+    print('循环正常结束之后执行的代码')
+~~~
+
+~~~python
+str1 = 'abcdef'
+for a in str1:
+    if a == 'd':
+        continue
+	print(a)
+else:
+    print('循环正常结束之后执行的代码')
+~~~
+
+break  不执行 else
+continue 执行 else
+
+# 9 字符串
+
+## 9.1 下标
+
+下标作用是通过下标快速找到对应的数据
+~~~python
+str1 = 'abcdefg'
+print(str1)
+print(str1[0])
+print(str1[1])
+~~~
+
+## 9.2 切片
+
+语法：序列[开始位置下标:结束位置下标:步长]
+
+~~~python
+str1 = 'abcdefg'
+print(str1)
+print(str1[2])
+print(str1[0:3:1])
+~~~
+
+## 9.3 常用操作方法
+
+字符串的常用操作方法有查找、修改、判断三大类
+
+### 9.3.1 查找
+
+字符串查找方法即是查找子串在字符串中的位置或出现的次数
+
+* find():检测某个子串是否包含在这个字符串中，如果在返回这个子串开始的位置下标，否则返回-1
+  语法：字符串序列.find(子串, 开始位置下标, 结束位置下标)
+  注意：开始和结束位置下标可以省略，表示在整个字符串序列中查找
+
+  ```python
+  mystr = "hello world and it and zx and Python"
+  print(mystr.find('and'))# 12
+  print(mystr.find('and', 15, 30))# 23
+  print(mystr.find('ands'))# -1
+  ```
+
+* index()
+  ```python
+  mystr = "hello world and it and zx and Python"
+  print(mystr.index('and'))# 12
+  print(mystr.index('and', 15, 30))# 23
+  print(mystr.index('ands'))# index查找子串不存在，报错
+  ```
+
+* count()
+  ```python
+  mystr = "hello world and it and zx and Python"
+  print(mystr.count('and', 15, 30))# 1
+  print(mystr.count('and'))# 3
+  print(mystr.count('ands'))# 0
+  ```
+
+rfind()和find功能相同，从右侧开始
+rindex()和index功能相同，从右侧开始
+
+### 9.3.2 修改
+
+所谓修改字符串，指的就是通过函数的形式修改字符串中的数据
+
+* replace():替换
+  语法：字符串序列.replace(旧子串, 新子串, 替换次数)
+
+  ```python
+  mystr = "hello world and it and zx and Python"
+  new_str = mystr.replace('and', 'he')
+  new_str = mystr.replace('and', 'he', 1)
+  new_str = mystr.replace('and', 'he', 10)
+  print(new_str)
+  ```
+
+  注意：数据按照是否能直接修改分为可变类型和不可变类型两种。字符串类型的数据修改的时候不能改变原有字符串，属于不能直接修改数据的类型即是不可变类型
+
+* split()：按照指定字符分割字符串
+  语法：字符串序列.split(分割字符, num)
+
+  ```python
+  mystr = "hello world and it and zx and Python"
+  list1 = mystr.split('and')
+  list1 = mystr.split('and', 2)
+  print(list1)# 丢失分割字符
+  ```
+
+  注意：如果分割字符是原有字符串中的子串，分割后则丢失该子串
+
+* join()：用一个字符或子串合并字符串，即是将多个字符串合并为一个新的字符串
+  语法：字符串.join(过字符串组成的序列)
+
+  ```python
+  mylist = ['aa', 'bb', 'cc']
+  new_str = '...'.join(mylist)
+  print(mylist)
+  ```
+
+* capitalize()：将字符串第一个字符转换成大写
+* lower()：将字符串中大写转小写
+* upper()：将字符串中小写转大写
+* lstrip()：删除字符串左侧空白字符
+* rstrip()：删除字符串右侧空白字符
+* strip()：删除字符串两侧空白字符
+
+* ljust()：返回一个原字符串左对齐，并使用指定字符（默认空格）填充至对应长度的新字符串
+  语法：字符串序列.ljust(长度, 填充字符
+
+* rjust()：左对齐
+* center()：居中对齐
+
+### 9.3.3 判断
+
+所谓判断即是判断真假，返回的结果是布尔型数据类型：True或False
+
+* startwith()：检查字符串是否是以指定子串开头，是则返回True,否则返回False。如果设置开始和结束位置下标，则在指定范围内检查。
+  语法：字符串序列.startwith(子串, 开始位置下标, 结束为止下标)
+
+  ```python
+  mystr = "hello world and it and zx and Python"
+  print(mystr.startwith('hello'))
+  ```
+
+* endwith()
+  ```python
+  mystr = "hello world and it and zx and Python"
+  print(mystr.endwith('Python'))
+  ```
+
+* isalpha()：如果字符串至少有一个字符并且所有字符都是字母则返回True,否则返回False
+* isdigit()：如果字符串只包含数字则返回True否则返回False
+* isalnum()：如果字符串至少有一个字符并且所有字符都是字母或数字则返回True,否则返回False
+* isspace()：如果字符串中只包含空白，则返回True,否则返回False
+
+# 10 列表
+
+[数据1, 数据2, 数据3, 数据4 \.\.\.]
+列表可以一次性存储多个数据，且可以为不同数据类型
+
+## 10.1 列表的常用操作
+
+### 10.1.1 查找
+
+#### 10.1.1.1 下标
+
+~~~python
+name_list = ['TOM', 'Lily', 'ROSE']
+print(name_list[1])
+print(name_list[0])
+~~~
+
+#### 10.1.1.2 函数
+
+* index()：返回指定数据所在位置的下标
+  语法：列表序列.index(数据, 开始位置下标, 结束位置下标)
+
+* count()：统计指定数据在当前列表中出现的次数
+* len()：访问列表长度，即列表中数据的个数
+
+~~~python
+name_list = ['TOM', 'Lily', 'ROSE']
+print(name_list.index('TOM'))
+print(name_list.count('TOM'))
+print(len(name_list))
+~~~
+
+### 10.1.2 判断是否存在
+
+* in：判断指定数据在某个列表序列，如果在返回True,否则返回False
+* not in：判断指定数据不在某个列表序列，如果不在返回True,否则返回False
+
+~~~python
+name_list = ['TOM', 'Lily', 'ROSE']
+print('TOM' in name_list)
+pritn('TOM' not in name_list)
+~~~
+
+#### 10.1.2.1 判断案例
+
+~~~python
+name_list = ['TOM', 'Lily', 'ROSE']
+name = input('请输入您的邮箱账号名')
+if name in name_list:
+    print(f'您输入的名字是{name}, 此用户已经存在')
+else:
+    print(f'您输入的名字是{name}, 名字不存在')
+~~~
+
+### 10.1.3 增加
+
+增加指定数据到列表中
+
+* append()：列表结尾追加数据
+  语法：列表序列.append(数据)
+  注意：如果append()追加的数据是一个序列，则追加整个序列到列表
+
+  ```python
+  name_list = ['TOM', 'Lily', 'ROSE']
+  name_list.append('xiaoming')
+  name_list.append([11, 22f])
+  print(name_list)
+  ```
+
+* extend()：列表结尾追加数据，如果数据是一个序列，则将这个序列的数据逐一添加到列表
+  语法：列表序列.extend(数据)
+
+  ~~~python
+  name_list = ['TOM', 'Lily', 'ROSE']
+  name_list.extend('xiaoming')
+  name_list.extend('xiaoming', 'xiaohong')
+  print(name_list)
+  ~~~
+
+  
+
+* insert()：指定位置新增数据
+  语法：列表序列.insert(位置下标, 数据)
+
+  ```python
+  name_list = ['TOM', 'Lily', 'ROSE']
+  name_list.insert(1, 'aaa')
+  print(name_list)
+  ```
+
+### 10.1.4 删除
+
+* del
+  语法：del 目标
+
+* pop()：删除指定下标的数据（默认为最后一个），并返回该数据
+  语法：列表序列.pop(下标)
+
+* remove()：移除列表中某个数据的第一个匹配项
+  语法：列表序列.remove(数据)
+
+* clear()：清空
+
+~~~python
+name_list = ['TOM', 'Lily', 'ROSE']
+del(name_list)
+del(name_list[0])
+print(name_list)
+del_name = name_list.pop()
+print(del_name)
+print(name_list)
+name_list.remove('ROSE')
+print(name_list)
+name_list.clear()
+print(name_list)
+~~~
+
+### 10.1.5 修改
+
+* 逆置：reverse()
+* 排序：sort()
+  语法：列表序列.sort(key=None, reverse=False)
+  注意：reverse表示排序规则，reverse=True降序，reverse=False升序（默认）
+
+~~~python
+name_list = ['TOM', 'Lily', 'ROSE']
+name_list[0] = 'aaa'
+print(name_list)
+list1 = [1, 3, 2, 5, 4, 6]
+list1.reverse()
+print(list1)
+list1.sort()
+print(list1)
+list1.sort(reverse=True)
+print(list1)
 ~~~
 
