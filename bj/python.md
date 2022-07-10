@@ -1790,3 +1790,6 @@ list1.sort(reverse=True)
 print(list1)
 ~~~
 
+### 10.1.6 复制
+
+函数：copy()
