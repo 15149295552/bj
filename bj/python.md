@@ -1793,3 +1793,519 @@ print(list1)
 ### 10.1.6 复制
 
 函数：copy()
+
+~~~python
+name_list = ['TOM', 'Lily', 'ROSE']
+list1 = name_list.copy
+print(list1)
+print(name_list)
+~~~
+
+## 10.2 列表的循环遍历
+
+### 10.2.1 while
+
+~~~python
+name_list = ['TOM', 'Lily', 'ROSE']
+i = 0
+while i < len(name_list):
+    print(name_list[i])
+    i += 1
+~~~
+
+### 10.2.2 for
+
+~~~python
+name_list = ['TOM', 'Lily', 'ROSE']
+for i in name_list:
+    print(i)
+~~~
+
+## 10.3 列表嵌套
+
+所谓列表嵌套指的就是一个列表里面包含了其他的子列表
+
+~~~python
+name_list = [['TOM', 'Lily', 'Rose'], ['张三', '李四', '王五'], ['xiaoming', 'xiaohong', 'xiaolv']]
+print(name_list)
+print(name_list[0])
+print(name_list[0][1])
+~~~
+
+## 10.4 综合练习
+
+随机分配办公室
+~~~python
+import random
+teachers = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+offices = [[], [], []]
+for name in teachers:
+    num = random.randint(0, 2)
+    offices[num].append(name)
+i = 1
+for office in offices:
+    print(f'办公室{1}的人数是{len(office)}, 老师分别是:')
+    for name in office:
+        print(name)
+~~~
+
+# 11 元组
+
+一个元组可以存多个数据，元组内的数据时不能修改的
+
+## 11.1 定义元组
+
+元组特点：定义元组使用小括号，且逗号隔开各个数据，数据可以是不同的数据类型
+
+多个数据元组：t1 = (10, 20, 30)
+单个数据元组：t2 = (10,)
+
+## 11.2 元组的常见操作
+
+元组数据不支持修改，只支持查找
+
+* 按下标查找数据
+* index()：查找某个数据，如果数据存在返回对应的下标，否则报错，语法和列表、字符串的index方法相同。
+* count()：统计某个数据在当前元组出现的次数
+* len()：统计元组中数据的个数
+
+~~~python
+t1 = ('aa', 'bb', 'cc', 'bb')
+print(t1[0])
+print(t1.index('bb'))
+print(t1.count('aa'))
+print(len(t1))
+~~~
+
+~~~python
+t1 = ('aa', 'bb', 'cc', 'bb')
+t2 = ('aa', 'bb', ['cc', 'dd'])
+print(t2[2][0])
+t2[2][0] = 'TOM'
+print(t2)
+~~~
+
+注意：元组里的列表数据可以修改
+
+# 12 字典
+
+字典里面的数据是以键值对形式出现，字典数据和数据顺序没有关系，即字典不支持下标后期无论数据如何变化，只需要按照对应的键的名字查找数据即可
+
+## 12.1 创建字典的语法
+
+字典特点
+
+* 符号为大括号
+* 数据为键值对形式出现
+* 各个键值对之间用逗号隔开
+
+~~~python
+dict1 = {'name': 'TOM', 'age': 20, 'gender': '男'}
+print(dict1)
+# 空字典
+dict2 = {}
+dict3 = dict()
+~~~
+
+## 12.2 字典常见操作
+
+### 12.2.1 增
+
+写法：字典序列[key] = 值
+注意：如果key存在则修改这个key对应的值；如果key不存在则新增此键值对
+	  字典为可变类型
+
+~~~python
+dict1 = {'name': 'TOM', 'age': 20, 'gender': '男'}
+dict1['id'] = 110
+print(dict1)
+dict1['name'] = 'ROSE'
+print(dict1)
+~~~
+
+### 12.2.2 删
+
+* del()/del：删除字典或删除字典中指定键值对
+* clear()：清空字典
+
+~~~python
+dict1 = {'name': 'TOM', 'age': 20, 'gender': '男'}
+del(dict1)
+print(dict1)
+del dict1['name']
+print(dict1)
+dict1.clear()
+print(dict1)
+~~~
+
+### 12.2.3 改
+
+写法：字典序列[key] = 值
+注意：如果key存在则修改这个key对应的值；如果key不存在则新增此键值对
+
+~~~python
+dict1 = {'name': 'TOM', 'age': 20, 'gender': '男'}
+dict1['name'] = 'Lily'
+print(dict1)
+dict1['id'] = 110
+print(dict1)
+~~~
+
+### 12.2.4 查
+
+#### 12.2.4.1 key值查找
+
+~~~python
+dict1 = {'name': 'TOM', 'age': 20, 'gender': '男'}
+print(dict1['name'])
+~~~
+
+#### 12.2.4.2 get
+
+语法：字典序列.get(key, 默认值)
+注意：当前查找的key不存在则返回第二个参数（默认值），如果省略第二个参数，则返回None
+
+```python
+dict1 = {'name': 'TOM', 'age': 20, 'gender': '男'}
+print(dict1.get('name'))
+```
+
+#### 12.2.4.3 keys
+
+~~~python
+dict1 = {'name': 'TOM', 'age': 20, 'gender': '男'}
+print(dict1.keys())
+~~~
+
+#### 12.2.4.4 values
+
+~~~python
+dict1 = {'name': 'TOM', 'age': 20, 'gender': '男'}
+print(dict1.values())
+~~~
+
+#### 12.2.4.5 items
+
+~~~python
+dict1 = {'name': 'TOM', 'age': 20, 'gender': '男'}
+print(dict1.items())
+~~~
+
+## 12.3 字典的循环遍历
+
+### 12.3.1 key
+
+~~~python
+dict1 = {'name': 'TOM', 'age': 20, 'gender': '男'}
+for key in dict1.keys():
+    print(key)
+~~~
+
+### 12.3.2 value
+
+~~~python
+dict1 = {'name': 'TOM', 'age': 20, 'gender': '男'}
+for value in dict1.values():
+    print(value)
+~~~
+
+### 12.3.3 遍历字典的元素
+
+~~~python
+dict1 = {'name': 'TOM', 'age': 20, 'gender': '男'}
+for item in dict1.items():
+    print(item)
+~~~
+
+### 12.3.4 遍历字典的键值对
+
+~~~python
+dict1 = {'name': 'TOM', 'age': 20, 'gender': '男'}
+for key, value in divt1.items():
+    print(f'{key}={value}')
+~~~
+
+# 13 集合
+
+## 13.1 创建集合
+
+创建集合使用{}或set()，但是如果要创建空集合只能使用set()，因为{}用来创建空字典
+
+~~~python
+s1 = {10, 20, 30, 40, 50}
+print(s1)
+s1 = set()
+~~~
+
+## 13.2 集合常见操作方法
+
+### 13.2.1 增加数据
+
+* add()
+
+* update()：追加的数据是序列
+
+~~~python
+s1 = {10, 20}
+s1.add(100)
+print(s1)
+s1.update([10, 20, 30, 40, 50])
+print(s1)
+~~~
+
+### 13.2.2 删除数据
+
+* remove()：删除集合中的指定数据，如果数据不存在则报错
+* discard()：删除集合中的指定数据，如果数据不存在也不会报错
+* pop()：随机删除集合中的某个数据，并返回这个数据
+
+~~~python
+s1 = {10, 20, 30, 40, 50}
+s1.remove(10)
+print(s1)
+s1.discard(10)
+print(s1)
+del_num = s1.pop()
+print(del_num)
+~~~
+
+### 13.2.3 查找数据
+
+* in：判断数据在集合序列
+* not in：判断数据在集合序列
+
+~~~python
+s1 = {10, 20, 30, 40, 50}
+print(10 in s1)
+print(10 not in s1)
+~~~
+
+# 14 公共操作
+
+## 14.1 运算符
+
+| 运算符 |      描述      |      支持的容器类型      |
+| :----: | :------------: | :----------------------: |
+|   +    |      合并      |    字符串、列表、元组    |
+|   *    |      复制      |    字符串、列表、元组    |
+|   in   |  元素是否存在  | 字符串、列表、元组、字典 |
+| not in | 元素是否不存在 | 字符串、列表、元组、字典 |
+
+~~~python
+str1 = 'aa'
+str2 = 'bb'
+list1 = [1, 2]
+list2 = [10, 20]
+t1 = (1, 2)
+t2 = (10, 20)
+dict1 = {'name': 'Python'}
+dict2 = {'age': 30}
+print(str1 + str2)
+print(list1 + list2)
+print(t1 + t2)
+~~~
+
+~~~python
+str1 = 'a'
+list1 = ['hello']
+t1 = ('world',)
+print(str1 * 5)
+print('-' * 10)
+print(list1 * 5)
+print(t1 * 5)
+~~~
+
+~~~python
+str1 = 'abcd'
+list1 = [10, 20, 30, 40]
+t1 = (100, 200, 300, 400)
+dict1 = {'name': 'Python', 'age': 30}
+print('a' in str1)
+print('a' not in str1)
+print(10 in list1)
+print(10 not in list1)
+print(100 not in t1)
+print(100 in t1)
+print('name' in dict1)
+print('name' not in dict1)
+print('name' in dict1.keys())
+print('name' in dict1.values())
+~~~
+
+## 14.2 公共方法
+
+|         函数          |                             描述                             |
+| :-------------------: | :----------------------------------------------------------: |
+|         len()         |                      计算容器中元素个数                      |
+|      del或del()       |                             删除                             |
+|         max()         |                     返回容器中元素最大值                     |
+|         min()         |                     返回容器中元素最小值                     |
+| range(start,end,step) |      生成从start到end的数字，步长为step，供for循环使用       |
+|       enumerate       | 函数用于将一个可遍历的数据对象（如列表、元组或字符串）组合为一个索引序列，同时列出数据和数据下标，一般用在for循环当中。 |
+
+enumerate()
+语法
+enumerate(可遍历对象, start=0)
+注意：stat参数用来设置遍历数据的下标的起始值，默认为0
+
+~~~python
+list1 = ['a', 'b', 'c', 'd', 'e']
+for i in enumerate(list1):
+    print(i)
+for i in enumerate(list1, start=1):
+    print(i)
+~~~
+
+## 14.3 容器类型转换
+
+* tuple()：将某个序列转换成元组
+* list()：将某个序列转换成列表
+* set()：将某个序列转换成集合
+  注意：集合可以快速完成列表去重；集合不支持下标
+
+~~~python
+list1 = [10, 20, 30, 40, 50]
+s1 = {100, 300, 200, 500}
+t1 = ('a', 'b', 'c', 'd', 'e')
+print(tuple(list1))
+print(tuple(s1))
+print(list(s1))
+print(list(t1))
+print(set(list1))
+print(set(t1))
+~~~
+
+# 15 推导式
+
+## 15.1 列表推导式
+
+作用：用一个表达式创建一个有规律的列表或控制一个有规律列表
+
+* while循环实现
+  ~~~python
+  list1 = []
+  i = 0
+  while i < 10:
+      list1.append(i)
+      i += 1
+  print(list1)
+  ~~~
+
+* for循环实现
+  ~~~python
+  list1 = []
+  for i in range(10):
+      list1.append(i)
+  print(list1)
+  ~~~
+
+* 列表推导式实现
+  ~~~python
+  list1 = [i for i in range(10)]
+  print(list1)
+  ~~~
+
+### 15.1.1 带if的列表推导式
+
+~~~python
+list1 = [for i in range(0, 10, 2)]
+print(list1)
+list2 = []
+for i in range(10):
+    if i % 2 == 0:
+        list2.append(i)
+print(list2)
+list3 = [i for i in range(10) if i % 2 == 0]
+print(list3)
+~~~
+
+### 15.1.2 多个for循环实现列表推导式
+
+~~~python
+list1 = []
+for i in range(1, 3):
+    for j in range(3):
+        list1.append((i, j))
+print(list1)
+list2 = [(i, j) for i in range(1, 3) for j in range(3)]
+print(list2)
+~~~
+
+## 15.2 字典推导式
+
+作用：快速合并列表为字典或提取字典中目标数据
+
+~~~python
+dict1 = {i: i**2 for i in range(1, 5)}
+print(dict1)
+list1 = ['name', 'age', 'gender']
+list2 = ['Tom', 20, 'man']
+dict1 = {list1[i]: list2[i] for i in range(len(list1))}
+print(dict1)
+counts = {'MBP': 268, 'HP': 125, 'DELL': 201, 'Lenovo': 199, 'acer': 99}
+count1 = {key: value for key, value in counts.items() if value >= 200}
+print(count1)
+~~~
+
+## 15.3 集合推导式
+
+创建一个集合，数据为下方列表的2次方
+
+~~~python
+list1 = [1, 1, 2]
+set1 = {i ** 2 for i in list1}
+print(set1)
+~~~
+
+# 16 函数
+
+## 16.1 函数的使用步骤
+
+### 16.1.1 定义函数
+
+语法
+def 函数名(参数)
+	代码1
+	代码2
+
+### 16.1.2 调用函数
+
+函数名(参数)
+
+### 16.1.3 快速体验
+
+~~~python
+def sel_func():
+	print('显示余额')
+	print('存款')
+	print('取款')
+print('恭喜您登录成功')
+sel_func()
+print('您的余额是10000')
+sel_func()
+print('取了100元钱')
+sel_func()
+~~~
+
+## 16.2 函数参数的作用
+
+~~~python
+def add_num1():
+    result = 1 + 2
+    print(result)
+add_num1()
+def add_num2(a, b):
+    result = a + b
+    print(result)
+add_num2(10, 20)
+~~~
+
+## 16.3 函数返回值的作用
+
+~~~python
+def buy():
+    return '1'
+goods = buy()
+print
+~~~
+
