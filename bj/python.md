@@ -2287,25 +2287,292 @@ print('取了100元钱')
 sel_func()
 ~~~
 
-## 16.2 函数参数的作用
+## 16.2 函数的说明文档
+
+* 定义说明文档
+  语法
+  def sum_num(a, b):
+  	"""求和函数"""
+  	return a + b
+  help(sum_num)
+* 查看说明文档
+  语法：help(函数名)
+
+## 16.3 函数嵌套调用
+
+所谓函数嵌套调用指的是一个函数里面又调用了另外一个函数
 
 ~~~python
-def add_num1():
-    result = 1 + 2
-    print(result)
-add_num1()
-def add_num2(a, b):
-    result = a + b
-    print(result)
-add_num2(10, 20)
+def testB():
+    print('B函数开始')
+    print('这是B函数')
+    print('B函数结束')
+def testA():
+    print('A函数开始')
+    testB()
+    print('A函数结束')
+testA()
 ~~~
 
-## 16.3 函数返回值的作用
+### 16.3.1 打印图形
 
 ~~~python
-def buy():
-    return '1'
-goods = buy()
-print
+def print_line():
+    print('-' * 20)
+def print_lines(num):
+    i = 0
+    while i < num:
+        print_line()
+        i += 1
+print_lines(5)
 ~~~
 
+### 16.3.2 函数计算
+
+~~~python
+def sum_num(a, b, c):
+    return a + b + c
+result = sum_num(1, 2, 3)
+print(result)
+def average_num(a, b, c):
+    sumResult = sum_num(a, b, c)
+    return sumResult / 3
+averageResult = average_num(1, 2, 3)
+print(averageResult)
+~~~
+
+## 16.4 变量作用域
+
+变量作用域指的是变量生效的范围，主要分为两类：局部变量和全局变量
+
+* 局部变量：定义在函数体内部的变量，即只在函数体内部生效
+  作用：在函数体内部，临时保存数据，即当函数调用完成后，则销毁局部变量
+
+  ~~~python
+  def testA():
+      a = 100
+      print(a)
+  testA
+  print(a)
+  ~~~
+
+* 全局变量：指的是在函数体内、外都能生效的变量
+  ~~~python
+  a = 100
+  print(a)
+  def testA():
+      print(a)
+  def testB():
+      print(a)
+  testA()
+  testB()
+  ~~~
+
+~~~python
+a = 100
+print(a)
+def testA():
+    print(a)
+def testB():
+    global a
+    a = 200
+    print(a)
+testA()
+testB()
+print(a)
+~~~
+
+## 16.5 多函数程序执行流程
+
+一般在实际开发过程中，一个程序往往由多个函数（后面知识中会讲解类）组成，并且多个函数共享某些数据
+
+* 共用全局变量
+  ~~~python
+  glo_num = 0
+  def test1():
+      global glo_num
+      glo_num = 100
+  def test2():
+      print(glo_num)
+  print(glo_num)
+  test1()
+  test2()
+  print(glo_num)
+  ~~~
+
+* 返回值作为参数传递
+  ~~~python
+  def test1():
+      return 50
+  def test2(num):
+      print(num)
+  result = test1()
+  test2(result)
+  ~~~
+
+## 16.6 函数的返回值
+
+~~~python
+def return_num():
+    return 1, 2
+result = return_num()
+print(result)
+~~~
+
+## 16.7 函数的参数
+
+### 16.7.1 位置参数
+
+调用函数时根据函数定义的参数位置来传递参数
+注意：传递和定义参数的顺序及个数必须一致
+
+~~~python
+def user_info(name, age, gender):
+    print(f'您的姓名{name}, 年龄是{age}, 性别是{gender}')
+user_info('TOM', 20, '男')
+~~~
+
+### 16.7.2 关键字参数
+
+函数调用，通过“键=值"形式加以指定。可以让函数更加清晰、容易使用，同时也清除了参数的顺序需求
+注意：函数调用时，如果有位置参数时，位置参数必须在关键字参数的前面，但关键字参数之间不存在先后顺序
+
+~~~python
+def user_info(name, age, gender):
+    print(f'您的姓名{name}, 年龄是{age}, 性别是{gender}')
+user_info('ROSE', age=20, gender='女')
+user_info('小明', gender='男', age=19)
+~~~
+
+### 16.7.3 缺省参数
+
+缺省参数也叫默认参数，用于定义函数，为参数提供默认值，调用函数时可不传该默认参数的值（注意：所有位置参数必须出现在默认参数前，包括函数定义和调用)
+注意：函数调用时，如果为缺省参数传值则修改默认参数值；否则使用这个默认值
+
+~~~python
+def user_info(name, age, gender='男'):
+    print(f'您的姓名{name}, 年龄是{age}, 性别是{gender}')
+user_info('TOM', 18)
+user_info('TOM', 18, gender='女')
+~~~
+
+### 16.7.4 不定长参数
+
+不定长参数也叫可变参数。用于不确定调用的时候会传递多少个参数（不传参也可以）的场景。此时，可用包裹(packing)位置参数，或者包裹关键字参数，来进行参数传递，会显得非常方便
+
+* 包裹位置传递
+  ~~~python
+  def user_info(*args):
+      print(args)
+  user_info('TOM')
+  user_info('TOM', 18)
+  ~~~
+
+  注意：传进的所有参数都会被args变量收集，它会根据传进参数的位置合并为一个元组(tuple)args是元组类型，这就是包裹位置传递
+
+* 包裹关键字传递
+  ~~~python
+  def user_info(**kwargs):
+      print(kwargs)
+  user_info(name='TOM', age=18, id=110)
+  ~~~
+
+## 16.8 拆包和交换变量值
+
+### 16.8.1 拆包
+
+* 元组
+  ~~~python
+  def return_num():
+      return 100, 200
+  num1, num2 = return_num()
+  print(num1)
+  print(num2)
+  ~~~
+
+* 字典
+  ```py
+  dict1 = {'name': 'TOM', 'age': 18}
+  a, b = dict1
+  print(a)
+  print(b)
+  print(dict[a])
+  print(dict[b])
+  ```
+
+### 16.8.2 交换变量值
+
+~~~python
+a = 10
+b = 20
+c = 0
+c = a
+a = b
+b = c
+print(a)
+print(b)
+~~~
+
+~~~python
+a, b = 1, 2
+a, b = b, a
+print(a)
+print(b)
+~~~
+
+## 16.9 引用
+
+在Python中，值是靠引用来传递来的
+我们可以用id()来判断两个变量是否为同一个值的引用。我们可以将id值理解为那块内存的地址标识
+
+~~~python
+a = 1
+b = a
+print(b)
+print(id(a))
+print(id(b))
+a = 2
+print(b)
+print(id(a))
+print(id(b))
+~~~
+
+~~~python
+aa = [10, 20]
+bb = aa
+print(id(aa))
+print(id(bb))
+aa.append(30)
+print(bb)
+print(id(aa))
+print(id(bb))
+~~~
+
+## 16.9.1 引用当做实参
+
+~~~python
+def test1(a):
+    print(a)
+    print(id(a))
+    a += a
+    print(a)
+    print(id(a))
+b = 100
+test1(b)
+c = [11, 22]
+test1(c)
+~~~
+
+## 16.10可变和不可变类型
+
+所谓可变类型与不可变类型是指：数据能够直接进行修改，如果能直接修改那么就是可变，否则是不可变
+
+* 可变类型
+  * 列表
+  * 字典
+  * 集合
+* 不可变类型
+  * 整型
+  * 浮点数
+  * 字符串
+  * 元组
