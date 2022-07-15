@@ -2591,20 +2591,202 @@ def info_print():
     print('5、显示所有学员')
     print('6、退出系统')
     print('-' * 20)
+info = []
+def add_info():
+    new_id = input('请输入学号：')
+    new_name = input('请输入姓名：')
+    nwe_tel = input('请输入手机号码：')
+    global info
+    for i in info:
+        if new_name == i['name']
+        print('此用户已经存在')
+    info_dict = {}
+    info_dict['id'] = new_id
+    info_dict['name'] = new_name
+    info_dict['tel'] = new_tel
+    info.append(info_dict)
+    print(info)
+def del_info():
+    del_name = input('请输入要删除的学员的姓名：')
+    global info
+    for i in info:
+        if del_name == i['name']:
+            info.remove(i)
+            break
+    else:
+        print('该学员不存在')
+    print(info)
+def modify_info():
+    modify_name = input('请输入要修改的学员的姓名：')
+    global info
+    for i in info:
+        if modify_name == i['name']:
+            i['tel'] = input('请输入新的手机号：')
+            break
+    else:
+        print('该学员不存在')
+    print(info)
+def search_info():
+    search_name = input('请输入要查询的学员的姓名：')
+    global info
+    for i in info:
+        if search_name == i['name']:
+            print('查询到的学员信息如下')
+            print(f"学员的学号是{i['id']}, 姓名是{i['name']}, 手机号{i['tel']}")
+            break
+    else:
+        print('查无此人')
+def print_all():
+    print('学号\t姓名\t手机号')
+    for i in info:
+        print(f'{i["id"]}\t{i["name"]}\t{i["tel"]}')
 while True:
     info_print()
     user_num = int(input('请输入功能序号：'))
     if user_num == 1:
-        print('添加')
+        add_info()
     elif user_num == 2:
-        print('删除')
+        del_info()
     elif user_num == 3:
-        print('修改')
+        modify_info()
     elif user_num == 4:
-        print('查询')
+        search_info()
     elif user_num == 5:
-        print('显示所有')
+        print_all()
     elif user_num == 6:
-        print('退出系统')
+        input('确认要退出吗？y or s')
+        if exit_flag == 'y':
+            break
+    else:
+        print('请输入的功能序号有误')
 ~~~
+
+## 17.2 递归
+
+* 函数内部自己调用自己
+* 必须有出口
+
+~~~python
+def sum_numbers(num):
+    if num == 1:
+        return 1
+    return num + sum_numbers(num-1)
+sum_result = sum_numbers(3)
+print(sum_result)
+~~~
+
+### 17.2.1 递归代码实现
+
+~~~python
+def sum_numbers(num):
+    return num + sum_numbers(num-1)
+result = sum_numbers(3)
+print(result)
+~~~
+
+# 18 lambda表达式
+
+如果一个函数有一个返回值，并且只有一句代码，可以使用lambda简化
+语法：lambda 参数列表: 表达式
+注意：lambda表达式的参数可有可无，函数的参数在lambda表达式中完全适用
+	  lambda表达式能接收任何数量的参数但只能返回一个表达式的值
+
+~~~python
+def fn1():
+    return 100
+result = fn1()
+print(result)
+fn2 = lambda: 100
+pritn(fn2)
+print(fn2())
+~~~
+
+注意：直接打印lambda表达式，输出的是此lambda的内存地址
+
+## 18.1 lambda的参数形式
+
+* 无参数
+  ~~~python
+  fn1 = lambda: 100
+  print(fn1())
+  ~~~
+
+* 一个参数
+  ~~~python
+  fn1 = lambda a: a
+  print(fn1('hello world'))
+  ~~~
+
+* 默认参数
+  ~~~python
+  fn1 = lambda a, b, c=100: a + b + c
+  print(fn1(10, 20))
+  ~~~
+
+* 可变参数 *args
+  ~~~python
+  fn1 = lambda *args: args
+  print(fn1(10, 20, 30))
+  ~~~
+
+  注意：这里的可变参数传入到lambda之后，返回值为元组
+
+* 可变参数 *\*kwargs
+  ~~~python
+  fn1 = lambda **kwargs: kwargs
+  print(fn1(name='Python', age=20))
+  ~~~
+
+## 18.2 lambda的应用
+
+* 带判断的lambda
+  ~~~python
+  fn1 = lambda a, b: a if a > b else b
+  print(fn1(1000, 500))
+  ~~~
+
+* 列表数据按字典key的值排序
+  ~~~python
+  students = [
+      {'name': 'TOM', 'age': 20}
+      {'name': 'ROSE', 'age': 19}
+      {'name': 'Jack', 'age': 22}
+  ]
+  students.sort(key=lambda x: x['name'])
+  print(students)
+  students.sort(key=lambda x: x['name'], reverse=True)
+  print(student)
+  ~~~
+
+# 19 高阶函数
+
+把函数作为参数传入，这样的函数称为高阶函数，高阶函数是函数式编程的体现。函数式编程就是指这种高度抽象的编程范式
+
+~~~python
+def add_num(a, b):
+    return abs(a) + abs(b)
+result = add_sum(-1.1, 1.9)
+print(result)
+def sum_num(a, b, f):
+    return f(a) + f(b)
+result1 = sum_num(-1, 5, abs)
+print(result1)
+sum_num(1.1, 1.3)
+~~~
+
+## 19.1 内置高阶函数
+
+### 19.1.1 map
+
+map(func,lst),将传入的函数变量func作用到lst变量的每个元素中
+
+~~~python
+def func(x):
+    return x ** 2
+result = map(func, list1)
+pritn(result)
+print(list(result))
+~~~
+
+### 19.1.2 rduce
 
