@@ -3139,3 +3139,13 @@ haier2.wash()
 ### 23.4.1 类外面添加对象属性
 
 语法：对象名.属性名 = 值
+
+~~~python
+class Washer():
+    def wash(self):
+        print('洗衣服')
+haier1 = Washer()
+haier1.wash = 400
+haier1.height = 500
+~~~
+
