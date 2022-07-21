@@ -2958,3 +2958,184 @@ f.close()
 
 # 21 文件备份
 
+## 21.1 步骤
+
+1. 接收用户输入的文件名
+   ~~~python
+   old_name = input('请输入您要备份的文件名:')
+   print(old_name)
+   print(type(old_name))
+   ~~~
+
+2. 规划备份文件名
+
+   1. 提取目标文件后缀
+
+   2. 组织备份的文件名.xx[备份]后缀
+
+      ~~~python
+      old_name = input('请输入您要备份的文件名:')
+      index = old_name.rfind('.')
+      print(old_name[:index])
+      print(old_name[index:])
+      new_name = old_name[:index] + '[备份]' + old_name[index:]
+      print(new_name)
+      ~~~
+
+3. 备份文件写入数据
+
+   1. 打开源文件和备份文件
+
+   2. 将源文件数据写入备份文件
+
+   3. 关闭文件
+
+      ~~~python
+      old_name = input('请输入您要备份的文件名:')
+      index = old_name.rfind('.')
+      if index > 0:
+          postfix = old_name[index:]
+      new_name = old_name[:index] + '[备份]' + postfix
+      old_f = open(old_name, 'rb')
+      old_f = open(old_name, 'wb')
+      while True:
+          con = old_f.read(1024)
+          if len(con) == 0:
+              break
+          new_f.write(con)
+      old_f.close()
+      new_f.close()
+      ~~~
+
+# 22 文件和文件夹的操作
+
+导入模块os
+
+~~~python
+import os
+os.函数名()
+~~~
+
+## 22.1 文件重命名
+
+~~~python
+import os
+os.rename('1.txt', '10.txt')
+~~~
+
+## 22.2 文件删除
+
+~~~python
+import os
+os.remove('10.txt')
+~~~
+
+## 22.3 创建文件夹
+
+~~~python
+import os
+os.mkdir('aa')
+~~~
+
+## 22.4 删除文件夹
+
+~~~python
+import os
+os.rmdir('aa')
+~~~
+
+## 22.5 获取当前目录
+
+~~~python
+import os
+print(os.getcwd)
+~~~
+
+## 22.6 改变目录路径
+
+~~~python
+import os
+os.mkdir('aa')
+os.chdir('aa')
+os.mkdir('bb')
+~~~
+
+## 22.7 获取目录列表
+
+~~~python
+import os
+print(os.listdir())
+print(os.listdir('aa'))
+~~~
+
+## 22.8 文件夹重命名
+
+~~~python
+import os
+os.rename(旧文件名, 新文件名)
+~~~
+
+## 22.9 应用案例
+
+~~~python
+import os
+flag = 2
+file_list = os.listdir()
+for i in file_list:
+    if flag == 1:
+        new_name = 'Python_' + i
+    elif flag == 2:
+        num = len('Python_')
+        new_name = i[num:]
+    os.rename(i, new_name)
+~~~
+
+# 23 面向对象
+
+## 23.1 类和对象
+关系：用类去实例化(创建)一个对象
+
+### 23.1.1 类
+
+类是对一系列具有相同特征和行为的事物的统称，是一个抽象的概念，不是真实存在的事物
+
+* 特征既是属性
+* 行为既是方法
+
+### 23.2 定义类
+
+语法
+class 类名():
+	代码
+注意：类名要满足标识符命名规则，同时遵循大驼峰命名规则
+
+~~~python
+class Washer():
+    def wash(self):
+        print('洗衣服')
+haier = Washer()
+print(haier)
+haier.wash()
+~~~
+
+### 23.2.1 self
+
+~~~python
+class Washer():
+    def wash(self):
+        print('洗衣服')
+haier1 = Washer()
+haier1.wash()
+haier2 = Washer()
+haier2.wash()
+~~~
+
+## 23.3 创建对象
+
+语法：对象名 = 类名()
+
+## 23.4 添加和获取对象属性
+
+### 23.4.1 类外面添加对象属性
+
+语法：对象名.属性名 = 值
