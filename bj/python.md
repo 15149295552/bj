@@ -2882,6 +2882,28 @@ f.write('aaa')
   f.close()
   ~~~
 
+* seek()
+  作用：用来移动文件指针
+  语法：文件对象.seek(偏移量, 起始位置)
+
+  * 0 - 文件开头
+  * 1 - 当前位置
+  * 2 - 文件结尾
+
+  ~~~python
+  f = open('test.txt', 'r+')
+  f.seek(2, 0)
+  f.seek(0, 2)
+  con = f.read()
+  print(con)
+  f.close()
+  f = open('test.txt', 'a+')
+  f.seek(0, 0)
+  con = f.read()
+  print(con)
+  f.close()
+  ~~~
+
 ### 20.1.3 关闭
 
 ~~~python
@@ -2920,5 +2942,19 @@ f.write('xyz')
 f.close()
 f = open('100.txt')
 f.close()
+f = open('test.txt', 'r+')
+con = f.read()
+print(con)
+f.close()
+f = open('test.txt', 'w+')
+con = f.read()
+print(con)
+f.close()
+f = open('test.txt', 'a+')
+con = f.read()
+print(con)
+f.close()
 ~~~
+
+# 21 文件备份
 
