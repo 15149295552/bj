@@ -3149,3 +3149,40 @@ haier1.wash = 400
 haier1.height = 500
 ~~~
 
+### 23.4.2 类外面获取对象属性
+
+语法：对象名.属性名
+~~~python
+class Washer():
+    def wash(self):
+        print('洗衣服')
+haier1 = Washer()
+haier1.wash = 400
+haier1.height = 500
+print(f'洗衣机的宽度是{haier1.width}')
+print(f'洗衣机的高度是{haier1.height}')
+~~~
+
+### 23.4.3 类里面获取对象属性
+
+语法：self.属性名
+~~~python
+class Washer():
+    def wash(self):
+        print('洗衣服')
+    def print_info(self):
+        print(self.width)
+haier1 = Washer()
+haier1.wash = 400
+haier1.height = 500
+haier1.print.info()
+~~~
+
+## 23.5 魔法方法
+
+### 23.5.1 __init\_\_()
+
+_\_init__()方法的作用：初始化对象
+~~~python
+
+~~~
