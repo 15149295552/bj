@@ -3244,3 +3244,19 @@ haier = Washer()
 
 ## 23.6 综合应用
 
+~~~python
+class SweetPotato():
+    def __init__(self):
+        self.cook_time = 0
+        self.cook_state = '生的'
+        self.condiments = []
+	def cook(self, time):
+        self.cook_time += time
+        if 0 <= self.cook_time < 3:
+            self.cook_state = '生的'
+        elif 3 <= self.cook_time < 5:
+            self.cook_state = '半生不熟'
+        elif 5 <+ self.cook_time < 8:
+            self
+~~~
+
