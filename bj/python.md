@@ -3180,9 +3180,67 @@ haier1.print.info()
 
 ## 23.5 魔法方法
 
+魔法方法指的是具有特殊功能的函数
+
 ### 23.5.1 __init\_\_()
 
 _\_init__()方法的作用：初始化对象
 ~~~python
-
+class Washer():
+    def __init__(self):
+        self.width = 500
+        self.height = 500
+	def print_info(self):
+        print(f'洗衣机的宽度是{self.width}')
+        print(f'洗衣机的高度是{self.height}')
+haier1 = Washer()
+haier1.print_info()
 ~~~
+
+注意
+
+* _\_init__()方法，在创建一个对象的默认被调用，不需要手动调用
+* _\_init\_\_(self)中的self参数，不需要开发者传递，Python解释器会自动把当前的对象引用传递过去
+
+~~~python
+class Washer():
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+    def print_info(self):
+        print(f'洗衣机的宽度是{self.width}, 洗衣机的高度是{self.height}')
+haier1 = Washer(10, 20)
+haier1.print_info()
+haier2 = Washer(100, 200)
+haier2.print_info()
+~~~
+
+### 23.5.2 _\_str__()
+
+当使用print输出对象的时候，默认打印对象的内存地址。如果类定义__str\_\_方法，那么就会打印从在这个方法中return的数据
+~~~python
+class Washer():
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+    def __str__(self):
+        return '这是海尔洗衣机的说明书'
+haier1 = Washer(10, 20)
+print(haier1)
+~~~
+
+### 23.5.3 __del\_\_()
+
+当删除对象时，Python解释器也会默认调用del方法
+
+~~~python
+class Washer():
+    def __init__(self):
+        self.width = 300
+	def __del__(self):
+        print('对象已经删除')
+haier = Washer()
+~~~
+
+## 23.6 综合应用
+
