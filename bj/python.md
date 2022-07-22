@@ -3257,6 +3257,20 @@ class SweetPotato():
         elif 3 <= self.cook_time < 5:
             self.cook_state = '半生不熟'
         elif 5 <+ self.cook_time < 8:
-            self
+            self.cook_static = '熟了'
+        elif self.cook_time >= 8:
+            self.cook_static = '烤糊了'
+	def add_coniments(self, condiment):
+        self.condiments.append(coniment)
+	def __str__(self):
+        return f'这个地瓜烤了{self.cook_time}分钟, 状态{self.cook_static}'
+digua1 = SweetPotato()
+print(digua1)
+digua1.cook(2)
+digua1.add_condiments('酱油')
+print(digua1)
+digua1.cook(2)
+digua1.add_condiments('辣椒面儿')
+print(digua1)
 ~~~
 
