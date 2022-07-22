@@ -3274,3 +3274,6 @@ digua1.add_condiments('辣椒面儿')
 print(digua1)
 ~~~
 
+~~~python
+~~~
+
