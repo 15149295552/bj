@@ -3398,9 +3398,10 @@ class Prentice(School, Master):
         self.kongfu = '[独创煎饼果子技术]'
 	def make_cake(self):
         print(f'运用{self.kongfu}制作煎饼果子')
+	def make_master_cake(self):
+        Master.make_cake()
 daqiu = Prentice()
-print(daqiu.kongfu)
 daqiu.make_cake()
-print(Prentice.__mro__)
+daqiu.make_master
 ~~~
 
