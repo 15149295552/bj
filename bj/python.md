@@ -3336,3 +3336,28 @@ print(daqiu.kongfu)
 
 ## 24.2 多继承
 
+~~~python
+class Master(object):
+    def __init__(self):
+        self.kongfu = '[古法煎饼果子配方]'
+	def make_cake(self):
+        print(f'运用{self.kongfu}制作煎饼果子')
+class School(object):
+    def __init__(self):
+        self.kongfu = '[煎饼果子配方]'
+	def make_cake(self):
+        print(f'运用{self.kongfu}制作煎饼果子')
+class Prentice(School, Master):
+    pass
+daqiu = Prentice()
+print(daqiu.kongfu)
+daqiu.make_cake()
+~~~
+
+注意：当一个类有多个父类的时候，默认使用第一个父类的同名属性和方法
+
+## 24.3 子类重写父类同名方法和属性
+
+~~~python
+~~~
+
