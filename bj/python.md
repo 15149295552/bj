@@ -3413,3 +3413,34 @@ daqiu.make_cake()
 
 ## 24.5 多层继承
 
+~~~python
+class Master(object):
+    def __init__(self):
+        self.kongfu = '[古法煎饼果子配方]'
+	def make_cake(self):
+        print(f'运用{self.kongfu}制作煎饼果子')
+class School(object):
+    def __init__(self):
+        self.kongfu = '[煎饼果子配方]'
+	def make_cake(self):
+        print(f'运用{self.kongfu}制作煎饼果子')
+class Prentice(School, Master):
+    def __init__(self):
+        self.kongfu = '[独创煎饼果子技术]'
+	def make_cake(self):
+        print(f'运用{self.kongfu}制作煎饼果子')
+	def make_master_cake(self):
+        Master.__init__(self)
+        Master.make_cake(self)
+	def make_school_cake(self):
+        School.__init__(self)
+        School.make_cake(self)
+class Tusun(Prentice):
+    pas
+daqiu = Prentice()
+daqiu.make_cake()
+daqiu.make_master_cake()
+daqiu.make_school_cake()
+daqiu.make_cake()
+~~~
+
