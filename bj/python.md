@@ -3306,3 +3306,16 @@ print(jia1)
 
 # 24 继承
 
+Python面向对象的继承指的是多个类之间的所属关系，即子类默认继承父类的所有属性和方法
+
+~~~python
+class A(object):
+    def __init__(self):
+        self.num = 1
+    def info_print(self):
+        print(self.num)
+class B(A):
+    pass
+result =  
+~~~
+
