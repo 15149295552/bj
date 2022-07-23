@@ -3377,5 +3377,6 @@ class Prentice(School, Master):
 daqiu = Prentice()
 print(daqiu.kongfu)
 daqiu.make_cake()
+print(Prentice.__mro__)
 ~~~
 
