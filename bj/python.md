@@ -3331,6 +3331,8 @@ class Master(object):
 class Prentice(Master):
     pass
 daqiu = Prentice()
-print(daqiu.kong)
+print(daqiu.kongfu)
 ~~~
+
+## 24.2 多继承
 
