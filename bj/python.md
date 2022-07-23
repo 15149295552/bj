@@ -3316,6 +3316,7 @@ class A(object):
         print(self.num)
 class B(A):
     pass
-result =  
+result =  B()
+result.info_print()
 ~~~
 
