@@ -3320,3 +3320,12 @@ result =  B()
 result.info_print()
 ~~~
 
+## 24.1 单继承
+
+~~~python
+class Master(object):
+    def __init__(self):
+        self.kongfu = '[古法煎饼果子配方]'
+	def make_cake(self)
+~~~
+
