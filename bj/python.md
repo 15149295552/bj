@@ -3407,6 +3407,9 @@ class Prentice(School, Master):
 daqiu = Prentice()
 daqiu.make_cake()
 daqiu.make_master_cake()
-daqiu.make_school
+daqiu.make_school_cake()
+daqiu.make_cake()
 ~~~
+
+## 24.5 多层继承
 
